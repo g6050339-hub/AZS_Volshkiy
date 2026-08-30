@@ -1,0 +1,418 @@
+:root {
+  --bg-color: var(--tg-theme-bg-color, #0f172a);
+  --secondary-bg: var(--tg-theme-secondary-bg-color, #1e293b);
+  --text-color: var(--tg-theme-text-color, #f8fafc);
+  --hint-color: var(--tg-theme-hint-color, #94a3b8);
+  --btn-color: var(--tg-theme-button-color, #2563eb);
+  --btn-text-color: var(--tg-theme-button-text-color, #ffffff);
+  
+  --color-green: #10b981;
+  --color-blue: #3b82f6;
+  --color-red: #ef4444;
+  --color-purple: #a855f7;
+  --color-gray: #64748b;
+  --card-border: rgba(255, 255, 255, 0.08);
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg-color: var(--tg-theme-bg-color, #f8fafc);
+    --secondary-bg: var(--tg-theme-secondary-bg-color, #ffffff);
+    --text-color: var(--tg-theme-text-color, #0f172a);
+    --hint-color: var(--tg-theme-hint-color, #64748b);
+    --card-border: rgba(0, 0, 0, 0.06);
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+body, html {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+#app {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header & Filter Bar */
+.header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 12px 12px 8px 12px;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.9) 0%, rgba(15, 23, 42, 0.6) 70%, transparent 100%);
+  pointer-events: none;
+}
+
+.filters-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: none;
+  pointer-events: auto;
+}
+.filters-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 9999px;
+  border: 1px solid var(--card-border);
+  background: var(--secondary-bg);
+  color: var(--text-color);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(8px);
+}
+
+.filter-pill:active {
+  transform: scale(0.95);
+}
+
+.filter-pill.active {
+  background: var(--btn-color);
+  color: var(--btn-text-color);
+  border-color: var(--btn-color);
+}
+
+.filter-pill .badge {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.filter-pill.active .badge {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.dot-blue { background-color: var(--color-blue); }
+.dot-green { background-color: var(--color-green); }
+.dot-red { background-color: var(--color-red); }
+.dot-black { background-color: #475569; }
+.dot-purple { background-color: var(--color-purple); }
+
+/* Map */
+#map {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* Map Controls */
+.map-controls {
+  position: absolute;
+  right: 14px;
+  bottom: 90px;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ctrl-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--card-border);
+  background: var(--secondary-bg);
+  color: var(--text-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.ctrl-btn:active {
+  transform: scale(0.9);
+}
+
+/* Custom Marker Pins */
+.custom-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--secondary-bg);
+  border: 2.5px solid var(--color-green);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  font-size: 16px;
+  transition: transform 0.2s ease;
+}
+
+.custom-pin.in-stock {
+  border-color: #10b981;
+  background: #064e3b;
+  color: #a7f3d0;
+}
+
+.custom-pin.out-of-stock {
+  border-color: #ef4444;
+  background: #450a0a;
+  color: #fca5a5;
+  opacity: 0.75;
+}
+
+.custom-pin.dimmed {
+  opacity: 0.3;
+  transform: scale(0.8);
+}
+
+.custom-pin:hover, .custom-pin.selected {
+  transform: scale(1.2);
+  z-index: 1000 !important;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+}
+
+/* Drawer Bottom Sheet */
+.drawer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1001;
+  background: var(--secondary-bg);
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.35);
+  border-top: 1px solid var(--card-border);
+  transform: translateY(110%);
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  padding: 0 16px 24px 16px;
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
+.drawer.open {
+  transform: translateY(0);
+}
+
+.drawer-handle-bar {
+  display: flex;
+  justify-content: center;
+  padding: 10px 0 6px 0;
+  cursor: grab;
+}
+
+.drawer-handle {
+  width: 40px;
+  height: 4px;
+  background: var(--hint-color);
+  opacity: 0.4;
+  border-radius: 2px;
+}
+
+.station-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.station-brand-icon {
+  font-size: 28px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.station-title-group {
+  flex: 1;
+}
+
+.station-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+.station-address {
+  font-size: 13px;
+  color: var(--hint-color);
+  margin-top: 2px;
+}
+
+.drawer-close {
+  background: none;
+  border: none;
+  color: var(--hint-color);
+  font-size: 18px;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.fuels-section {
+  margin-bottom: 18px;
+}
+
+.section-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--hint-color);
+  margin-bottom: 10px;
+}
+
+.fuels-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.fuel-card {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--card-border);
+}
+
+.fuel-card.in-stock {
+  border-color: rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.fuel-card.out-of-stock {
+  border-color: rgba(239, 68, 68, 0.2);
+  background: rgba(239, 68, 68, 0.04);
+  opacity: 0.6;
+}
+
+.fuel-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.fuel-card-name {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.fuel-status-tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.fuel-status-tag.in-stock {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+
+.fuel-status-tag.out-of-stock {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.fuel-card-price {
+  font-size: 13px;
+  color: var(--hint-color);
+  font-weight: 500;
+}
+
+.station-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+}
+
+.primary-btn {
+  background: var(--btn-color);
+  color: var(--btn-text-color);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+}
+
+.primary-btn:active {
+  opacity: 0.9;
+  transform: scale(0.98);
+}
+
+/* Loader */
+.loader-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2000;
+  background: var(--bg-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: var(--hint-color);
+  transition: opacity 0.3s ease;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--btn-color);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.hidden {
+  display: none !important;
+}
