@@ -1,7 +1,125 @@
 {
   "status": "ok",
-  "count": 22,
+  "count": 25,
   "stations": [
+    {
+      "id": "1101313335",
+      "name": "Татнефть",
+      "address": "ул. Александрова, 2Б",
+      "lat": 48.76792,
+      "lon": 44.790207,
+      "chain": "Татнефть",
+      "yandex_url": "https://yandex.ru/maps/org/1101313335",
+      "cash_only": false,
+      "queue_status": "UNKNOWN",
+      "queue_label": "⚪ Обычный поток",
+      "signals_count_per_hour": 0,
+      "fuel_limit": null,
+      "last_signal_timestamp": 1788089136,
+      "fuels": {
+        "AI92": {
+          "fuel_type": "AI92",
+          "name": "92",
+          "status": "UNCERTAIN",
+          "price_text": "64.14 ₽",
+          "price_value": 64.14
+        },
+        "AI95": {
+          "fuel_type": "AI95",
+          "name": "95",
+          "status": "UNCERTAIN",
+          "price_text": "71.4 ₽",
+          "price_value": 71.4
+        },
+        "AI95_PREMIUM": {
+          "fuel_type": "AI95_PREMIUM",
+          "name": "95+",
+          "status": "OUT_OF_STOCK",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI98": {
+          "fuel_type": "AI98",
+          "name": "98",
+          "status": "OUT_OF_STOCK",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI100": {
+          "fuel_type": "AI100",
+          "name": "100",
+          "status": "OUT_OF_STOCK",
+          "price_text": null,
+          "price_value": null
+        },
+        "DIESEL": {
+          "fuel_type": "DIESEL",
+          "name": "ДТ",
+          "status": "UNCERTAIN",
+          "price_text": "83.86 ₽",
+          "price_value": 83.86
+        }
+      }
+    },
+    {
+      "id": "1396829568",
+      "name": "Татнефть",
+      "address": "ул. имени Ф.Г. Логинова, 14",
+      "lat": 48.817,
+      "lon": 44.7799,
+      "chain": "Татнефть",
+      "yandex_url": "https://yandex.ru/maps/org/1396829568",
+      "cash_only": false,
+      "queue_status": "UNKNOWN",
+      "queue_label": "⚪ Обычный поток",
+      "signals_count_per_hour": 0,
+      "fuel_limit": null,
+      "last_signal_timestamp": 1788087037,
+      "fuels": {
+        "AI92": {
+          "fuel_type": "AI92",
+          "name": "92",
+          "status": "UNCERTAIN",
+          "price_text": "64.14 ₽",
+          "price_value": 64.14
+        },
+        "AI95": {
+          "fuel_type": "AI95",
+          "name": "95",
+          "status": "OUT_OF_STOCK",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI95_PREMIUM": {
+          "fuel_type": "AI95_PREMIUM",
+          "name": "95+",
+          "status": "OUT_OF_STOCK",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI98": {
+          "fuel_type": "AI98",
+          "name": "98",
+          "status": "UNCERTAIN",
+          "price_text": "99.99 ₽",
+          "price_value": 99.99
+        },
+        "AI100": {
+          "fuel_type": "AI100",
+          "name": "100",
+          "status": "OUT_OF_STOCK",
+          "price_text": null,
+          "price_value": null
+        },
+        "DIESEL": {
+          "fuel_type": "DIESEL",
+          "name": "ДТ",
+          "status": "UNCERTAIN",
+          "price_text": "83.86 ₽",
+          "price_value": 83.86
+        }
+      }
+    },
     {
       "id": "1817417962",
       "name": "Лукойл",
@@ -11,16 +129,16 @@
       "chain": "Лукойл",
       "yandex_url": "https://yandex.ru/maps/org/1817417962",
       "cash_only": false,
-      "queue_status": "UNKNOWN",
-      "queue_label": "⚪ Обычный поток",
+      "queue_status": "HIGH",
+      "queue_label": "🔴 Большая очередь",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788089061,
+      "last_signal_timestamp": 1788092901,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
           "name": "92",
-          "status": "OUT_OF_STOCK",
+          "status": "IN_STOCK",
           "price_text": "66.16 ₽",
           "price_value": 66.16
         },
@@ -34,7 +152,7 @@
         "AI95_PREMIUM": {
           "fuel_type": "AI95_PREMIUM",
           "name": "95+",
-          "status": "OUT_OF_STOCK",
+          "status": "IN_STOCK",
           "price_text": "73.63 ₽",
           "price_value": 73.63
         },
@@ -62,6 +180,65 @@
       }
     },
     {
+      "id": "30406389541",
+      "name": "Татнефть",
+      "address": "Двинская ул., 16, посёлок Металлург-1",
+      "lat": 48.733196,
+      "lon": 44.832818,
+      "chain": "Татнефть",
+      "yandex_url": "https://yandex.ru/maps/org/30406389541",
+      "cash_only": false,
+      "queue_status": "UNKNOWN",
+      "queue_label": "⚪ Обычный поток",
+      "signals_count_per_hour": 0,
+      "fuel_limit": null,
+      "last_signal_timestamp": 1788090142,
+      "fuels": {
+        "AI92": {
+          "fuel_type": "AI92",
+          "name": "92",
+          "status": "UNCERTAIN",
+          "price_text": "64.14 ₽",
+          "price_value": 64.14
+        },
+        "AI95": {
+          "fuel_type": "AI95",
+          "name": "95",
+          "status": "UNCERTAIN",
+          "price_text": "71.4 ₽",
+          "price_value": 71.4
+        },
+        "AI95_PREMIUM": {
+          "fuel_type": "AI95_PREMIUM",
+          "name": "95+",
+          "status": "OUT_OF_STOCK",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI98": {
+          "fuel_type": "AI98",
+          "name": "98",
+          "status": "OUT_OF_STOCK",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI100": {
+          "fuel_type": "AI100",
+          "name": "100",
+          "status": "OUT_OF_STOCK",
+          "price_text": null,
+          "price_value": null
+        },
+        "DIESEL": {
+          "fuel_type": "DIESEL",
+          "name": "ДТ",
+          "status": "UNCERTAIN",
+          "price_text": "83.86 ₽",
+          "price_value": 83.86
+        }
+      }
+    },
+    {
       "id": "1044580373",
       "name": "Лукойл",
       "address": "ул. Пушкина, 51",
@@ -72,14 +249,14 @@
       "cash_only": false,
       "queue_status": "HIGH",
       "queue_label": "🔴 Большая очередь",
-      "signals_count_per_hour": 2,
+      "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788090151,
+      "last_signal_timestamp": 1788091403,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
           "name": "92",
-          "status": "IN_STOCK",
+          "status": "OUT_OF_STOCK",
           "price_text": "66.16 ₽",
           "price_value": 66.16
         },
@@ -117,65 +294,6 @@
           "status": "IN_STOCK",
           "price_text": null,
           "price_value": null
-        }
-      }
-    },
-    {
-      "id": "1101313335",
-      "name": "Татнефть",
-      "address": "ул. Александрова, 2Б",
-      "lat": 48.76792,
-      "lon": 44.790207,
-      "chain": "Татнефть",
-      "yandex_url": "https://yandex.ru/maps/org/1101313335",
-      "cash_only": false,
-      "queue_status": "UNKNOWN",
-      "queue_label": "⚪ Обычный поток",
-      "signals_count_per_hour": 1,
-      "fuel_limit": null,
-      "last_signal_timestamp": 1788089136,
-      "fuels": {
-        "AI92": {
-          "fuel_type": "AI92",
-          "name": "92",
-          "status": "IN_STOCK",
-          "price_text": "64.14 ₽",
-          "price_value": 64.14
-        },
-        "AI95": {
-          "fuel_type": "AI95",
-          "name": "95",
-          "status": "IN_STOCK",
-          "price_text": "71.4 ₽",
-          "price_value": 71.4
-        },
-        "AI95_PREMIUM": {
-          "fuel_type": "AI95_PREMIUM",
-          "name": "95+",
-          "status": "OUT_OF_STOCK",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI98": {
-          "fuel_type": "AI98",
-          "name": "98",
-          "status": "OUT_OF_STOCK",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI100": {
-          "fuel_type": "AI100",
-          "name": "100",
-          "status": "OUT_OF_STOCK",
-          "price_text": null,
-          "price_value": null
-        },
-        "DIESEL": {
-          "fuel_type": "DIESEL",
-          "name": "ДТ",
-          "status": "UNCERTAIN",
-          "price_text": "83.86 ₽",
-          "price_value": 83.86
         }
       }
     },
@@ -249,9 +367,9 @@
       "cash_only": false,
       "queue_status": "UNKNOWN",
       "queue_label": "⚪ Обычный поток",
-      "signals_count_per_hour": 2,
+      "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788090711,
+      "last_signal_timestamp": 1788093078,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -298,33 +416,33 @@
       }
     },
     {
-      "id": "1396829568",
-      "name": "Татнефть",
-      "address": "ул. имени Ф.Г. Логинова, 14",
-      "lat": 48.817,
-      "lon": 44.7799,
-      "chain": "Татнефть",
-      "yandex_url": "https://yandex.ru/maps/org/1396829568",
+      "id": "190378037547",
+      "name": "Газпром",
+      "address": "просп. имени Ленина, 308А",
+      "lat": 48.756854,
+      "lon": 44.787772,
+      "chain": "Газпром",
+      "yandex_url": "https://yandex.ru/maps/org/190378037547",
       "cash_only": false,
       "queue_status": "UNKNOWN",
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 0,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788087037,
+      "last_signal_timestamp": null,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
           "name": "92",
-          "status": "UNCERTAIN",
-          "price_text": "64.14 ₽",
-          "price_value": 64.14
+          "status": "UNKNOWN",
+          "price_text": "64.25 ₽",
+          "price_value": 64.25
         },
         "AI95": {
           "fuel_type": "AI95",
           "name": "95",
           "status": "OUT_OF_STOCK",
-          "price_text": null,
-          "price_value": null
+          "price_text": "71.35 ₽",
+          "price_value": 71.35
         },
         "AI95_PREMIUM": {
           "fuel_type": "AI95_PREMIUM",
@@ -336,9 +454,9 @@
         "AI98": {
           "fuel_type": "AI98",
           "name": "98",
-          "status": "UNCERTAIN",
-          "price_text": "99.99 ₽",
-          "price_value": 99.99
+          "status": "OUT_OF_STOCK",
+          "price_text": null,
+          "price_value": null
         },
         "AI100": {
           "fuel_type": "AI100",
@@ -350,9 +468,9 @@
         "DIESEL": {
           "fuel_type": "DIESEL",
           "name": "ДТ",
-          "status": "UNCERTAIN",
-          "price_text": "83.86 ₽",
-          "price_value": 83.86
+          "status": "UNKNOWN",
+          "price_text": "77.2 ₽",
+          "price_value": 77.2
         }
       }
     },
@@ -369,7 +487,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788089061,
+      "last_signal_timestamp": 1788091155,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -416,6 +534,30 @@
       }
     },
     {
+      "id": "126604438954",
+      "name": "Ока-Пропан",
+      "address": "Фрунзенская ул., 3, хутор Бурковский",
+      "lat": 48.696352,
+      "lon": 44.670552,
+      "chain": "Ока-Пропан",
+      "yandex_url": "https://yandex.ru/maps/org/126604438954",
+      "cash_only": false,
+      "queue_status": "UNKNOWN",
+      "queue_label": "⚪ Обычный поток",
+      "signals_count_per_hour": 0,
+      "fuel_limit": null,
+      "last_signal_timestamp": null,
+      "fuels": {
+        "LPG": {
+          "fuel_type": "LPG",
+          "name": "Пропан",
+          "status": "UNKNOWN",
+          "price_text": "35.9 ₽",
+          "price_value": 35.9
+        }
+      }
+    },
+    {
       "id": "1902867491",
       "name": "Лукойл",
       "address": "просп. имени Ленина, 92Г",
@@ -424,11 +566,11 @@
       "chain": "Лукойл",
       "yandex_url": "https://yandex.ru/maps/org/1902867491",
       "cash_only": false,
-      "queue_status": "LOW",
-      "queue_label": "🟢 Свободно",
+      "queue_status": "UNKNOWN",
+      "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788090172,
+      "last_signal_timestamp": 1788091403,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -440,7 +582,7 @@
         "AI95": {
           "fuel_type": "AI95",
           "name": "95",
-          "status": "IN_STOCK",
+          "status": "OUT_OF_STOCK",
           "price_text": "72.93 ₽",
           "price_value": 72.93
         },
@@ -542,23 +684,23 @@
       "chain": "Лукойл",
       "yandex_url": "https://yandex.ru/maps/org/1166376984",
       "cash_only": false,
-      "queue_status": "LOW",
-      "queue_label": "🟢 Свободно",
+      "queue_status": "UNKNOWN",
+      "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788089061,
+      "last_signal_timestamp": 1788091403,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
           "name": "92",
-          "status": "OUT_OF_STOCK",
+          "status": "IN_STOCK",
           "price_text": "66.16 ₽",
           "price_value": 66.16
         },
         "AI95": {
           "fuel_type": "AI95",
           "name": "95",
-          "status": "OUT_OF_STOCK",
+          "status": "IN_STOCK",
           "price_text": "72.93 ₽",
           "price_value": 72.93
         },
@@ -579,7 +721,7 @@
         "AI100": {
           "fuel_type": "AI100",
           "name": "100",
-          "status": "OUT_OF_STOCK",
+          "status": "IN_STOCK",
           "price_text": "98.24 ₽",
           "price_value": 98.24
         },
@@ -648,65 +790,6 @@
           "status": "IN_STOCK",
           "price_text": "79.37 ₽",
           "price_value": 79.37
-        }
-      }
-    },
-    {
-      "id": "30406389541",
-      "name": "Татнефть",
-      "address": "Двинская ул., 16, посёлок Металлург-1",
-      "lat": 48.733196,
-      "lon": 44.832818,
-      "chain": "Татнефть",
-      "yandex_url": "https://yandex.ru/maps/org/30406389541",
-      "cash_only": false,
-      "queue_status": "UNKNOWN",
-      "queue_label": "⚪ Обычный поток",
-      "signals_count_per_hour": 1,
-      "fuel_limit": null,
-      "last_signal_timestamp": 1788090142,
-      "fuels": {
-        "AI92": {
-          "fuel_type": "AI92",
-          "name": "92",
-          "status": "UNCERTAIN",
-          "price_text": "64.14 ₽",
-          "price_value": 64.14
-        },
-        "AI95": {
-          "fuel_type": "AI95",
-          "name": "95",
-          "status": "UNCERTAIN",
-          "price_text": "71.4 ₽",
-          "price_value": 71.4
-        },
-        "AI95_PREMIUM": {
-          "fuel_type": "AI95_PREMIUM",
-          "name": "95+",
-          "status": "OUT_OF_STOCK",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI98": {
-          "fuel_type": "AI98",
-          "name": "98",
-          "status": "OUT_OF_STOCK",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI100": {
-          "fuel_type": "AI100",
-          "name": "100",
-          "status": "OUT_OF_STOCK",
-          "price_text": null,
-          "price_value": null
-        },
-        "DIESEL": {
-          "fuel_type": "DIESEL",
-          "name": "ДТ",
-          "status": "UNCERTAIN",
-          "price_text": "83.86 ₽",
-          "price_value": 83.86
         }
       }
     },
@@ -780,9 +863,9 @@
       "cash_only": false,
       "queue_status": "UNKNOWN",
       "queue_label": "⚪ Обычный поток",
-      "signals_count_per_hour": 1,
+      "signals_count_per_hour": 3,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788088909,
+      "last_signal_timestamp": 1788093744,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -837,11 +920,11 @@
       "chain": "Лукойл",
       "yandex_url": "https://yandex.ru/maps/org/1170901381",
       "cash_only": false,
-      "queue_status": "UNKNOWN",
-      "queue_label": "⚪ Обычный поток",
+      "queue_status": "HIGH",
+      "queue_label": "🔴 Большая очередь",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788089061,
+      "last_signal_timestamp": 1788091403,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -955,8 +1038,8 @@
       "chain": "Газпром",
       "yandex_url": "https://yandex.ru/maps/org/1754761481",
       "cash_only": false,
-      "queue_status": "HIGH",
-      "queue_label": "🔴 Большая очередь",
+      "queue_status": "MEDIUM",
+      "queue_label": "🟡 Средняя очередь",
       "signals_count_per_hour": 0,
       "fuel_limit": null,
       "last_signal_timestamp": 1788082674,
@@ -1065,65 +1148,6 @@
       }
     },
     {
-      "id": "190378037547",
-      "name": "Газпром",
-      "address": "просп. имени Ленина, 308А",
-      "lat": 48.756854,
-      "lon": 44.787772,
-      "chain": "Газпром",
-      "yandex_url": "https://yandex.ru/maps/org/190378037547",
-      "cash_only": false,
-      "queue_status": "UNKNOWN",
-      "queue_label": "⚪ Обычный поток",
-      "signals_count_per_hour": 0,
-      "fuel_limit": null,
-      "last_signal_timestamp": null,
-      "fuels": {
-        "AI92": {
-          "fuel_type": "AI92",
-          "name": "92",
-          "status": "UNKNOWN",
-          "price_text": "64.25 ₽",
-          "price_value": 64.25
-        },
-        "AI95": {
-          "fuel_type": "AI95",
-          "name": "95",
-          "status": "OUT_OF_STOCK",
-          "price_text": "71.35 ₽",
-          "price_value": 71.35
-        },
-        "AI95_PREMIUM": {
-          "fuel_type": "AI95_PREMIUM",
-          "name": "95+",
-          "status": "OUT_OF_STOCK",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI98": {
-          "fuel_type": "AI98",
-          "name": "98",
-          "status": "OUT_OF_STOCK",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI100": {
-          "fuel_type": "AI100",
-          "name": "100",
-          "status": "OUT_OF_STOCK",
-          "price_text": null,
-          "price_value": null
-        },
-        "DIESEL": {
-          "fuel_type": "DIESEL",
-          "name": "ДТ",
-          "status": "UNKNOWN",
-          "price_text": "77.2 ₽",
-          "price_value": 77.2
-        }
-      }
-    },
-    {
       "id": "92428607289",
       "name": "АГНКС",
       "address": "Волгоградская область, Волжский",
@@ -1195,12 +1219,12 @@
       "queue_label": "🔴 Большая очередь",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788089061,
+      "last_signal_timestamp": 1788094418,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
           "name": "92",
-          "status": "UNCERTAIN",
+          "status": "IN_STOCK",
           "price_text": "65.65 ₽",
           "price_value": 65.65
         },
@@ -1235,7 +1259,7 @@
         "DIESEL": {
           "fuel_type": "DIESEL",
           "name": "ДТ",
-          "status": "IN_STOCK",
+          "status": "UNCERTAIN",
           "price_text": "77.05 ₽",
           "price_value": 77.05
         }
@@ -1254,7 +1278,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788090908,
+      "last_signal_timestamp": 1788091403,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -1290,6 +1314,124 @@
           "status": "OUT_OF_STOCK",
           "price_text": "98.24 ₽",
           "price_value": 98.24
+        },
+        "DIESEL": {
+          "fuel_type": "DIESEL",
+          "name": "ДТ",
+          "status": "IN_STOCK",
+          "price_text": "79.37 ₽",
+          "price_value": 79.37
+        }
+      }
+    },
+    {
+      "id": "1053748068",
+      "name": "АЗС",
+      "address": "Шоссейная ул., 2",
+      "lat": 48.809854,
+      "lon": 44.728295,
+      "chain": null,
+      "yandex_url": "https://yandex.ru/maps/org/1053748068",
+      "cash_only": false,
+      "queue_status": "LOW",
+      "queue_label": "🟢 Свободно",
+      "signals_count_per_hour": 0,
+      "fuel_limit": null,
+      "last_signal_timestamp": null,
+      "fuels": {
+        "AI92": {
+          "fuel_type": "AI92",
+          "name": "92",
+          "status": "UNKNOWN",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI95": {
+          "fuel_type": "AI95",
+          "name": "95",
+          "status": "UNKNOWN",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI95_PREMIUM": {
+          "fuel_type": "AI95_PREMIUM",
+          "name": "95+",
+          "status": "UNKNOWN",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI98": {
+          "fuel_type": "AI98",
+          "name": "98",
+          "status": "UNKNOWN",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI100": {
+          "fuel_type": "AI100",
+          "name": "100",
+          "status": "UNKNOWN",
+          "price_text": null,
+          "price_value": null
+        },
+        "DIESEL": {
+          "fuel_type": "DIESEL",
+          "name": "ДТ",
+          "status": "UNKNOWN",
+          "price_text": null,
+          "price_value": null
+        }
+      }
+    },
+    {
+      "id": "167579520225",
+      "name": "Лукойл",
+      "address": "ул. Майора Дмитрия Кузнецова, 21А, рабочий посёлок Ерзовка",
+      "lat": 48.922736,
+      "lon": 44.622437,
+      "chain": "Лукойл",
+      "yandex_url": "https://yandex.ru/maps/org/167579520225",
+      "cash_only": false,
+      "queue_status": "LOW",
+      "queue_label": "🟢 Свободно",
+      "signals_count_per_hour": 0,
+      "fuel_limit": null,
+      "last_signal_timestamp": null,
+      "fuels": {
+        "AI92": {
+          "fuel_type": "AI92",
+          "name": "92",
+          "status": "OUT_OF_STOCK",
+          "price_text": "66.16 ₽",
+          "price_value": 66.16
+        },
+        "AI95": {
+          "fuel_type": "AI95",
+          "name": "95",
+          "status": "UNKNOWN",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI95_PREMIUM": {
+          "fuel_type": "AI95_PREMIUM",
+          "name": "95+",
+          "status": "OUT_OF_STOCK",
+          "price_text": "73.63 ₽",
+          "price_value": 73.63
+        },
+        "AI98": {
+          "fuel_type": "AI98",
+          "name": "98",
+          "status": "UNKNOWN",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI100": {
+          "fuel_type": "AI100",
+          "name": "100",
+          "status": "UNKNOWN",
+          "price_text": null,
+          "price_value": null
         },
         "DIESEL": {
           "fuel_type": "DIESEL",
