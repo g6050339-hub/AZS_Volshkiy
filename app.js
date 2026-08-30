@@ -77,6 +77,46 @@ const FUEL_INFO = {
   'METHANE': { name: 'Метан', emoji: '⚪', class: 'cng' },
 };
 
+// Smart Fuel Matcher (Includes premium varieties)
+function checkFuelInStock(station, filter) {
+  if (!station || !station.fuels) return false;
+  
+  if (filter === 'ALL') {
+    return Object.values(station.fuels).some(f => f.status === 'IN_STOCK');
+  }
+  
+  if (filter === 'AI95') {
+    const f1 = station.fuels['AI95'];
+    const f2 = station.fuels['AI95_PREMIUM'];
+    return (f1 && f1.status === 'IN_STOCK') || (f2 && f2.status === 'IN_STOCK');
+  }
+  
+  if (filter === 'AI92') {
+    const f1 = station.fuels['AI92'];
+    return (f1 && f1.status === 'IN_STOCK');
+  }
+  
+  if (filter === 'AI100') {
+    const f1 = station.fuels['AI100'];
+    const f2 = station.fuels['AI98'];
+    return (f1 && f1.status === 'IN_STOCK') || (f2 && f2.status === 'IN_STOCK');
+  }
+  
+  if (filter === 'DIESEL') {
+    const f1 = station.fuels['DIESEL'];
+    return (f1 && f1.status === 'IN_STOCK');
+  }
+  
+  if (filter === 'AI98') {
+    const f1 = station.fuels['AI98'];
+    const f2 = station.fuels['AI100'];
+    return (f1 && f1.status === 'IN_STOCK') || (f2 && f2.status === 'IN_STOCK');
+  }
+  
+  const fuel = station.fuels[filter];
+  return fuel && fuel.status === 'IN_STOCK';
+}
+
 // Queue Metadata
 const QUEUE_INFO = {
   'LOW': { text: 'Свободно (мало машин)', badgeClass: 'q-low', dotClass: 'q-low', emoji: '🟢' },
@@ -228,7 +268,7 @@ function renderCitiesList(filterQuery = '') {
   }
 
   filtered.forEach(c => {
-    if (!filterQuery && c.popular) return; // already shown in popular
+    if (!filterQuery && c.popular) return;
     citiesContainer.appendChild(createCityItemElement(c));
   });
 }
@@ -266,9 +306,7 @@ function selectCity(city) {
   updateCityHeaderUI();
   cityModal.classList.remove('open');
 
-  // Smooth fly to city
   map.flyTo(city.coords, city.zoom, { duration: 1.2 });
-
   loadStationsForCity(city);
 }
 
@@ -391,33 +429,32 @@ function closeDrawer() {
   selectedStation = null;
 }
 
-// Load stations with smart fallback
+// Load stations
 async function loadStationsForCity(city) {
   loader.classList.remove('hidden');
   document.getElementById('loader-text').textContent = `Загрузка АЗС: ${city.name}...`;
 
   try {
-    if (allStations.length === 0) {
-      let data = null;
-      try {
-        const res = await fetch('./stations.json?t=' + Date.now());
-        if (res.ok) data = await res.json();
-      } catch (e) {
-        console.warn('Fallback to /api/stations');
-      }
+    let data = null;
+    try {
+      const res = await fetch('./stations.json?t=' + Date.now());
+      if (res.ok) data = await res.json();
+    } catch (e) {
+      console.warn('Fallback to /api/stations');
+    }
 
-      if (!data) {
+    if (!data) {
+      try {
         const res = await fetch('/api/stations');
         data = await res.json();
-      }
-
-      allStations = data.stations || data || [];
+      } catch (e) {}
     }
+
+    allStations = data?.stations || data || [];
 
     if (city.id === 'volzhsky' || city.id === 'volgograd') {
       displayedStations = allStations;
     } else {
-      // Generate standard representative stations for selected Russian city
       displayedStations = generateCityStations(city);
     }
 
@@ -469,18 +506,11 @@ function generateCityStations(city) {
 function updateBadgeCounts() {
   document.getElementById('count-all').textContent = displayedStations.length;
 
-  const countFor = (fuelType) => {
-    return displayedStations.filter(st => {
-      const f = st.fuels?.[fuelType];
-      return f && f.status === 'IN_STOCK';
-    }).length;
-  };
-
-  document.getElementById('count-ai95').textContent = countFor('AI95');
-  document.getElementById('count-ai92').textContent = countFor('AI92');
-  document.getElementById('count-ai100').textContent = countFor('AI100');
-  document.getElementById('count-diesel').textContent = countFor('DIESEL');
-  document.getElementById('count-ai98').textContent = countFor('AI98');
+  document.getElementById('count-ai95').textContent = displayedStations.filter(st => checkFuelInStock(st, 'AI95')).length;
+  document.getElementById('count-ai92').textContent = displayedStations.filter(st => checkFuelInStock(st, 'AI92')).length;
+  document.getElementById('count-ai100').textContent = displayedStations.filter(st => checkFuelInStock(st, 'AI100')).length;
+  document.getElementById('count-diesel').textContent = displayedStations.filter(st => checkFuelInStock(st, 'DIESEL')).length;
+  document.getElementById('count-ai98').textContent = displayedStations.filter(st => checkFuelInStock(st, 'AI98')).length;
 }
 
 function renderMarkers() {
@@ -537,12 +567,11 @@ function updateMarkersVisibility() {
     }
 
     if (currentFilter === 'ALL') {
-      const hasAnyStock = Object.values(station.fuels || {}).some(f => f.status === 'IN_STOCK');
+      const hasAnyStock = checkFuelInStock(station, 'ALL');
       el.className = `custom-pin ${hasAnyStock ? 'in-stock' : 'out-of-stock'}`;
       marker.setOpacity(1.0);
     } else {
-      const fuelItem = station.fuels?.[currentFilter];
-      const inStock = fuelItem && fuelItem.status === 'IN_STOCK';
+      const inStock = checkFuelInStock(station, currentFilter);
 
       if (inStock) {
         el.className = 'custom-pin in-stock';
