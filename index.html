@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Мониторинг АЗС и Топлива</title>
+  
+  <!-- Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- Leaflet CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Top Header Bar with City Selector & Fuel Filters -->
+    <header class="header">
+      <!-- City & Search Row -->
+      <div class="top-action-bar">
+        <button id="btn-city-select" class="city-pill-btn">
+          <span class="city-icon">📍</span>
+          <span id="current-city-name" class="city-name-text">Волжский</span>
+          <span class="city-arrow">▾</span>
+        </button>
+        <div class="city-priority-indicator" id="priority-indicator" title="Приоритетный город">⭐</div>
+      </div>
+
+      <!-- Filters Scroll -->
+      <div class="filters-scroll">
+        <button class="filter-pill active" data-fuel="ALL">
+          <span>Все АЗС</span>
+          <span class="badge" id="count-all">0</span>
+        </button>
+        <button class="filter-pill" data-fuel="AI95">
+          <span class="dot dot-blue"></span>
+          <span>АИ-95</span>
+          <span class="badge" id="count-ai95">0</span>
+        </button>
+        <button class="filter-pill" data-fuel="AI92">
+          <span class="dot dot-green"></span>
+          <span>АИ-92</span>
+          <span class="badge" id="count-ai92">0</span>
+        </button>
+        <button class="filter-pill" data-fuel="AI100">
+          <span class="dot dot-red"></span>
+          <span>АИ-100</span>
+          <span class="badge" id="count-ai100">0</span>
+        </button>
+        <button class="filter-pill" data-fuel="DIESEL">
+          <span class="dot dot-black"></span>
+          <span>ДТ</span>
+          <span class="badge" id="count-diesel">0</span>
+        </button>
+        <button class="filter-pill" data-fuel="AI98">
+          <span class="dot dot-purple"></span>
+          <span>АИ-98</span>
+          <span class="badge" id="count-ai98">0</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Map Container -->
+    <div id="map"></div>
+
+    <!-- Floating Action Buttons -->
+    <div class="map-controls">
+      <button id="btn-locate" class="ctrl-btn" title="Мое местоположение">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <circle cx="12" cy="12" r="3"></circle>
+          <line x1="12" y1="2" x2="12" y2="5"></line>
+          <line x1="12" y1="19" x2="12" y2="22"></line>
+          <line x1="2" y1="12" x2="5" y2="12"></line>
+          <line x1="19" y1="12" x2="22" y2="12"></line>
+        </svg>
+      </button>
+      <button id="btn-refresh" class="ctrl-btn" title="Обновить">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- City Selection Modal Sheet -->
+    <div id="city-modal" class="city-modal">
+      <div class="city-modal-backdrop" id="city-modal-backdrop"></div>
+      <div class="city-modal-sheet">
+        <div class="drawer-handle-bar">
+          <div class="drawer-handle"></div>
+        </div>
+        
+        <div class="city-modal-header">
+          <div class="city-modal-title">Выберите город России</div>
+          <button class="city-modal-close" id="city-modal-close">✕</button>
+        </div>
+
+        <div class="city-search-box">
+          <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="city-search-input" placeholder="Поиск города (например: Волгоград, Москва...)" autocomplete="off">
+          <button id="city-search-clear" class="search-clear hidden">✕</button>
+        </div>
+
+        <!-- Priority City Toggle Bar -->
+        <div class="priority-toggle-bar">
+          <div class="priority-toggle-info">
+            <span class="p-star">⭐</span>
+            <div class="p-text">
+              <div class="p-title">Приоритет города</div>
+              <div class="p-sub">Открывать этот город автоматически при входе</div>
+            </div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="priority-city-checkbox">
+            <span class="slider round"></span>
+          </label>
+        </div>
+
+        <!-- Cities List Container -->
+        <div class="cities-container" id="cities-container">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Station Drawer / Modal -->
+    <div id="drawer" class="drawer">
+      <div class="drawer-handle-bar" id="drawer-handle">
+        <div class="drawer-handle"></div>
+      </div>
+      
+      <div class="drawer-content" id="drawer-content">
+        <div class="station-header">
+          <div class="station-brand-icon" id="station-brand-icon">⛽</div>
+          <div class="station-title-group">
+            <h2 class="station-name" id="station-name">АЗС</h2>
+            <p class="station-address" id="station-address">Адрес</p>
+          </div>
+          <button class="drawer-close" id="drawer-close">✕</button>
+        </div>
+
+        <!-- Live Queue Card -->
+        <div class="queue-status-card" id="queue-card">
+          <div class="queue-header">
+            <span class="queue-icon" id="queue-icon">🚗</span>
+            <div class="queue-info">
+              <div class="queue-title-row">
+                <span class="queue-label-text">Очередь:</span>
+                <span class="queue-badge" id="queue-badge">Свободно</span>
+              </div>
+              <p class="queue-detail" id="queue-detail">Активность: 0 машин за час</p>
+            </div>
+          </div>
+          <div id="queue-warnings" class="queue-warnings"></div>
+
+          <!-- User Feedback Queue Buttons -->
+          <div class="report-queue-box">
+            <div class="report-title">Отметить очередь:</div>
+            <div class="report-buttons">
+              <button class="report-btn" data-report="LOW">🟢 Свободно</button>
+              <button class="report-btn" data-report="MEDIUM">🟡 5-10 машин</button>
+              <button class="report-btn" data-report="HIGH">🔴 Затор</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="fuels-section">
+          <h3 class="section-title">Наличие топлива и цены</h3>
+          <div class="fuels-grid" id="fuels-grid"></div>
+        </div>
+
+        <div class="station-actions">
+          <a id="btn-navigate" href="#" target="_blank" class="action-btn primary-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+            </svg>
+            Поехать в Навигаторе
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loader" class="loader-overlay">
+      <div class="spinner"></div>
+      <p id="loader-text">Загрузка АЗС...</p>
+    </div>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
