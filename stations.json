@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 22,
-  "updated_at": 1788096320,
+  "updated_at": 1788096519,
   "stations": [
     {
       "id": "1817417962",
@@ -75,7 +75,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788092426,
+      "last_signal_timestamp": 1788092836,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -370,7 +370,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788092426,
+      "last_signal_timestamp": 1788092836,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -547,7 +547,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788092426,
+      "last_signal_timestamp": 1788092836,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -665,7 +665,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788092426,
+      "last_signal_timestamp": 1788092836,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -677,7 +677,7 @@
         "AI95": {
           "fuel_type": "AI95",
           "name": "95",
-          "status": "UNCERTAIN",
+          "status": "IN_STOCK",
           "price_text": null,
           "price_value": null
         },
@@ -724,7 +724,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788092426,
+      "last_signal_timestamp": 1788092836,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -781,7 +781,7 @@
       "cash_only": false,
       "queue_status": "UNKNOWN",
       "queue_label": "⚪ Обычный поток",
-      "signals_count_per_hour": 3,
+      "signals_count_per_hour": 2,
       "fuel_limit": null,
       "last_signal_timestamp": 1788093744,
       "fuels": {
@@ -842,7 +842,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788092426,
+      "last_signal_timestamp": 1788092836,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -956,11 +956,11 @@
       "chain": "Газпром",
       "yandex_url": "https://yandex.ru/maps/org/1754761481",
       "cash_only": false,
-      "queue_status": "MEDIUM",
-      "queue_label": "🟡 Средняя очередь",
-      "signals_count_per_hour": 1,
+      "queue_status": "UNKNOWN",
+      "queue_label": "⚪ Обычный поток",
+      "signals_count_per_hour": 2,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788094437,
+      "last_signal_timestamp": 1788095830,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
