@@ -27,6 +27,14 @@ const FUEL_INFO = {
   'METHANE': { name: 'Метан', emoji: '⚪', class: 'cng' },
 };
 
+// Queue Metadata
+const QUEUE_INFO = {
+  'LOW': { text: 'Свободно (мало машин)', badgeClass: 'q-low', dotClass: 'q-low', emoji: '🟢' },
+  'MEDIUM': { text: 'Средняя (5–10 машин)', badgeClass: 'q-med', dotClass: 'q-med', emoji: '🟡' },
+  'HIGH': { text: 'Большая очередь (затор)', badgeClass: 'q-high', dotClass: 'q-high', emoji: '🔴' },
+  'UNKNOWN': { text: 'Обычный поток', badgeClass: 'q-unknown', dotClass: 'q-unknown', emoji: '⚪' }
+};
+
 // Brand Icons
 const BRAND_ICONS = {
   'лукойл': '🔴',
@@ -48,6 +56,14 @@ function haptic(type = 'light') {
   try {
     if (tg?.HapticFeedback) {
       tg.HapticFeedback.impactOccurred(type);
+    }
+  } catch (e) {}
+}
+
+function hapticNotification(type = 'success') {
+  try {
+    if (tg?.HapticFeedback) {
+      tg.HapticFeedback.notificationOccurred(type);
     }
   } catch (e) {}
 }
@@ -87,6 +103,60 @@ drawerClose.addEventListener('click', () => {
   closeDrawer();
 });
 
+// Setup User Report Queue Buttons
+document.querySelectorAll('.report-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (!selectedStation) return;
+    const reportVal = btn.dataset.report;
+    hapticNotification('success');
+
+    // Update locally in real-time
+    selectedStation.queue_status = reportVal;
+    renderQueueCard(selectedStation);
+    updateMarkersVisibility();
+
+    btn.textContent = '✅ Принято!';
+    setTimeout(() => {
+      if (reportVal === 'LOW') btn.textContent = '🟢 Свободно';
+      else if (reportVal === 'MEDIUM') btn.textContent = '🟡 5-10 машин';
+      else if (reportVal === 'HIGH') btn.textContent = '🔴 Затор';
+    }, 2000);
+  });
+});
+
+function renderQueueCard(station) {
+  const qStatus = station.queue_status || 'UNKNOWN';
+  const qMeta = QUEUE_INFO[qStatus] || QUEUE_INFO['UNKNOWN'];
+
+  const badge = document.getElementById('queue-badge');
+  badge.className = `queue-badge ${qMeta.badgeClass}`;
+  badge.textContent = qMeta.text;
+
+  const activity = station.signals_count_per_hour || 0;
+  let detailText = activity > 0 
+    ? `⚡ Активность водителей: ${activity} чел. за последний час` 
+    : '🕒 Данные телеметрии дорожного потока';
+  document.getElementById('queue-detail').textContent = detailText;
+
+  // Warnings (Cash only or limits)
+  const warningsBox = document.getElementById('queue-warnings');
+  warningsBox.innerHTML = '';
+
+  if (station.cash_only) {
+    const w = document.createElement('div');
+    w.className = 'warning-pill';
+    w.innerHTML = '⚠️ <b>Только наличный расчет</b> (терминалы не работают)';
+    warningsBox.appendChild(w);
+  }
+
+  if (station.fuel_limit) {
+    const w = document.createElement('div');
+    w.className = 'warning-pill';
+    w.innerHTML = `⛔ <b>Ограничение:</b> ${station.fuel_limit}`;
+    warningsBox.appendChild(w);
+  }
+}
+
 function openDrawer(station) {
   selectedStation = station;
   haptic('light');
@@ -95,6 +165,9 @@ function openDrawer(station) {
   document.getElementById('station-brand-icon').textContent = brandIcon;
   document.getElementById('station-name').textContent = station.name;
   document.getElementById('station-address').textContent = station.address;
+
+  // Render Queue Card
+  renderQueueCard(station);
 
   // Fuels Grid
   const grid = document.getElementById('fuels-grid');
@@ -139,7 +212,7 @@ function closeDrawer() {
   selectedStation = null;
 }
 
-// Fetch Stations Data (Tries API first, then falls back to static stations.json for GitHub Pages)
+// Fetch Stations Data (Tries static stations.json for GitHub Pages, falls back to /api/stations)
 async function loadStations() {
   loader.classList.remove('hidden');
   try {
@@ -204,10 +277,17 @@ function renderMarkers() {
 
 function createMarker(station) {
   const brandIcon = getBrandIcon(station.name);
+  const qStatus = station.queue_status || 'UNKNOWN';
+  const qMeta = QUEUE_INFO[qStatus] || QUEUE_INFO['UNKNOWN'];
   
   const icon = L.divIcon({
     className: 'custom-div-icon',
-    html: `<div class="custom-pin in-stock" id="pin-${station.id}">${brandIcon}</div>`,
+    html: `
+      <div class="custom-pin in-stock" id="pin-${station.id}">
+        ${brandIcon}
+        <div class="pin-queue-dot ${qMeta.dotClass}" id="qdot-${station.id}" title="${qMeta.text}"></div>
+      </div>
+    `,
     iconSize: [36, 36],
     iconAnchor: [18, 18]
   });
@@ -224,7 +304,15 @@ function createMarker(station) {
 function updateMarkersVisibility() {
   markers.forEach(({ marker, station }) => {
     const el = document.getElementById(`pin-${station.id}`);
+    const qdot = document.getElementById(`qdot-${station.id}`);
     if (!el) return;
+
+    // Update queue dot
+    if (qdot) {
+      const qStatus = station.queue_status || 'UNKNOWN';
+      const qMeta = QUEUE_INFO[qStatus] || QUEUE_INFO['UNKNOWN'];
+      qdot.className = `pin-queue-dot ${qMeta.dotClass}`;
+    }
 
     if (currentFilter === 'ALL') {
       const hasAnyStock = Object.values(station.fuels || {}).some(f => f.status === 'IN_STOCK');

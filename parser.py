@@ -1,5 +1,5 @@
 """
-Parser module for fetching real-time fuel availability and prices from gas stations in Volzhsky.
+Parser module for fetching real-time fuel availability, prices, and queue telemetry from gas stations in Volzhsky.
 """
 import re
 import json
@@ -33,6 +33,9 @@ class GasStation:
     yandex_url: Optional[str] = None
     fuels: Dict[str, FuelItem] = field(default_factory=dict)
     cash_only: bool = False
+    queue_status: str = "UNKNOWN"              # "LOW" | "MEDIUM" | "HIGH" | "UNKNOWN"
+    signals_count_per_hour: int = 0            # Driver activity count
+    fuel_limit: Optional[str] = None           # e.g. "Лимит 30 л"
     last_signal_timestamp: Optional[int] = None
     raw_data: Optional[Dict[str, Any]] = None
 
@@ -48,6 +51,16 @@ class GasStation:
     def out_of_stock_fuels(self) -> List[FuelItem]:
         return [f for f in self.fuels.values() if f.status == "OUT_OF_STOCK"]
 
+    @property
+    def queue_label(self) -> str:
+        if self.queue_status == "HIGH":
+            return "🔴 Большая очередь"
+        elif self.queue_status == "MEDIUM":
+            return "🟡 Средняя очередь"
+        elif self.queue_status == "LOW":
+            return "🟢 Свободно"
+        return "⚪ Обычный поток"
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "id": self.id,
@@ -58,6 +71,10 @@ class GasStation:
             "chain": self.chain,
             "yandex_url": self.yandex_url,
             "cash_only": self.cash_only,
+            "queue_status": self.queue_status,
+            "queue_label": self.queue_label,
+            "signals_count_per_hour": self.signals_count_per_hour,
+            "fuel_limit": self.fuel_limit,
             "last_signal_timestamp": self.last_signal_timestamp,
             "fuels": {k: asdict(v) for k, v in self.fuels.items()}
         }
@@ -137,7 +154,7 @@ class VolzhskyFuelParser:
 
     async def fetch_gas_stations(self) -> List[GasStation]:
         """
-        Fetches the live list of gas stations in Volzhsky with availability and prices.
+        Fetches the live list of gas stations in Volzhsky with availability, prices, and queues.
         """
         async with httpx.AsyncClient(headers=self.HEADERS, follow_redirects=True, timeout=20.0) as client:
             try:
@@ -195,14 +212,20 @@ class VolzhskyFuelParser:
                             "value": price_obj.get("value")
                         }
 
-            # Availability from fuelAvailability
+            # Availability & Queue from fuelAvailability
             fuel_dict: Dict[str, FuelItem] = {}
             fuel_avail = item.get("fuelAvailability", {})
             cash_only = False
+            queue_status = "UNKNOWN"
+            signals_count = 0
+            fuel_limit = None
             last_ts = None
 
             if isinstance(fuel_avail, dict):
-                cash_only = fuel_avail.get("cashOnly", False)
+                cash_only = bool(fuel_avail.get("cashOnly", False))
+                queue_status = str(fuel_avail.get("queueStatus") or "UNKNOWN").upper()
+                signals_count = int(fuel_avail.get("signalsCountPerHour") or 0)
+                fuel_limit = fuel_avail.get("localizedFuelLimit") or None
                 last_ts = fuel_avail.get("lastSignalTimestamp")
                 raw_fuels = fuel_avail.get("fuel", [])
                 
@@ -252,6 +275,9 @@ class VolzhskyFuelParser:
                 yandex_url=f"https://yandex.ru/maps/org/{station_id}" if station_id.isdigit() else None,
                 fuels=fuel_dict,
                 cash_only=cash_only,
+                queue_status=queue_status,
+                signals_count_per_hour=signals_count,
+                fuel_limit=fuel_limit,
                 last_signal_timestamp=last_ts,
                 raw_data=None
             )

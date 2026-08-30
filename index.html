@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Топливо в Волжском</title>
+  <title>Топливо и Очереди в Волжском</title>
   
   <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -88,10 +88,37 @@
         <div class="station-header">
           <div class="station-brand-icon" id="station-brand-icon">⛽</div>
           <div class="station-title-group">
-            <h2 class="station-name" id="station-name">Выберите заправку</h2>
-            <p class="station-address" id="station-address">Нажмите на метку на карте</p>
+            <h2 class="station-name" id="station-name">АЗС</h2>
+            <p class="station-address" id="station-address">Адрес</p>
           </div>
           <button class="drawer-close" id="drawer-close">✕</button>
+        </div>
+
+        <!-- Live Queue Card -->
+        <div class="queue-status-card" id="queue-card">
+          <div class="queue-header">
+            <span class="queue-icon" id="queue-icon">🚗</span>
+            <div class="queue-info">
+              <div class="queue-title-row">
+                <span class="queue-label-text">Очередь:</span>
+                <span class="queue-badge" id="queue-badge">Свободно</span>
+              </div>
+              <p class="queue-detail" id="queue-detail">Активность: 0 машин за час</p>
+            </div>
+          </div>
+          <div id="queue-warnings" class="queue-warnings">
+            <!-- Warnings like Cash Only or Limits -->
+          </div>
+
+          <!-- User Feedback Queue Buttons -->
+          <div class="report-queue-box">
+            <div class="report-title">Отметить очередь сейчас:</div>
+            <div class="report-buttons">
+              <button class="report-btn" data-report="LOW">🟢 Свободно</button>
+              <button class="report-btn" data-report="MEDIUM">🟡 5-10 машин</button>
+              <button class="report-btn" data-report="HIGH">🔴 Затор</button>
+            </div>
+          </div>
         </div>
 
         <div class="fuels-section">
@@ -115,7 +142,7 @@
     <!-- Loading Overlay -->
     <div id="loader" class="loader-overlay">
       <div class="spinner"></div>
-      <p>Загрузка АЗС Волжского...</p>
+      <p>Загрузка данных АЗС Волжского...</p>
     </div>
   </div>
 
