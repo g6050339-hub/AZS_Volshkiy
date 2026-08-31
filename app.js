@@ -451,40 +451,40 @@ async function fetchRealStations(city) {
 
 // Fetch real stations along a route corridor using Backend API
 async function fetchRouteStations(routeCoords) {
-  // Compute bounding box of the route to find center and span
-  let minLat = Infinity, maxLat = -Infinity, minLon = Infinity, maxLon = -Infinity;
-  const step = Math.max(1, Math.floor(routeCoords.length / 100));
+  // Yandex Maps limits results to ~50 per query. We cannot use one giant bounding box.
+  // Instead, we sample up to 10 points evenly distributed along the route.
+  const maxRequests = 10;
+  const step = Math.max(1, Math.floor(routeCoords.length / maxRequests));
+  const stations = [];
+  const seen = new Set();
+  
+  const promises = [];
   for (let i = 0; i < routeCoords.length; i += step) {
     const [lon, lat] = routeCoords[i];
-    if (lat < minLat) minLat = lat;
-    if (lat > maxLat) maxLat = lat;
-    if (lon < minLon) minLon = lon;
-    if (lon > maxLon) maxLon = lon;
-  }
-  
-  const centerLat = (minLat + maxLat) / 2;
-  const centerLon = (minLon + maxLon) / 2;
-  const spnLat = (maxLat - minLat) + 0.05;
-  const spnLon = (maxLon - minLon) + 0.05;
-  
-  const url = `${API_BASE_URL}/api/stations?lat=${centerLat}&lon=${centerLon}&spn=${Math.max(spnLon, spnLat)}`;
-
-  console.log('[API-ROUTE] Fetching stations along route, center:', centerLat, centerLon, 'spn:', Math.max(spnLon, spnLat));
-
-  try {
-    const res = await fetch(url, { headers: { 'Bypass-Tunnel-Reminder': 'true' } });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
+    // Small span for each chunk
+    const url = `${API_BASE_URL}/api/stations?lat=${lat}&lon=${lon}&spn=0.3`;
     
-    if (data.status === 'ok' && data.stations) {
-      console.log('[API-ROUTE] Found', data.stations.length, 'stations along route');
-      return data.stations;
-    }
-    return [];
-  } catch (err) {
-    console.warn('[API-ROUTE] Fetch failed:', err);
-    return [];
+    promises.push(
+      fetch(url, { headers: { 'Bypass-Tunnel-Reminder': 'true' } })
+        .then(r => r.json())
+        .then(data => {
+          if (data.status === 'ok' && data.stations) {
+            data.stations.forEach(s => {
+              if (!seen.has(s.id)) {
+                seen.add(s.id);
+                stations.push(s);
+              }
+            });
+          }
+        })
+        .catch(err => console.warn('[API-ROUTE] Chunk fetch failed:', err))
+    );
   }
+  
+  console.log(`[API-ROUTE] Fetching ${promises.length} chunks along route...`);
+  await Promise.all(promises);
+  console.log('[API-ROUTE] Found', stations.length, 'total stations along route');
+  return stations;
 }
 
 function updateBadgeCounts() {
