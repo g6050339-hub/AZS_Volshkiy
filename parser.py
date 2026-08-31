@@ -133,10 +133,14 @@ class VolzhskyFuelParser:
     }
 
     def __init__(self):
-        self.base_url = (
-            f"https://yandex.ru/maps/?ll={settings.VOLZHSKY_LON}%2C{settings.VOLZHSKY_LAT}"
-            f"&sll={settings.VOLZHSKY_LON}%2C{settings.VOLZHSKY_LAT}"
-            f"&sspn={settings.VOLZHSKY_SPN_LON}%2C{settings.VOLZHSKY_SPN_LAT}"
+        pass
+
+    def _build_url(self, lon: float, lat: float, spn_lon: float = 0.28, spn_lat: float = 0.22) -> str:
+        """Build Yandex Maps search URL for given coordinates."""
+        return (
+            f"https://yandex.ru/maps/?ll={lon}%2C{lat}"
+            f"&sll={lon}%2C{lat}"
+            f"&sspn={spn_lon}%2C{spn_lat}"
             f"&text=%D0%90%D0%97%D0%A1&z=12"
         )
 
@@ -151,17 +155,23 @@ class VolzhskyFuelParser:
                 return v
         return None
 
-    async def fetch_gas_stations(self) -> List[GasStation]:
+    async def fetch_gas_stations(self, lat: float = None, lon: float = None, 
+                                  spn_lon: float = 0.28, spn_lat: float = 0.22) -> List[GasStation]:
         """
-        Fetches the live list of gas stations in Volzhsky with availability, prices, and queues.
+        Fetches gas stations with availability, prices, and queues.
+        If lat/lon not provided, defaults to Volzhsky coordinates.
         """
+        use_lat = lat if lat is not None else settings.VOLZHSKY_LAT
+        use_lon = lon if lon is not None else settings.VOLZHSKY_LON
+        url = self._build_url(use_lon, use_lat, spn_lon, spn_lat)
+        
         async with httpx.AsyncClient(headers=self.HEADERS, follow_redirects=True, timeout=20.0) as client:
             try:
-                response = await client.get(self.base_url)
+                response = await client.get(url)
                 response.raise_for_status()
                 html = response.text
             except Exception as e:
-                logger.error(f"Error fetching Yandex Maps data: {e}")
+                logger.error(f"Error fetching Yandex Maps data for ({use_lat}, {use_lon}): {e}")
                 return []
 
         match = re.search(r'class="state-view"[^>]*>([^<]+)', html)
