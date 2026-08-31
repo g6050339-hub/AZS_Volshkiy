@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 22,
-  "updated_at": 1788200786,
+  "updated_at": 1788200985,
   "stations": [
     {
       "id": "1817417962",
@@ -75,7 +75,7 @@
       "queue_label": "🟢 Свободно",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788197082,
+      "last_signal_timestamp": 1788197363,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
