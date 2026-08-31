@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 22,
-  "updated_at": 1788200406,
+  "updated_at": 1788200596,
   "stations": [
     {
       "id": "1817417962",
@@ -1184,19 +1184,19 @@
       }
     },
     {
-      "id": "92428607289",
-      "name": "АГНКС",
-      "address": "Волгоградская область, Волжский",
-      "lat": 48.778169,
-      "lon": 44.769818,
-      "chain": null,
-      "yandex_url": "https://yandex.ru/maps/org/92428607289",
+      "id": "1933105753",
+      "name": "Татнефть",
+      "address": "Волжский, ул. Александрова, 54В",
+      "lat": 48.78858,
+      "lon": 44.833129,
+      "chain": "Татнефть",
+      "yandex_url": "https://yandex.ru/maps/org/1933105753",
       "cash_only": false,
-      "queue_status": "LOW",
-      "queue_label": "🟢 Свободно",
-      "signals_count_per_hour": 0,
+      "queue_status": "UNKNOWN",
+      "queue_label": "⚪ Обычный поток",
+      "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": null,
+      "last_signal_timestamp": 1788196110,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -1215,21 +1215,21 @@
         "AI95_PREMIUM": {
           "fuel_type": "AI95_PREMIUM",
           "name": "95+",
-          "status": "UNKNOWN",
+          "status": "OUT_OF_STOCK",
           "price_text": null,
           "price_value": null
         },
         "AI98": {
           "fuel_type": "AI98",
           "name": "98",
-          "status": "UNKNOWN",
+          "status": "OUT_OF_STOCK",
           "price_text": null,
           "price_value": null
         },
         "AI100": {
           "fuel_type": "AI100",
           "name": "100",
-          "status": "UNKNOWN",
+          "status": "OUT_OF_STOCK",
           "price_text": null,
           "price_value": null
         },
@@ -1243,13 +1243,13 @@
       }
     },
     {
-      "id": "1053748068",
-      "name": "АЗС",
-      "address": "Волжский, Шоссейная ул., 2",
-      "lat": 48.809854,
-      "lon": 44.728295,
+      "id": "92428607289",
+      "name": "АГНКС",
+      "address": "Волгоградская область, Волжский",
+      "lat": 48.778169,
+      "lon": 44.769818,
       "chain": null,
-      "yandex_url": "https://yandex.ru/maps/org/1053748068",
+      "yandex_url": "https://yandex.ru/maps/org/92428607289",
       "cash_only": false,
       "queue_status": "LOW",
       "queue_label": "🟢 Свободно",
