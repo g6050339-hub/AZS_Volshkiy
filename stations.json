@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 22,
-  "updated_at": 1788154402,
+  "updated_at": 1788154588,
   "stations": [
     {
       "id": "1817417962",
@@ -75,7 +75,7 @@
       "queue_label": "🟢 Свободно",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788150624,
+      "last_signal_timestamp": 1788150875,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -189,8 +189,8 @@
       "chain": "Лукойл",
       "yandex_url": "https://yandex.ru/maps/org/1869791562",
       "cash_only": false,
-      "queue_status": "LOW",
-      "queue_label": "🟢 Свободно",
+      "queue_status": "UNKNOWN",
+      "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 0,
       "fuel_limit": null,
       "last_signal_timestamp": null,
@@ -425,8 +425,8 @@
       "chain": "Лукойл",
       "yandex_url": "https://yandex.ru/maps/org/1902867491",
       "cash_only": false,
-      "queue_status": "LOW",
-      "queue_label": "🟢 Свободно",
+      "queue_status": "UNKNOWN",
+      "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
       "last_signal_timestamp": 1788151585,
@@ -783,7 +783,7 @@
       "queue_label": "🟡 Средняя очередь",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788150624,
+      "last_signal_timestamp": 1788150875,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
