@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 22,
-  "updated_at": 1788158496,
+  "updated_at": 1788158682,
   "stations": [
     {
       "id": "1817417962",
@@ -12,11 +12,11 @@
       "chain": "Лукойл",
       "yandex_url": "https://yandex.ru/maps/org/1817417962",
       "cash_only": false,
-      "queue_status": "UNKNOWN",
-      "queue_label": "⚪ Обычный поток",
-      "signals_count_per_hour": 1,
+      "queue_status": "HIGH",
+      "queue_label": "🔴 Большая очередь",
+      "signals_count_per_hour": 2,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788154748,
+      "last_signal_timestamp": 1788157884,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -35,7 +35,7 @@
         "AI95_PREMIUM": {
           "fuel_type": "AI95_PREMIUM",
           "name": "95+",
-          "status": "IN_STOCK",
+          "status": "OUT_OF_STOCK",
           "price_text": null,
           "price_value": null
         },
@@ -132,7 +132,7 @@
       "cash_only": false,
       "queue_status": "UNKNOWN",
       "queue_label": "⚪ Обычный поток",
-      "signals_count_per_hour": 8,
+      "signals_count_per_hour": 5,
       "fuel_limit": null,
       "last_signal_timestamp": 1788156710,
       "fuels": {
@@ -250,14 +250,14 @@
       "cash_only": false,
       "queue_status": "UNKNOWN",
       "queue_label": "⚪ Обычный поток",
-      "signals_count_per_hour": 6,
+      "signals_count_per_hour": 3,
       "fuel_limit": null,
       "last_signal_timestamp": 1788155722,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
           "name": "92",
-          "status": "IN_STOCK",
+          "status": "UNCERTAIN",
           "price_text": null,
           "price_value": null
         },
@@ -425,11 +425,11 @@
       "chain": "Лукойл",
       "yandex_url": "https://yandex.ru/maps/org/1902867491",
       "cash_only": false,
-      "queue_status": "LOW",
-      "queue_label": "🟢 Свободно",
+      "queue_status": "UNKNOWN",
+      "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788154460,
+      "last_signal_timestamp": 1788154998,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -486,7 +486,7 @@
       "cash_only": false,
       "queue_status": "MEDIUM",
       "queue_label": "🟡 Средняя очередь",
-      "signals_count_per_hour": 1,
+      "signals_count_per_hour": 0,
       "fuel_limit": null,
       "last_signal_timestamp": 1788154295,
       "fuels": {
@@ -545,9 +545,9 @@
       "cash_only": false,
       "queue_status": "MEDIUM",
       "queue_label": "🟡 Средняя очередь",
-      "signals_count_per_hour": 1,
+      "signals_count_per_hour": 2,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788156537,
+      "last_signal_timestamp": 1788157499,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -606,7 +606,7 @@
       "queue_label": "🔴 Большая очередь",
       "signals_count_per_hour": 2,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788156674,
+      "last_signal_timestamp": 1788157435,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -665,7 +665,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788154460,
+      "last_signal_timestamp": 1788154998,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -724,7 +724,7 @@
       "queue_label": "🔴 Большая очередь",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788154460,
+      "last_signal_timestamp": 1788154998,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -1017,7 +1017,7 @@
       "cash_only": false,
       "queue_status": "UNKNOWN",
       "queue_label": "⚪ Обычный поток",
-      "signals_count_per_hour": 1,
+      "signals_count_per_hour": 0,
       "fuel_limit": null,
       "last_signal_timestamp": 1788154076,
       "fuels": {
@@ -1135,7 +1135,7 @@
       "cash_only": false,
       "queue_status": "HIGH",
       "queue_label": "🔴 Большая очередь",
-      "signals_count_per_hour": 2,
+      "signals_count_per_hour": 1,
       "fuel_limit": null,
       "last_signal_timestamp": 1788156210,
       "fuels": {
