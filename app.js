@@ -69,15 +69,15 @@ function getSavedPriorityCity() {
 const FUEL_INFO = {
   'AI92': { name: 'АИ-92', emoji: '🟢', class: 'ai92' },
   'AI95': { name: 'АИ-95', emoji: '🔵', class: 'ai95' },
-  'AI95_PREMIUM': { name: 'АИ-95+', emoji: '🔷', class: 'ai95p' },
+  'AI95_PREMIUM': { name: 'АИ-95+ (Экто/G-Drive)', emoji: '🔷', class: 'ai95p' },
   'AI98': { name: 'АИ-98', emoji: '🟣', class: 'ai98' },
   'AI100': { name: 'АИ-100', emoji: '🔴', class: 'ai100' },
-  'DIESEL': { name: 'Дизель', emoji: '⚫', class: 'diesel' },
+  'DIESEL': { name: 'Дизель (ДТ)', emoji: '⚫', class: 'diesel' },
   'LPG': { name: 'Пропан', emoji: '🟡', class: 'lpg' },
   'METHANE': { name: 'Метан', emoji: '⚪', class: 'cng' },
 };
 
-// Smart Fuel Matcher (Includes premium varieties)
+// Exact Fuel Matcher corresponding 1-to-1 with Telegram Bot categories
 function checkFuelInStock(station, filter) {
   if (!station || !station.fuels) return false;
   
@@ -86,14 +86,18 @@ function checkFuelInStock(station, filter) {
   }
   
   if (filter === 'AI95') {
-    const f1 = station.fuels['AI95'];
-    const f2 = station.fuels['AI95_PREMIUM'];
-    return (f1 && f1.status === 'IN_STOCK') || (f2 && f2.status === 'IN_STOCK');
+    const f = station.fuels['AI95'];
+    return f && f.status === 'IN_STOCK';
+  }
+
+  if (filter === 'AI95_PREMIUM') {
+    const f = station.fuels['AI95_PREMIUM'];
+    return f && f.status === 'IN_STOCK';
   }
   
   if (filter === 'AI92') {
-    const f1 = station.fuels['AI92'];
-    return (f1 && f1.status === 'IN_STOCK');
+    const f = station.fuels['AI92'];
+    return f && f.status === 'IN_STOCK';
   }
   
   if (filter === 'AI100') {
@@ -103,14 +107,8 @@ function checkFuelInStock(station, filter) {
   }
   
   if (filter === 'DIESEL') {
-    const f1 = station.fuels['DIESEL'];
-    return (f1 && f1.status === 'IN_STOCK');
-  }
-  
-  if (filter === 'AI98') {
-    const f1 = station.fuels['AI98'];
-    const f2 = station.fuels['AI100'];
-    return (f1 && f1.status === 'IN_STOCK') || (f2 && f2.status === 'IN_STOCK');
+    const f = station.fuels['DIESEL'];
+    return f && f.status === 'IN_STOCK';
   }
   
   const fuel = station.fuels[filter];
@@ -437,6 +435,7 @@ async function loadStationsForCity(city) {
   try {
     let data = null;
     try {
+      // Force fresh cache fetch
       const res = await fetch('./stations.json?t=' + Date.now());
       if (res.ok) data = await res.json();
     } catch (e) {
@@ -445,7 +444,7 @@ async function loadStationsForCity(city) {
 
     if (!data) {
       try {
-        const res = await fetch('/api/stations');
+        const res = await fetch('/api/stations?t=' + Date.now());
         data = await res.json();
       } catch (e) {}
     }
@@ -507,10 +506,15 @@ function updateBadgeCounts() {
   document.getElementById('count-all').textContent = displayedStations.length;
 
   document.getElementById('count-ai95').textContent = displayedStations.filter(st => checkFuelInStock(st, 'AI95')).length;
+  
+  const el95p = document.getElementById('count-ai95p');
+  if (el95p) {
+    el95p.textContent = displayedStations.filter(st => checkFuelInStock(st, 'AI95_PREMIUM')).length;
+  }
+
   document.getElementById('count-ai92').textContent = displayedStations.filter(st => checkFuelInStock(st, 'AI92')).length;
   document.getElementById('count-ai100').textContent = displayedStations.filter(st => checkFuelInStock(st, 'AI100')).length;
   document.getElementById('count-diesel').textContent = displayedStations.filter(st => checkFuelInStock(st, 'DIESEL')).length;
-  document.getElementById('count-ai98').textContent = displayedStations.filter(st => checkFuelInStock(st, 'AI98')).length;
 }
 
 function renderMarkers() {
@@ -579,7 +583,7 @@ function updateMarkersVisibility() {
         marker.setZIndexOffset(100);
       } else {
         el.className = 'custom-pin out-of-stock dimmed';
-        marker.setOpacity(0.4);
+        marker.setOpacity(0.3);
         marker.setZIndexOffset(0);
       }
     }
@@ -623,6 +627,11 @@ document.getElementById('btn-refresh').addEventListener('click', () => {
   haptic('medium');
   loadStationsForCity(currentCity);
 });
+
+// Auto-refresh every 60 seconds while open
+setInterval(() => {
+  loadStationsForCity(currentCity);
+}, 60000);
 
 // Initial load
 loadStationsForCity(currentCity);
