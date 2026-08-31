@@ -57,7 +57,19 @@ let displayedStations = [];
 let markers = [];
 let currentFilter = 'ALL';
 let userMarker = null;
+let userCoords = null;
 let selectedStation = null;
+
+// Navigator & Route State
+let isRouteMode = false;
+let pointA = null; // { lat, lon, label }
+let pointB = null; // { lat, lon, label }
+let markerA = null;
+let markerB = null;
+let routePolyline = null;
+let routeCasingPolyline = null;
+let routeFuelFilter = 'ALL';
+let stationsOnRoute = [];
 
 function getSavedPriorityCity() {
   const id = localStorage.getItem('priority_city_id');
@@ -170,7 +182,10 @@ L.tileLayer(tileUrl, {
   subdomains: 'abcd'
 }).addTo(map);
 
-// Drawer & Modal Elements
+// DOM Elements
+const standardHeader = document.getElementById('standard-header');
+const routeHeader = document.getElementById('route-header');
+const routeSummarySheet = document.getElementById('route-summary-sheet');
 const drawer = document.getElementById('drawer');
 const drawerClose = document.getElementById('drawer-close');
 const loader = document.getElementById('loader');
@@ -182,6 +197,16 @@ const priorityCheckbox = document.getElementById('priority-city-checkbox');
 const citySearchInput = document.getElementById('city-search-input');
 const citySearchClear = document.getElementById('city-search-clear');
 const citiesContainer = document.getElementById('cities-container');
+
+// Navigator Buttons & Inputs
+const btnToggleRoute = document.getElementById('btn-toggle-route');
+const btnExitRoute = document.getElementById('btn-exit-route');
+const textPointA = document.getElementById('text-point-a');
+const textPointB = document.getElementById('text-point-b');
+const btnSetAGps = document.getElementById('btn-set-a-gps');
+const btnClearB = document.getElementById('btn-clear-b');
+const btnRouteToStation = document.getElementById('btn-route-to-station');
+const btnYandexNaviStart = document.getElementById('btn-yandex-navi-start');
 
 // Update City UI header
 function updateCityHeaderUI() {
@@ -308,7 +333,7 @@ function selectCity(city) {
   loadStationsForCity(city);
 }
 
-// Filter Pills
+// Standard Filter Pills
 document.querySelectorAll('.filter-pill').forEach(pill => {
   pill.addEventListener('click', () => {
     haptic('medium');
@@ -316,6 +341,20 @@ document.querySelectorAll('.filter-pill').forEach(pill => {
     pill.classList.add('active');
     currentFilter = pill.dataset.fuel;
     updateMarkersVisibility();
+  });
+});
+
+// Route Fuel Filter Pills
+document.querySelectorAll('.rf-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    haptic('medium');
+    document.querySelectorAll('.rf-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    routeFuelFilter = pill.dataset.rfuel;
+    
+    if (pointA && pointB) {
+      calculateAndRenderRoute();
+    }
   });
 });
 
@@ -427,6 +466,15 @@ function closeDrawer() {
   selectedStation = null;
 }
 
+// "Route Here" button inside drawer
+btnRouteToStation.addEventListener('click', () => {
+  if (!selectedStation) return;
+  const target = selectedStation;
+  closeDrawer();
+  startRouteMode();
+  setPointB(target.lat, target.lon, target.name);
+});
+
 // Load stations
 async function loadStationsForCity(city) {
   loader.classList.remove('hidden');
@@ -435,7 +483,6 @@ async function loadStationsForCity(city) {
   try {
     let data = null;
     try {
-      // Force fresh cache fetch
       const res = await fetch('./stations.json?t=' + Date.now());
       if (res.ok) data = await res.json();
     } catch (e) {
@@ -459,6 +506,10 @@ async function loadStationsForCity(city) {
 
     updateBadgeCounts();
     renderMarkers();
+
+    if (isRouteMode && pointA && pointB) {
+      calculateAndRenderRoute();
+    }
   } catch (err) {
     console.error('Failed to load stations:', err);
   } finally {
@@ -551,6 +602,14 @@ function createMarker(station) {
 
   const marker = L.marker([station.lat, station.lon], { icon });
   marker.on('click', () => {
+    if (isRouteMode && (!pointB || !pointA)) {
+      if (!pointA) {
+        setPointA(station.lat, station.lon, station.name);
+      } else {
+        setPointB(station.lat, station.lon, station.name);
+      }
+      return;
+    }
     map.panTo([station.lat, station.lon]);
     openDrawer(station);
   });
@@ -568,6 +627,20 @@ function updateMarkersVisibility() {
       const qStatus = station.queue_status || 'UNKNOWN';
       const qMeta = QUEUE_INFO[qStatus] || QUEUE_INFO['UNKNOWN'];
       qdot.className = `pin-queue-dot ${qMeta.dotClass}`;
+    }
+
+    if (isRouteMode && stationsOnRoute.length > 0) {
+      const isOnRoute = stationsOnRoute.some(s => s.id === station.id);
+      if (isOnRoute) {
+        el.className = 'custom-pin in-stock on-route-pulse';
+        marker.setOpacity(1.0);
+        marker.setZIndexOffset(1000);
+      } else {
+        el.className = 'custom-pin out-of-stock dimmed';
+        marker.setOpacity(0.25);
+        marker.setZIndexOffset(0);
+      }
+      return;
     }
 
     if (currentFilter === 'ALL') {
@@ -590,6 +663,345 @@ function updateMarkersVisibility() {
   });
 }
 
+// ==========================================================================
+// Navigator & Route Mode Logic (OSRM Routing Engine + Fuel Corridor)
+// ==========================================================================
+
+btnToggleRoute.addEventListener('click', () => {
+  haptic('medium');
+  if (isRouteMode) {
+    exitRouteMode();
+  } else {
+    startRouteMode();
+  }
+});
+
+btnExitRoute.addEventListener('click', () => {
+  haptic('light');
+  exitRouteMode();
+});
+
+btnSetAGps.addEventListener('click', () => {
+  haptic('light');
+  locateAndSetPointA();
+});
+
+btnClearB.addEventListener('click', () => {
+  haptic('light');
+  clearPointB();
+});
+
+function startRouteMode() {
+  isRouteMode = true;
+  standardHeader.classList.add('hidden');
+  routeHeader.classList.remove('hidden');
+  closeDrawer();
+
+  // Set Default Point A to GPS user position or city center
+  if (userCoords) {
+    setPointA(userCoords.lat, userCoords.lon, 'Мое местоположение (GPS)');
+  } else {
+    locateAndSetPointA();
+  }
+}
+
+function exitRouteMode() {
+  isRouteMode = false;
+  routeHeader.classList.add('hidden');
+  standardHeader.classList.remove('hidden');
+  routeSummarySheet.classList.add('hidden');
+
+  clearRouteLines();
+  if (markerA) { map.removeLayer(markerA); markerA = null; }
+  if (markerB) { map.removeLayer(markerB); markerB = null; }
+  pointA = null;
+  pointB = null;
+  stationsOnRoute = [];
+  updateMarkersVisibility();
+}
+
+function setPointA(lat, lon, label = 'Точка А') {
+  pointA = { lat, lon, label };
+  textPointA.textContent = label;
+  textPointA.classList.remove('placeholder');
+
+  if (markerA) map.removeLayer(markerA);
+  const iconA = L.divIcon({
+    className: 'custom-waypoint',
+    html: '<div class="waypoint-pin pin-a">А</div>',
+    iconSize: [30, 30],
+    iconAnchor: [15, 15]
+  });
+  markerA = L.marker([lat, lon], { icon: iconA }).addTo(map);
+
+  if (pointB) {
+    calculateAndRenderRoute();
+  }
+}
+
+function setPointB(lat, lon, label = 'Точка Б') {
+  pointB = { lat, lon, label };
+  textPointB.textContent = label;
+  textPointB.classList.remove('placeholder');
+
+  if (markerB) map.removeLayer(markerB);
+  const iconB = L.divIcon({
+    className: 'custom-waypoint',
+    html: '<div class="waypoint-pin pin-b">Б</div>',
+    iconSize: [30, 30],
+    iconAnchor: [15, 15]
+  });
+  markerB = L.marker([lat, lon], { icon: iconB }).addTo(map);
+
+  if (pointA) {
+    calculateAndRenderRoute();
+  }
+}
+
+function clearPointB() {
+  pointB = null;
+  textPointB.textContent = 'Кликните на карту или выберите АЗС...';
+  textPointB.classList.add('placeholder');
+  if (markerB) { map.removeLayer(markerB); markerB = null; }
+  clearRouteLines();
+  routeSummarySheet.classList.add('hidden');
+  stationsOnRoute = [];
+  updateMarkersVisibility();
+}
+
+function locateAndSetPointA() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        userCoords = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+        setPointA(userCoords.lat, userCoords.lon, 'Мое местоположение (GPS)');
+      },
+      () => {
+        // Fallback: City Center
+        const [cLat, cLon] = currentCity.coords;
+        setPointA(cLat, cLon, `${currentCity.name} (Центр)`);
+      },
+      { enableHighAccuracy: true }
+    );
+  } else {
+    const [cLat, cLon] = currentCity.coords;
+    setPointA(cLat, cLon, `${currentCity.name} (Центр)`);
+  }
+}
+
+// Map Click Listener for setting points in Route Mode
+map.on('click', (e) => {
+  if (!isRouteMode) return;
+  const { lat, lng } = e.latlng;
+
+  if (!pointA) {
+    setPointA(lat, lng, `Точка: ${lat.toFixed(3)}, ${lng.toFixed(3)}`);
+  } else {
+    setPointB(lat, lng, `Точка: ${lat.toFixed(3)}, ${lng.toFixed(3)}`);
+  }
+});
+
+// OSRM Fast Routing API
+async function calculateAndRenderRoute() {
+  if (!pointA || !pointB) return;
+
+  loader.classList.remove('hidden');
+  document.getElementById('loader-text').textContent = 'Построение маршрута и поиск АЗС...';
+
+  try {
+    const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${pointA.lon},${pointA.lat};${pointB.lon},${pointB.lat}?overview=full&geometries=geojson`;
+    const res = await fetch(osrmUrl);
+    const data = await res.json();
+
+    if (!data.routes || data.routes.length === 0) {
+      alert('Не удалось проложить маршрут между этими точками');
+      return;
+    }
+
+    const route = data.routes[0];
+    const coords = route.geometry.coordinates; // [[lon, lat], ...]
+    const latLngs = coords.map(([lon, lat]) => [lat, lon]);
+
+    // Draw Polyline
+    clearRouteLines();
+
+    routeCasingPolyline = L.polyline(latLngs, {
+      color: '#ffffff',
+      weight: 9,
+      opacity: 0.9,
+      lineCap: 'round',
+      lineJoin: 'round'
+    }).addTo(map);
+
+    routePolyline = L.polyline(latLngs, {
+      color: '#2563eb',
+      weight: 6,
+      opacity: 1.0,
+      lineCap: 'round',
+      lineJoin: 'round'
+    }).addTo(map);
+
+    // Zoom to fit route
+    map.fitBounds(routePolyline.getBounds(), {
+      padding: [60, 60],
+      maxZoom: 15
+    });
+
+    // Scan for Gas Stations along Route Corridor (within 800m)
+    stationsOnRoute = findStationsAlongCorridor(coords, routeFuelFilter);
+
+    // Render Route Bottom Sheet
+    renderRouteSummary(route.distance, route.duration, stationsOnRoute);
+
+    // Update marker pins
+    updateMarkersVisibility();
+
+  } catch (err) {
+    console.error('Routing error:', err);
+  } finally {
+    loader.classList.add('hidden');
+  }
+}
+
+function clearRouteLines() {
+  if (routePolyline) { map.removeLayer(routePolyline); routePolyline = null; }
+  if (routeCasingPolyline) { map.removeLayer(routeCasingPolyline); routeCasingPolyline = null; }
+}
+
+// Distance from point to line segment in meters
+function distToSegmentInMeters(pLat, pLon, aLat, aLon, bLat, bLon) {
+  const x = (bLon - aLon) * Math.cos((aLat + bLat) * Math.PI / 360);
+  const y = bLat - aLat;
+  const lenSq = x * x + y * y;
+
+  if (lenSq === 0) {
+    const dx = (pLon - aLon) * Math.cos((aLat + pLat) * Math.PI / 360);
+    const dy = pLat - aLat;
+    return Math.sqrt(dx * dx + dy * dy) * 111320;
+  }
+
+  const px = (pLon - aLon) * Math.cos((aLat + pLat) * Math.PI / 360);
+  const py = pLat - aLat;
+  const u = Math.max(0, Math.min(1, (px * x + py * y) / lenSq));
+
+  const projX = u * x;
+  const projY = u * y;
+  const distSq = (px - projX) * (px - projX) + (py - projY) * (py - projY);
+  return Math.sqrt(distSq) * 111320;
+}
+
+// Find stations within 800m corridor of the route that have selected fuel IN_STOCK
+function findStationsAlongCorridor(routeCoords, filter) {
+  const corridorMaxMeters = 850;
+  const found = [];
+
+  displayedStations.forEach(station => {
+    if (!checkFuelInStock(station, filter)) return;
+
+    let minDistance = Infinity;
+    let closestSegmentIdx = 0;
+
+    for (let i = 0; i < routeCoords.length - 1; i++) {
+      const [aLon, aLat] = routeCoords[i];
+      const [bLon, bLat] = routeCoords[i + 1];
+      const d = distToSegmentInMeters(station.lat, station.lon, aLat, aLon, bLat, bLon);
+      if (d < minDistance) {
+        minDistance = d;
+        closestSegmentIdx = i;
+      }
+    }
+
+    if (minDistance <= corridorMaxMeters) {
+      // Calculate distance along route to this station
+      let distFromStart = 0;
+      for (let i = 0; i < closestSegmentIdx; i++) {
+        const [lon1, lat1] = routeCoords[i];
+        const [lon2, lat2] = routeCoords[i + 1];
+        const dx = (lon2 - lon1) * Math.cos((lat1 + lat2) * Math.PI / 360);
+        const dy = lat2 - lat1;
+        distFromStart += Math.sqrt(dx * dx + dy * dy) * 111320;
+      }
+
+      found.push({
+        ...station,
+        corridorDistanceMeters: Math.round(minDistance),
+        distAlongRouteMeters: Math.round(distFromStart)
+      });
+    }
+  });
+
+  // Sort by order along the route
+  found.sort((a, b) => a.distAlongRouteMeters - b.distAlongRouteMeters);
+  return found;
+}
+
+function renderRouteSummary(distanceMeters, durationSeconds, stationsList) {
+  const km = (distanceMeters / 1000).toFixed(1);
+  const mins = Math.max(1, Math.round(durationSeconds / 60));
+
+  document.getElementById('route-dist-text').textContent = `${km} км`;
+  document.getElementById('route-time-text').textContent = `~${mins} мин`;
+
+  const badge = document.getElementById('route-fuel-count-badge');
+  badge.textContent = `⛽ ${stationsList.length} АЗС с топливом`;
+
+  const listContainer = document.getElementById('route-stations-list');
+  listContainer.innerHTML = '';
+
+  if (stationsList.length === 0) {
+    listContainer.innerHTML = `
+      <div style="text-align:center;padding:12px;color:var(--hint-color);font-size:12px;">
+        В коридоре маршрута нет АЗС с выбранным топливом в наличии. Попробуйте выбрать другое топливо или расширить маршрут.
+      </div>
+    `;
+  } else {
+    stationsList.forEach((st, idx) => {
+      const brandIcon = getBrandIcon(st.name);
+      const qStatus = st.queue_status || 'UNKNOWN';
+      const qMeta = QUEUE_INFO[qStatus] || QUEUE_INFO['UNKNOWN'];
+      const kmFromStart = (st.distAlongRouteMeters / 1000).toFixed(1);
+
+      // Best fuel price
+      let priceDisplay = 'В наличии';
+      if (routeFuelFilter !== 'ALL' && st.fuels?.[routeFuelFilter]?.price_text) {
+        priceDisplay = st.fuels[routeFuelFilter].price_text;
+      } else {
+        const anyPrice = Object.values(st.fuels || {}).find(f => f.price_text)?.price_text;
+        if (anyPrice) priceDisplay = anyPrice;
+      }
+
+      const item = document.createElement('div');
+      item.className = 'route-station-item';
+      item.innerHTML = `
+        <div class="rsi-left">
+          <span class="rsi-icon">${brandIcon}</span>
+          <div class="rsi-info">
+            <div class="rsi-name">${idx + 1}. ${st.name}</div>
+            <div class="rsi-dist">📍 Через ${kmFromStart} км · ${st.address}</div>
+          </div>
+        </div>
+        <div class="rsi-right">
+          <span class="rsi-queue-badge ${qMeta.badgeClass}">${qMeta.emoji} ${qMeta.text.split(' ')[0]}</span>
+          <span class="rsi-price">${priceDisplay}</span>
+        </div>
+      `;
+
+      item.addEventListener('click', () => {
+        haptic('light');
+        map.panTo([st.lat, st.lon]);
+        openDrawer(st);
+      });
+
+      listContainer.appendChild(item);
+    });
+  }
+
+  // Configure Yandex Navigator Start button
+  btnYandexNaviStart.href = `https://yandex.ru/maps/?rtext=${pointA.lat}%2C${pointA.lon}~${pointB.lat}%2C${pointB.lon}&rtt=auto`;
+
+  routeSummarySheet.classList.remove('hidden');
+}
+
 // Locate User button
 document.getElementById('btn-locate').addEventListener('click', () => {
   haptic('medium');
@@ -601,6 +1013,7 @@ document.getElementById('btn-locate').addEventListener('click', () => {
   navigator.geolocation.getCurrentPosition(
     pos => {
       const { latitude, longitude } = pos.coords;
+      userCoords = { lat: latitude, lon: longitude };
       map.setView([latitude, longitude], 15);
 
       if (userMarker) {
@@ -613,6 +1026,10 @@ document.getElementById('btn-locate').addEventListener('click', () => {
           iconAnchor: [8, 8]
         });
         userMarker = L.marker([latitude, longitude], { icon: userIcon }).addTo(map);
+      }
+
+      if (isRouteMode && (!pointA || pointA.label.includes('GPS'))) {
+        setPointA(latitude, longitude, 'Мое местоположение (GPS)');
       }
     },
     err => {
