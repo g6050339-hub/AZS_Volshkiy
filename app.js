@@ -396,11 +396,11 @@ async function loadStationsForCity(city) {
     
     if (['volzhsky', 'volgograd'].includes(city.id)) {
       displayedStations = allStations;
-      console.log('[LOAD] Using real stations for', city.id);
+      console.log('[LOAD] Using real parser data for', city.id);
     } else {
-      displayedStations = generateCityStations(city);
-      console.log('[LOAD] Generated', displayedStations.length, 'stations for', city.name);
-      console.log('[LOAD] First station:', displayedStations[0]?.name, displayedStations[0]?.lat, displayedStations[0]?.lon);
+      document.getElementById('loader-text').textContent = `Поиск реальных АЗС: ${city.name}...`;
+      displayedStations = await fetchRealStationsOSM(city);
+      console.log('[LOAD] OSM returned', displayedStations.length, 'stations for', city.name);
     }
     
     updateBadgeCounts();
@@ -414,22 +414,156 @@ async function loadStationsForCity(city) {
   }
 }
 
-function generateCityStations(city) {
+// ============================================================
+// OVERPASS API — Real gas stations from OpenStreetMap
+// ============================================================
+const osmStationsCache = {}; // cityId -> stations[]
+
+async function fetchRealStationsOSM(city) {
+  // Return from cache if available
+  if (osmStationsCache[city.id]) {
+    console.log('[OSM] Cache hit for', city.name);
+    return osmStationsCache[city.id];
+  }
+
   const [cLat, cLon] = city.coords;
-  const brands = [
-    { name: 'Лукойл', fuels: { AI95: { name: 'АИ-95', status: 'IN_STOCK', price_text: '59.20 ₽' }, AI92: { name: 'АИ-92', status: 'IN_STOCK', price_text: '53.80 ₽' }, AI100: { name: 'ЭКТО 100', status: 'IN_STOCK', price_text: '71.50 ₽' }, DIESEL: { name: 'ДТ', status: 'IN_STOCK', price_text: '65.10 ₽' } } },
-    { name: 'Газпромнефть', fuels: { AI95: { name: 'G-Drive 95', status: 'IN_STOCK', price_text: '58.90 ₽' }, AI92: { name: 'АИ-92', status: 'IN_STOCK', price_text: '53.50 ₽' }, DIESEL: { name: 'ДТ', status: 'IN_STOCK', price_text: '64.80 ₽' } } },
-    { name: 'Роснефть', fuels: { AI95: { name: 'Pulsar 95', status: 'IN_STOCK', price_text: '58.70 ₽' }, AI92: { name: 'АИ-92', status: 'IN_STOCK', price_text: '53.40 ₽' }, DIESEL: { name: 'ДТ', status: 'IN_STOCK', price_text: '64.50 ₽' } } },
-    { name: 'Татнефть', fuels: { AI95: { name: 'Танеко 95', status: 'IN_STOCK', price_text: '58.80 ₽' }, AI92: { name: 'АИ-92', status: 'IN_STOCK', price_text: '53.60 ₽' }, DIESEL: { name: 'ДТ', status: 'IN_STOCK', price_text: '64.90 ₽' } } },
-    { name: 'Teboil', fuels: { AI95: { name: 'Teboil 95+', status: 'IN_STOCK', price_text: '59.40 ₽' }, AI92: { name: 'Teboil 92', status: 'IN_STOCK', price_text: '53.90 ₽' }, DIESEL: { name: 'ДТ', status: 'IN_STOCK', price_text: '65.20 ₽' } } }
-  ];
-  const offsets = [[0.015,0.020,'Северный въезд, 1'],[-0.018,-0.015,'Центральный пр., 45'],[0.010,-0.025,'Западное шоссе, 12'],[-0.022,0.018,'Южная объездная, 8'],[0.003,0.005,'ул. Ленина, 102']];
-  return brands.map((b, i) => ({
-    id: `${city.id}_st_${i}`, name: b.name, address: `${city.name}, ${offsets[i][2]}`,
-    lat: cLat + offsets[i][0], lon: cLon + offsets[i][1], chain: b.name, fuels: b.fuels,
-    cash_only: false, queue_status: i % 2 === 0 ? 'LOW' : i === 1 ? 'MEDIUM' : 'HIGH',
-    signals_count_per_hour: (i + 1) * 2, fuel_limit: null
-  }));
+  const delta = 0.08; // ~8km radius around city center
+  const bbox = `${cLat - delta},${cLon - delta},${cLat + delta},${cLon + delta}`;
+  const query = `[out:json][timeout:15];(node["amenity"="fuel"](${bbox});way["amenity"="fuel"](${bbox}););out center body;`;
+  const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+
+  console.log('[OSM] Fetching real stations for', city.name);
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    const stations = data.elements.map((el, i) => {
+      const tags = el.tags || {};
+      const lat = el.lat || el.center?.lat;
+      const lon = el.lon || el.center?.lon;
+      if (!lat || !lon) return null;
+
+      const name = tags.name || tags.brand || tags.operator || 'АЗС';
+      const brand = tags.brand || tags.operator || '';
+      const addr = [tags['addr:street'], tags['addr:housenumber']].filter(Boolean).join(', ');
+
+      // Map OSM fuel tags to our format
+      const fuels = {};
+      if (tags['fuel:octane_92'] === 'yes' || tags['fuel:octane_80'] === 'yes') {
+        fuels.AI92 = { name: 'АИ-92', status: 'IN_STOCK', price_text: '' };
+      }
+      if (tags['fuel:octane_95'] === 'yes') {
+        fuels.AI95 = { name: 'АИ-95', status: 'IN_STOCK', price_text: '' };
+      }
+      if (tags['fuel:octane_98'] === 'yes') {
+        fuels.AI98 = { name: 'АИ-98', status: 'IN_STOCK', price_text: '' };
+      }
+      if (tags['fuel:octane_100'] === 'yes') {
+        fuels.AI100 = { name: 'АИ-100', status: 'IN_STOCK', price_text: '' };
+      }
+      if (tags['fuel:diesel'] === 'yes') {
+        fuels.DIESEL = { name: 'ДТ', status: 'IN_STOCK', price_text: '' };
+      }
+      if (tags['fuel:lpg'] === 'yes') {
+        fuels.LPG = { name: 'Пропан', status: 'IN_STOCK', price_text: '' };
+      }
+      if (tags['fuel:cng'] === 'yes') {
+        fuels.METHANE = { name: 'Метан', status: 'IN_STOCK', price_text: '' };
+      }
+      // If no fuel tags specified, assume standard fuel set
+      if (Object.keys(fuels).length === 0) {
+        fuels.AI92 = { name: 'АИ-92', status: 'IN_STOCK', price_text: '' };
+        fuels.AI95 = { name: 'АИ-95', status: 'IN_STOCK', price_text: '' };
+        fuels.DIESEL = { name: 'ДТ', status: 'IN_STOCK', price_text: '' };
+      }
+
+      return {
+        id: `osm_${el.id}`,
+        name: name,
+        address: addr ? `${city.name}, ${addr}` : city.name,
+        lat, lon,
+        chain: brand,
+        fuels,
+        cash_only: false,
+        queue_status: 'UNKNOWN',
+        signals_count_per_hour: 0,
+        fuel_limit: null
+      };
+    }).filter(Boolean);
+
+    console.log('[OSM] Found', stations.length, 'real stations in', city.name);
+    osmStationsCache[city.id] = stations;
+    return stations;
+  } catch (err) {
+    console.warn('[OSM] Overpass failed for', city.name, err);
+    return []; // Return empty, not fake data
+  }
+}
+
+// Fetch real stations along a route corridor using Overpass
+async function fetchRouteStationsOSM(routeCoords) {
+  // Compute bounding box of the route
+  let minLat = Infinity, maxLat = -Infinity, minLon = Infinity, maxLon = -Infinity;
+  // Sample every Nth point for efficiency
+  const step = Math.max(1, Math.floor(routeCoords.length / 100));
+  for (let i = 0; i < routeCoords.length; i += step) {
+    const [lon, lat] = routeCoords[i];
+    if (lat < minLat) minLat = lat;
+    if (lat > maxLat) maxLat = lat;
+    if (lon < minLon) minLon = lon;
+    if (lon > maxLon) maxLon = lon;
+  }
+  // Expand bbox by ~2km for corridor
+  const pad = 0.02;
+  const bbox = `${minLat - pad},${minLon - pad},${maxLat + pad},${maxLon + pad}`;
+  const query = `[out:json][timeout:25];(node["amenity"="fuel"](${bbox});way["amenity"="fuel"](${bbox}););out center body;`;
+  const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+
+  console.log('[OSM-ROUTE] Fetching stations along route, bbox:', bbox);
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    const stations = data.elements.map((el, i) => {
+      const tags = el.tags || {};
+      const lat = el.lat || el.center?.lat;
+      const lon = el.lon || el.center?.lon;
+      if (!lat || !lon) return null;
+
+      const name = tags.name || tags.brand || tags.operator || 'АЗС';
+      const addr = [tags['addr:city'], tags['addr:street'], tags['addr:housenumber']].filter(Boolean).join(', ');
+
+      const fuels = {};
+      if (tags['fuel:octane_92'] === 'yes') fuels.AI92 = { name: 'АИ-92', status: 'IN_STOCK', price_text: '' };
+      if (tags['fuel:octane_95'] === 'yes') fuels.AI95 = { name: 'АИ-95', status: 'IN_STOCK', price_text: '' };
+      if (tags['fuel:octane_98'] === 'yes') fuels.AI98 = { name: 'АИ-98', status: 'IN_STOCK', price_text: '' };
+      if (tags['fuel:octane_100'] === 'yes') fuels.AI100 = { name: 'АИ-100', status: 'IN_STOCK', price_text: '' };
+      if (tags['fuel:diesel'] === 'yes') fuels.DIESEL = { name: 'ДТ', status: 'IN_STOCK', price_text: '' };
+      if (tags['fuel:lpg'] === 'yes') fuels.LPG = { name: 'Пропан', status: 'IN_STOCK', price_text: '' };
+      if (tags['fuel:cng'] === 'yes') fuels.METHANE = { name: 'Метан', status: 'IN_STOCK', price_text: '' };
+      if (Object.keys(fuels).length === 0) {
+        fuels.AI92 = { name: 'АИ-92', status: 'IN_STOCK', price_text: '' };
+        fuels.AI95 = { name: 'АИ-95', status: 'IN_STOCK', price_text: '' };
+        fuels.DIESEL = { name: 'ДТ', status: 'IN_STOCK', price_text: '' };
+      }
+
+      return {
+        id: `osm_${el.id}`, name, address: addr || 'Россия',
+        lat, lon, chain: tags.brand || tags.operator || '', fuels,
+        cash_only: false, queue_status: 'UNKNOWN', signals_count_per_hour: 0, fuel_limit: null
+      };
+    }).filter(Boolean);
+
+    console.log('[OSM-ROUTE] Found', stations.length, 'stations along route');
+    return stations;
+  } catch (err) {
+    console.warn('[OSM-ROUTE] Overpass failed:', err);
+    return [];
+  }
 }
 
 function updateBadgeCounts() {
@@ -711,11 +845,19 @@ async function calculateAndRenderRoute() {
     routePolyline = L.polyline(latLngs, { color: '#2ea043', weight: 5, opacity: 1.0, lineCap: 'round', lineJoin: 'round' }).addTo(map);
     map.fitBounds(routePolyline.getBounds(), { padding: [60, 60], maxZoom: 15 });
 
-    // Collect stations from ALL cities along the route (within 30km corridor)
-    document.getElementById('loader-text').textContent = 'Поиск АЗС по маршруту...';
-    const routeStationsPool = collectStationsAlongRoute(coords);
+    // Fetch REAL gas stations along the entire route from OpenStreetMap
+    document.getElementById('loader-text').textContent = 'Поиск реальных АЗС по маршруту...';
+    const osmRouteStations = await fetchRouteStationsOSM(coords);
 
-    // Add route station markers to the map (that aren't already displayed)
+    // Combine with currently displayed stations (Volzhsky real data)
+    const routeStationsPool = [...displayedStations];
+    osmRouteStations.forEach(s => {
+      if (!routeStationsPool.some(existing => existing.id === s.id)) {
+        routeStationsPool.push(s);
+      }
+    });
+
+    // Add route station markers to the map
     addRouteStationMarkers(routeStationsPool);
 
     stationsOnRoute = findStationsAlongCorridor(coords, routeFuelFilter, routeStationsPool);
@@ -728,45 +870,8 @@ async function calculateAndRenderRoute() {
   }
 }
 
-// Find all cities within ~30km of the route and collect their stations
+// Route extra markers management
 let routeExtraMarkers = [];
-
-function collectStationsAlongRoute(routeCoords) {
-  const corridorKm = 30; // 30km from route to city center
-  const allRouteStations = [...displayedStations]; // Start with current city
-  const addedCityIds = new Set([currentCity.id]);
-
-  // Sample route points every ~50 segments for efficiency
-  const step = Math.max(1, Math.floor(routeCoords.length / 200));
-
-  CITIES_DB.forEach(city => {
-    if (addedCityIds.has(city.id)) return;
-    const [cLat, cLon] = city.coords;
-
-    // Check if city is near any route point
-    for (let i = 0; i < routeCoords.length; i += step) {
-      const [rLon, rLat] = routeCoords[i];
-      const dx = (rLon - cLon) * Math.cos((rLat + cLat) * Math.PI / 360);
-      const dy = rLat - cLat;
-      const distKm = Math.sqrt(dx * dx + dy * dy) * 111.32;
-      if (distKm <= corridorKm) {
-        // City is near the route — generate stations for it
-        const cityStations = ['volzhsky', 'volgograd'].includes(city.id)
-          ? allStations // Use real data for home cities
-          : generateCityStations(city);
-        cityStations.forEach(s => {
-          if (!allRouteStations.some(existing => existing.id === s.id)) {
-            allRouteStations.push(s);
-          }
-        });
-        addedCityIds.add(city.id);
-        break;
-      }
-    }
-  });
-
-  return allRouteStations;
-}
 
 function addRouteStationMarkers(stationsPool) {
   // Remove previously added route-only markers
