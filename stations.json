@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 22,
-  "updated_at": 1788156075,
+  "updated_at": 1788156261,
   "stations": [
     {
       "id": "1817417962",
@@ -889,6 +889,65 @@
       }
     },
     {
+      "id": "37225209495",
+      "name": "Газпром",
+      "address": "Волжский, Севастопольская ул., 1",
+      "lat": 48.748219,
+      "lon": 44.835784,
+      "chain": "Газпром",
+      "yandex_url": "https://yandex.ru/maps/org/37225209495",
+      "cash_only": false,
+      "queue_status": "UNKNOWN",
+      "queue_label": "⚪ Обычный поток",
+      "signals_count_per_hour": 0,
+      "fuel_limit": null,
+      "last_signal_timestamp": null,
+      "fuels": {
+        "AI92": {
+          "fuel_type": "AI92",
+          "name": "92",
+          "status": "UNKNOWN",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI95": {
+          "fuel_type": "AI95",
+          "name": "95",
+          "status": "UNKNOWN",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI95_PREMIUM": {
+          "fuel_type": "AI95_PREMIUM",
+          "name": "95+",
+          "status": "OUT_OF_STOCK",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI98": {
+          "fuel_type": "AI98",
+          "name": "98",
+          "status": "OUT_OF_STOCK",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI100": {
+          "fuel_type": "AI100",
+          "name": "100",
+          "status": "OUT_OF_STOCK",
+          "price_text": null,
+          "price_value": null
+        },
+        "DIESEL": {
+          "fuel_type": "DIESEL",
+          "name": "ДТ",
+          "status": "UNKNOWN",
+          "price_text": null,
+          "price_value": null
+        }
+      }
+    },
+    {
       "id": "199343947081",
       "name": "Аркон-Про",
       "address": "Волгоградская область, Среднеахтубинский район, Фрунзенское сельское поселение",
@@ -1191,65 +1250,6 @@
       "lon": 44.728295,
       "chain": null,
       "yandex_url": "https://yandex.ru/maps/org/1053748068",
-      "cash_only": false,
-      "queue_status": "LOW",
-      "queue_label": "🟢 Свободно",
-      "signals_count_per_hour": 0,
-      "fuel_limit": null,
-      "last_signal_timestamp": null,
-      "fuels": {
-        "AI92": {
-          "fuel_type": "AI92",
-          "name": "92",
-          "status": "UNKNOWN",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI95": {
-          "fuel_type": "AI95",
-          "name": "95",
-          "status": "UNKNOWN",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI95_PREMIUM": {
-          "fuel_type": "AI95_PREMIUM",
-          "name": "95+",
-          "status": "UNKNOWN",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI98": {
-          "fuel_type": "AI98",
-          "name": "98",
-          "status": "UNKNOWN",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI100": {
-          "fuel_type": "AI100",
-          "name": "100",
-          "status": "UNKNOWN",
-          "price_text": null,
-          "price_value": null
-        },
-        "DIESEL": {
-          "fuel_type": "DIESEL",
-          "name": "ДТ",
-          "status": "UNKNOWN",
-          "price_text": null,
-          "price_value": null
-        }
-      }
-    },
-    {
-      "id": "185045030546",
-      "name": "АЗС",
-      "address": "Волжский, просп. Металлургов, 11",
-      "lat": 48.801878,
-      "lon": 44.787483,
-      "chain": null,
-      "yandex_url": "https://yandex.ru/maps/org/185045030546",
       "cash_only": false,
       "queue_status": "LOW",
       "queue_label": "🟢 Свободно",
