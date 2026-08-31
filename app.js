@@ -601,6 +601,13 @@ function exitRouteMode() {
   clearRouteLines();
   if (markerA) { map.removeLayer(markerA); markerA = null; }
   if (markerB) { map.removeLayer(markerB); markerB = null; }
+  // Remove route-only extra city markers
+  routeExtraMarkers.forEach(m => {
+    map.removeLayer(m.marker);
+    const idx = markers.findIndex(x => x.station.id === m.station.id);
+    if (idx !== -1) markers.splice(idx, 1);
+  });
+  routeExtraMarkers = [];
   pointA = null; pointB = null;
   inputPointA.value = '';
   inputPointB.value = '';
@@ -691,7 +698,15 @@ async function calculateAndRenderRoute() {
     routeCasingPolyline = L.polyline(latLngs, { color: '#ffffff', weight: 8, opacity: 0.25, lineCap: 'round', lineJoin: 'round' }).addTo(map);
     routePolyline = L.polyline(latLngs, { color: '#2ea043', weight: 5, opacity: 1.0, lineCap: 'round', lineJoin: 'round' }).addTo(map);
     map.fitBounds(routePolyline.getBounds(), { padding: [60, 60], maxZoom: 15 });
-    stationsOnRoute = findStationsAlongCorridor(coords, routeFuelFilter);
+
+    // Collect stations from ALL cities along the route (within 30km corridor)
+    document.getElementById('loader-text').textContent = 'Поиск АЗС по маршруту...';
+    const routeStationsPool = collectStationsAlongRoute(coords);
+
+    // Add route station markers to the map (that aren't already displayed)
+    addRouteStationMarkers(routeStationsPool);
+
+    stationsOnRoute = findStationsAlongCorridor(coords, routeFuelFilter, routeStationsPool);
     renderRouteSummary(route.distance, route.duration, stationsOnRoute);
     updateMarkersVisibility();
   } catch (err) {
@@ -699,6 +714,63 @@ async function calculateAndRenderRoute() {
   } finally {
     loader.classList.add('hidden');
   }
+}
+
+// Find all cities within ~30km of the route and collect their stations
+let routeExtraMarkers = [];
+
+function collectStationsAlongRoute(routeCoords) {
+  const corridorKm = 30; // 30km from route to city center
+  const allRouteStations = [...displayedStations]; // Start with current city
+  const addedCityIds = new Set([currentCity.id]);
+
+  // Sample route points every ~50 segments for efficiency
+  const step = Math.max(1, Math.floor(routeCoords.length / 200));
+
+  CITIES_DB.forEach(city => {
+    if (addedCityIds.has(city.id)) return;
+    const [cLat, cLon] = city.coords;
+
+    // Check if city is near any route point
+    for (let i = 0; i < routeCoords.length; i += step) {
+      const [rLon, rLat] = routeCoords[i];
+      const dx = (rLon - cLon) * Math.cos((rLat + cLat) * Math.PI / 360);
+      const dy = rLat - cLat;
+      const distKm = Math.sqrt(dx * dx + dy * dy) * 111.32;
+      if (distKm <= corridorKm) {
+        // City is near the route — generate stations for it
+        const cityStations = ['volzhsky', 'volgograd'].includes(city.id)
+          ? allStations // Use real data for home cities
+          : generateCityStations(city);
+        cityStations.forEach(s => {
+          if (!allRouteStations.some(existing => existing.id === s.id)) {
+            allRouteStations.push(s);
+          }
+        });
+        addedCityIds.add(city.id);
+        break;
+      }
+    }
+  });
+
+  return allRouteStations;
+}
+
+function addRouteStationMarkers(stationsPool) {
+  // Remove previously added route-only markers
+  routeExtraMarkers.forEach(m => map.removeLayer(m.marker));
+  routeExtraMarkers = [];
+
+  stationsPool.forEach(station => {
+    // Skip if already displayed as a regular marker
+    if (markers.some(m => m.station.id === station.id)) return;
+    if (!station.lat || !station.lon) return;
+
+    const marker = createMarker(station);
+    marker.addTo(map);
+    markers.push({ marker, station });
+    routeExtraMarkers.push({ marker, station });
+  });
 }
 
 function clearRouteLines() {
@@ -722,10 +794,11 @@ function distToSegmentInMeters(pLat, pLon, aLat, aLon, bLat, bLon) {
   return Math.sqrt(dx * dx + dy * dy) * 111320;
 }
 
-function findStationsAlongCorridor(routeCoords, filter) {
+function findStationsAlongCorridor(routeCoords, filter, stationsPool) {
   const maxDist = 850;
   const found = [];
-  displayedStations.forEach(station => {
+  const searchPool = stationsPool || displayedStations;
+  searchPool.forEach(station => {
     if (!checkFuelInStock(station, filter)) return;
     let minD = Infinity, segIdx = 0;
     for (let i = 0; i < routeCoords.length - 1; i++) {
