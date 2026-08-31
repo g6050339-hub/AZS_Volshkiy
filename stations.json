@@ -1,8 +1,126 @@
 {
   "status": "ok",
-  "count": 22,
-  "updated_at": 1788139724,
+  "count": 25,
+  "updated_at": 1788139909,
   "stations": [
+    {
+      "id": "1101313335",
+      "name": "Татнефть",
+      "address": "Волжский, ул. Александрова, 2Б",
+      "lat": 48.76792,
+      "lon": 44.790207,
+      "chain": "Татнефть",
+      "yandex_url": "https://yandex.ru/maps/org/1101313335",
+      "cash_only": false,
+      "queue_status": "UNKNOWN",
+      "queue_label": "⚪ Обычный поток",
+      "signals_count_per_hour": 1,
+      "fuel_limit": null,
+      "last_signal_timestamp": 1788136056,
+      "fuels": {
+        "AI92": {
+          "fuel_type": "AI92",
+          "name": "92",
+          "status": "IN_STOCK",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI95": {
+          "fuel_type": "AI95",
+          "name": "95",
+          "status": "UNCERTAIN",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI95_PREMIUM": {
+          "fuel_type": "AI95_PREMIUM",
+          "name": "95+",
+          "status": "OUT_OF_STOCK",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI98": {
+          "fuel_type": "AI98",
+          "name": "98",
+          "status": "OUT_OF_STOCK",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI100": {
+          "fuel_type": "AI100",
+          "name": "100",
+          "status": "OUT_OF_STOCK",
+          "price_text": null,
+          "price_value": null
+        },
+        "DIESEL": {
+          "fuel_type": "DIESEL",
+          "name": "ДТ",
+          "status": "UNCERTAIN",
+          "price_text": null,
+          "price_value": null
+        }
+      }
+    },
+    {
+      "id": "1396829568",
+      "name": "Татнефть",
+      "address": "Волжский, ул. имени Ф.Г. Логинова, 14",
+      "lat": 48.817,
+      "lon": 44.7799,
+      "chain": "Татнефть",
+      "yandex_url": "https://yandex.ru/maps/org/1396829568",
+      "cash_only": false,
+      "queue_status": "UNKNOWN",
+      "queue_label": "⚪ Обычный поток",
+      "signals_count_per_hour": 0,
+      "fuel_limit": null,
+      "last_signal_timestamp": 1788134130,
+      "fuels": {
+        "AI92": {
+          "fuel_type": "AI92",
+          "name": "92",
+          "status": "UNCERTAIN",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI95": {
+          "fuel_type": "AI95",
+          "name": "95",
+          "status": "OUT_OF_STOCK",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI95_PREMIUM": {
+          "fuel_type": "AI95_PREMIUM",
+          "name": "95+",
+          "status": "OUT_OF_STOCK",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI98": {
+          "fuel_type": "AI98",
+          "name": "98",
+          "status": "UNCERTAIN",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI100": {
+          "fuel_type": "AI100",
+          "name": "100",
+          "status": "OUT_OF_STOCK",
+          "price_text": null,
+          "price_value": null
+        },
+        "DIESEL": {
+          "fuel_type": "DIESEL",
+          "name": "ДТ",
+          "status": "UNCERTAIN",
+          "price_text": null,
+          "price_value": null
+        }
+      }
+    },
     {
       "id": "1817417962",
       "name": "Лукойл",
@@ -50,6 +168,65 @@
           "fuel_type": "AI100",
           "name": "100",
           "status": "IN_STOCK",
+          "price_text": null,
+          "price_value": null
+        },
+        "DIESEL": {
+          "fuel_type": "DIESEL",
+          "name": "ДТ",
+          "status": "IN_STOCK",
+          "price_text": null,
+          "price_value": null
+        }
+      }
+    },
+    {
+      "id": "30406389541",
+      "name": "Татнефть",
+      "address": "Волжский, посёлок Металлург-1, Двинская ул., 16",
+      "lat": 48.733196,
+      "lon": 44.832818,
+      "chain": "Татнефть",
+      "yandex_url": "https://yandex.ru/maps/org/30406389541",
+      "cash_only": false,
+      "queue_status": "UNKNOWN",
+      "queue_label": "⚪ Обычный поток",
+      "signals_count_per_hour": 1,
+      "fuel_limit": null,
+      "last_signal_timestamp": 1788136056,
+      "fuels": {
+        "AI92": {
+          "fuel_type": "AI92",
+          "name": "92",
+          "status": "UNCERTAIN",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI95": {
+          "fuel_type": "AI95",
+          "name": "95",
+          "status": "IN_STOCK",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI95_PREMIUM": {
+          "fuel_type": "AI95_PREMIUM",
+          "name": "95+",
+          "status": "OUT_OF_STOCK",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI98": {
+          "fuel_type": "AI98",
+          "name": "98",
+          "status": "OUT_OF_STOCK",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI100": {
+          "fuel_type": "AI100",
+          "name": "100",
+          "status": "OUT_OF_STOCK",
           "price_text": null,
           "price_value": null
         },
@@ -116,65 +293,6 @@
           "fuel_type": "DIESEL",
           "name": "ДТ",
           "status": "IN_STOCK",
-          "price_text": null,
-          "price_value": null
-        }
-      }
-    },
-    {
-      "id": "1101313335",
-      "name": "Татнефть",
-      "address": "Волжский, ул. Александрова, 2Б",
-      "lat": 48.76792,
-      "lon": 44.790207,
-      "chain": "Татнефть",
-      "yandex_url": "https://yandex.ru/maps/org/1101313335",
-      "cash_only": false,
-      "queue_status": "UNKNOWN",
-      "queue_label": "⚪ Обычный поток",
-      "signals_count_per_hour": 1,
-      "fuel_limit": null,
-      "last_signal_timestamp": 1788136056,
-      "fuels": {
-        "AI92": {
-          "fuel_type": "AI92",
-          "name": "92",
-          "status": "IN_STOCK",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI95": {
-          "fuel_type": "AI95",
-          "name": "95",
-          "status": "UNCERTAIN",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI95_PREMIUM": {
-          "fuel_type": "AI95_PREMIUM",
-          "name": "95+",
-          "status": "OUT_OF_STOCK",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI98": {
-          "fuel_type": "AI98",
-          "name": "98",
-          "status": "OUT_OF_STOCK",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI100": {
-          "fuel_type": "AI100",
-          "name": "100",
-          "status": "OUT_OF_STOCK",
-          "price_text": null,
-          "price_value": null
-        },
-        "DIESEL": {
-          "fuel_type": "DIESEL",
-          "name": "ДТ",
-          "status": "UNCERTAIN",
           "price_text": null,
           "price_value": null
         }
@@ -299,24 +417,24 @@
       }
     },
     {
-      "id": "1396829568",
-      "name": "Татнефть",
-      "address": "Волжский, ул. имени Ф.Г. Логинова, 14",
-      "lat": 48.817,
-      "lon": 44.7799,
-      "chain": "Татнефть",
-      "yandex_url": "https://yandex.ru/maps/org/1396829568",
+      "id": "190378037547",
+      "name": "Газпром",
+      "address": "Волжский, просп. имени Ленина, 308А",
+      "lat": 48.756854,
+      "lon": 44.787772,
+      "chain": "Газпром",
+      "yandex_url": "https://yandex.ru/maps/org/190378037547",
       "cash_only": false,
       "queue_status": "UNKNOWN",
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 0,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788134130,
+      "last_signal_timestamp": null,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
           "name": "92",
-          "status": "UNCERTAIN",
+          "status": "UNKNOWN",
           "price_text": null,
           "price_value": null
         },
@@ -337,7 +455,7 @@
         "AI98": {
           "fuel_type": "AI98",
           "name": "98",
-          "status": "UNCERTAIN",
+          "status": "OUT_OF_STOCK",
           "price_text": null,
           "price_value": null
         },
@@ -351,7 +469,7 @@
         "DIESEL": {
           "fuel_type": "DIESEL",
           "name": "ДТ",
-          "status": "UNCERTAIN",
+          "status": "UNKNOWN",
           "price_text": null,
           "price_value": null
         }
@@ -411,6 +529,30 @@
           "fuel_type": "DIESEL",
           "name": "ДТ",
           "status": "IN_STOCK",
+          "price_text": null,
+          "price_value": null
+        }
+      }
+    },
+    {
+      "id": "126604438954",
+      "name": "Ока-Пропан",
+      "address": "хутор Бурковский, Фрунзенская ул., 3",
+      "lat": 48.696352,
+      "lon": 44.670552,
+      "chain": "Ока-Пропан",
+      "yandex_url": "https://yandex.ru/maps/org/126604438954",
+      "cash_only": false,
+      "queue_status": "UNKNOWN",
+      "queue_label": "⚪ Обычный поток",
+      "signals_count_per_hour": 0,
+      "fuel_limit": null,
+      "last_signal_timestamp": null,
+      "fuels": {
+        "LPG": {
+          "fuel_type": "LPG",
+          "name": "Пропан",
+          "status": "UNKNOWN",
           "price_text": null,
           "price_value": null
         }
@@ -619,65 +761,6 @@
           "fuel_type": "AI95",
           "name": "95",
           "status": "OUT_OF_STOCK",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI95_PREMIUM": {
-          "fuel_type": "AI95_PREMIUM",
-          "name": "95+",
-          "status": "OUT_OF_STOCK",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI98": {
-          "fuel_type": "AI98",
-          "name": "98",
-          "status": "OUT_OF_STOCK",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI100": {
-          "fuel_type": "AI100",
-          "name": "100",
-          "status": "OUT_OF_STOCK",
-          "price_text": null,
-          "price_value": null
-        },
-        "DIESEL": {
-          "fuel_type": "DIESEL",
-          "name": "ДТ",
-          "status": "IN_STOCK",
-          "price_text": null,
-          "price_value": null
-        }
-      }
-    },
-    {
-      "id": "30406389541",
-      "name": "Татнефть",
-      "address": "Волжский, посёлок Металлург-1, Двинская ул., 16",
-      "lat": 48.733196,
-      "lon": 44.832818,
-      "chain": "Татнефть",
-      "yandex_url": "https://yandex.ru/maps/org/30406389541",
-      "cash_only": false,
-      "queue_status": "UNKNOWN",
-      "queue_label": "⚪ Обычный поток",
-      "signals_count_per_hour": 1,
-      "fuel_limit": null,
-      "last_signal_timestamp": 1788136056,
-      "fuels": {
-        "AI92": {
-          "fuel_type": "AI92",
-          "name": "92",
-          "status": "UNCERTAIN",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI95": {
-          "fuel_type": "AI95",
-          "name": "95",
-          "status": "IN_STOCK",
           "price_text": null,
           "price_value": null
         },
@@ -1066,65 +1149,6 @@
       }
     },
     {
-      "id": "190378037547",
-      "name": "Газпром",
-      "address": "Волжский, просп. имени Ленина, 308А",
-      "lat": 48.756854,
-      "lon": 44.787772,
-      "chain": "Газпром",
-      "yandex_url": "https://yandex.ru/maps/org/190378037547",
-      "cash_only": false,
-      "queue_status": "UNKNOWN",
-      "queue_label": "⚪ Обычный поток",
-      "signals_count_per_hour": 0,
-      "fuel_limit": null,
-      "last_signal_timestamp": null,
-      "fuels": {
-        "AI92": {
-          "fuel_type": "AI92",
-          "name": "92",
-          "status": "UNKNOWN",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI95": {
-          "fuel_type": "AI95",
-          "name": "95",
-          "status": "OUT_OF_STOCK",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI95_PREMIUM": {
-          "fuel_type": "AI95_PREMIUM",
-          "name": "95+",
-          "status": "OUT_OF_STOCK",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI98": {
-          "fuel_type": "AI98",
-          "name": "98",
-          "status": "OUT_OF_STOCK",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI100": {
-          "fuel_type": "AI100",
-          "name": "100",
-          "status": "OUT_OF_STOCK",
-          "price_text": null,
-          "price_value": null
-        },
-        "DIESEL": {
-          "fuel_type": "DIESEL",
-          "name": "ДТ",
-          "status": "UNKNOWN",
-          "price_text": null,
-          "price_value": null
-        }
-      }
-    },
-    {
       "id": "92428607289",
       "name": "АГНКС",
       "address": "Волгоградская область, Волжский",
@@ -1296,6 +1320,124 @@
           "fuel_type": "DIESEL",
           "name": "ДТ",
           "status": "UNKNOWN",
+          "price_text": null,
+          "price_value": null
+        }
+      }
+    },
+    {
+      "id": "1028093616",
+      "name": "Роснефть",
+      "address": "Волгоград, Латошинская ул., 44",
+      "lat": 48.858768,
+      "lon": 44.649987,
+      "chain": "Роснефть",
+      "yandex_url": "https://yandex.ru/maps/org/1028093616",
+      "cash_only": false,
+      "queue_status": "UNKNOWN",
+      "queue_label": "⚪ Обычный поток",
+      "signals_count_per_hour": 0,
+      "fuel_limit": null,
+      "last_signal_timestamp": 1788121991,
+      "fuels": {
+        "AI92": {
+          "fuel_type": "AI92",
+          "name": "92",
+          "status": "UNCERTAIN",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI95": {
+          "fuel_type": "AI95",
+          "name": "95",
+          "status": "UNCERTAIN",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI95_PREMIUM": {
+          "fuel_type": "AI95_PREMIUM",
+          "name": "95+",
+          "status": "UNCERTAIN",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI98": {
+          "fuel_type": "AI98",
+          "name": "98",
+          "status": "OUT_OF_STOCK",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI100": {
+          "fuel_type": "AI100",
+          "name": "100",
+          "status": "OUT_OF_STOCK",
+          "price_text": null,
+          "price_value": null
+        },
+        "DIESEL": {
+          "fuel_type": "DIESEL",
+          "name": "ДТ",
+          "status": "UNCERTAIN",
+          "price_text": null,
+          "price_value": null
+        }
+      }
+    },
+    {
+      "id": "1403855927",
+      "name": "Татнефть",
+      "address": "Волжский, Заволжская ул., 23",
+      "lat": 48.876049,
+      "lon": 44.811256,
+      "chain": "Татнефть",
+      "yandex_url": "https://yandex.ru/maps/org/1403855927",
+      "cash_only": false,
+      "queue_status": "UNKNOWN",
+      "queue_label": "⚪ Обычный поток",
+      "signals_count_per_hour": 0,
+      "fuel_limit": null,
+      "last_signal_timestamp": 1788118960,
+      "fuels": {
+        "AI92": {
+          "fuel_type": "AI92",
+          "name": "92",
+          "status": "UNCERTAIN",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI95": {
+          "fuel_type": "AI95",
+          "name": "95",
+          "status": "UNCERTAIN",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI95_PREMIUM": {
+          "fuel_type": "AI95_PREMIUM",
+          "name": "95+",
+          "status": "OUT_OF_STOCK",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI98": {
+          "fuel_type": "AI98",
+          "name": "98",
+          "status": "OUT_OF_STOCK",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI100": {
+          "fuel_type": "AI100",
+          "name": "100",
+          "status": "OUT_OF_STOCK",
+          "price_text": null,
+          "price_value": null
+        },
+        "DIESEL": {
+          "fuel_type": "DIESEL",
+          "name": "ДТ",
+          "status": "UNCERTAIN",
           "price_text": null,
           "price_value": null
         }
