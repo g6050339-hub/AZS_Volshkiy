@@ -37,7 +37,6 @@ class GasStation:
     signals_count_per_hour: int = 0            # Driver activity count
     fuel_limit: Optional[str] = None           # e.g. "Лимит 30 л"
     last_signal_timestamp: Optional[int] = None
-    raw_data: Optional[Dict[str, Any]] = None
 
     @property
     def navigator_url(self) -> str:
@@ -147,7 +146,7 @@ class VolzhskyFuelParser:
         cleaned = raw_key.strip().lower()
         if cleaned in self.FUEL_MAPPING:
             return self.FUEL_MAPPING[cleaned]
-        for k, v in self.FUEL_MAPPING.items():
+        for k, v in sorted(self.FUEL_MAPPING.items(), key=lambda x: len(x[0]), reverse=True):
             if k in cleaned:
                 return v
         return None
@@ -278,8 +277,7 @@ class VolzhskyFuelParser:
                 queue_status=queue_status,
                 signals_count_per_hour=signals_count,
                 fuel_limit=fuel_limit,
-                last_signal_timestamp=last_ts,
-                raw_data=None
+                last_signal_timestamp=last_ts
             )
             stations.append(station)
 

@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+*.pyo
+*.db
+.env
+venv/
+cloudflared.exe
+*.zip
+.idea/
+.vscode/
+*.log

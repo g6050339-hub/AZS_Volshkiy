@@ -851,16 +851,16 @@ input:checked + .slider:before {
    Navigator & Fuel Along Route Styles
    ========================================================================== */
 
-/* Navigator FAB button with label */
-.fab-route {
-  width: auto !important;
-  height: 44px !important;
-  padding: 0 16px !important;
-  border-radius: 22px !important;
-  gap: 8px !important;
-  background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
-  color: #fff !important;
-  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45) !important;
+/* Navigator FAB button with label — overrides .ctrl-btn base */
+.ctrl-btn.fab-route {
+  width: auto;
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 22px;
+  gap: 8px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
 }
 .fab-label {
   font-size: 13px;

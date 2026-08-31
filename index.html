@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="./style.css?v=3.5">
+  <link rel="stylesheet" href="./style.css?v=4.0">
 </head>
 <body>
   <div id="app">
@@ -110,11 +110,11 @@
 
     <!-- Map Controls (Floating Action Buttons) -->
     <div class="map-controls">
-      <button id="btn-toggle-route" class="fab-btn fab-route" title="Построить маршрут и найти заправки">
+      <button id="btn-toggle-route" class="ctrl-btn fab-route" title="Построить маршрут и найти заправки" aria-label="Построить маршрут">
         <span style="font-size:18px;">🧭</span>
         <span class="fab-label">Маршрут</span>
       </button>
-      <button id="btn-locate" class="fab-btn" title="Мое местоположение">
+      <button id="btn-locate" class="ctrl-btn" title="Мое местоположение" aria-label="Мое местоположение">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="7"/>
           <line x1="12" y1="1" x2="12" y2="5"/>
@@ -123,7 +123,7 @@
           <line x1="19" y1="12" x2="23" y2="12"/>
         </svg>
       </button>
-      <button id="btn-refresh" class="fab-btn" title="Обновить данные">
+      <button id="btn-refresh" class="ctrl-btn" title="Обновить данные" aria-label="Обновить данные">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
         </svg>
@@ -162,30 +162,30 @@
         <div class="drawer-handle"></div>
       </div>
       
-      <div class="drawer-header">
-        <div class="drawer-brand-icon" id="station-brand-icon">⛽</div>
-        <div class="drawer-header-info">
-          <h2 id="station-name" class="drawer-title">Название АЗС</h2>
-          <p id="station-address" class="drawer-address">Адрес заправки</p>
+      <div class="station-header">
+        <div class="station-brand-icon" id="station-brand-icon">⛽</div>
+        <div class="station-title-group">
+          <h2 id="station-name" class="station-name">Название АЗС</h2>
+          <p id="station-address" class="station-address">Адрес заправки</p>
         </div>
-        <button id="drawer-close" class="drawer-close-btn">&times;</button>
+        <button id="drawer-close" class="drawer-close" aria-label="Закрыть">&times;</button>
       </div>
 
       <!-- Live Queue Card -->
-      <div class="queue-card" id="queue-card">
-        <div class="queue-card-top">
-          <span class="queue-label-title">🚦 Очередь на АЗС:</span>
+      <div class="queue-status-card" id="queue-card">
+        <div class="queue-header">
+          <span class="queue-label-text">🚦 Очередь на АЗС:</span>
           <span class="queue-badge q-unknown" id="queue-badge">Обычный поток</span>
         </div>
-        <div class="queue-card-detail" id="queue-detail">
+        <div class="queue-detail" id="queue-detail">
           🕒 Данные телеметрии дорожного потока
         </div>
         <div id="queue-warnings" class="queue-warnings"></div>
 
         <!-- User Crowd-Report Queue Buttons -->
-        <div class="user-report-section">
-          <span class="user-report-label">Вы на этой АЗС? Сообщите очередь:</span>
-          <div class="user-report-buttons">
+        <div class="report-queue-box">
+          <span class="report-title">Вы на этой АЗС? Сообщите очередь:</span>
+          <div class="report-buttons">
             <button class="report-btn" data-report="LOW">🟢 Свободно</button>
             <button class="report-btn" data-report="MEDIUM">🟡 5-10 машин</button>
             <button class="report-btn" data-report="HIGH">🔴 Затор</button>
@@ -194,19 +194,19 @@
       </div>
 
       <!-- Fuel Types Grid -->
-      <div class="drawer-content">
-        <div class="fuels-title">Наличие топлива и цены</div>
+      <div class="fuels-section">
+        <div class="section-title">Наличие топлива и цены</div>
         <div id="fuels-grid" class="fuels-grid">
           <!-- Populated dynamically -->
         </div>
       </div>
 
       <!-- Action Button: Open in Yandex Maps -->
-      <div class="drawer-footer">
+      <div class="station-actions">
         <button id="btn-route-to-station" class="btn-secondary-route">
           🧭 Маршрут сюда
         </button>
-        <a id="btn-navigate" href="#" target="_blank" class="btn-primary">
+        <a id="btn-navigate" href="#" target="_blank" class="action-btn primary-btn">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
             <polygon points="3 11 22 2 13 21 11 13 3 11"/>
           </svg>
@@ -219,24 +219,27 @@
     <div id="city-modal" class="city-modal">
       <div class="city-modal-backdrop" id="city-modal-backdrop"></div>
       <div class="city-modal-sheet">
-        <div class="city-modal-handle"></div>
+        <div class="drawer-handle-bar"><div class="drawer-handle"></div></div>
         <div class="city-modal-header">
-          <h3>Выбор города</h3>
-          <button class="city-modal-close-btn" id="city-modal-close">&times;</button>
+          <h3 class="city-modal-title">Выбор города</h3>
+          <button class="city-modal-close" id="city-modal-close" aria-label="Закрыть">&times;</button>
         </div>
 
         <!-- Search Bar -->
         <div class="city-search-box">
           <span class="search-icon">🔍</span>
-          <input type="text" id="city-search-input" placeholder="Поиск города..." autocomplete="off">
-          <button id="city-search-clear" class="search-clear hidden">&times;</button>
+          <input type="text" id="city-search-input" placeholder="Поиск города..." autocomplete="off" aria-label="Поиск города">
+          <button id="city-search-clear" class="search-clear hidden" aria-label="Очистить поиск">&times;</button>
         </div>
 
         <!-- Priority City Switch -->
-        <div class="priority-city-box">
-          <div class="priority-text-group">
-            <span class="priority-title">⭐ Приоритет города</span>
-            <span class="priority-subtitle">Всегда открывать этот город первым</span>
+        <div class="priority-toggle-bar">
+          <div class="priority-toggle-info">
+            <span class="p-star">⭐</span>
+            <div>
+              <div class="p-title">Приоритет города</div>
+              <div class="p-sub">Всегда открывать этот город первым</div>
+            </div>
           </div>
           <label class="switch">
             <input type="checkbox" id="priority-city-checkbox">
@@ -258,6 +261,6 @@
     </div>
   </div>
 
-  <script src="./app.js?v=3.5"></script>
+  <script src="./app.js?v=4.0"></script>
 </body>
 </html>

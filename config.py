@@ -2,7 +2,7 @@
 Configuration settings for Volzhsky Fuel Monitor.
 """
 from typing import List, Dict
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
 
 
@@ -45,10 +45,10 @@ class Settings(BaseSettings):
     BOT_TOKEN: str = Field(default="", env="BOT_TOKEN")
     
     # Администратор бота (ID в Telegram)
-    ADMIN_ID: int = Field(default=705941333, env="ADMIN_ID")
+    ADMIN_ID: int = Field(default=0, env="ADMIN_ID")
 
     # Список разрешенных пользователей (через запятую, например: "705941333")
-    ALLOWED_USER_IDS: str = Field(default="705941333", env="ALLOWED_USER_IDS")
+    ALLOWED_USER_IDS: str = Field(default="", env="ALLOWED_USER_IDS")
     
     # Интервал проверки данных в секундах (по умолчанию 3 минуты = 180 сек)
     CHECK_INTERVAL_SECONDS: int = Field(default=180, env="CHECK_INTERVAL_SECONDS")
@@ -79,10 +79,11 @@ class Settings(BaseSettings):
         except Exception:
             return [self.ADMIN_ID] if self.ADMIN_ID else []
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        extra = "ignore"
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
 
 settings = Settings()
