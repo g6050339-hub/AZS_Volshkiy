@@ -386,17 +386,29 @@ btnRouteToStation.addEventListener('click', () => {
 async function loadStationsForCity(city) {
   loader.classList.remove('hidden');
   document.getElementById('loader-text').textContent = `Загрузка АЗС: ${city.name}...`;
+  console.log('[LOAD] Loading city:', city.id, city.name);
   try {
     let data = null;
     try { const r = await fetch('./stations.json?t=' + Date.now()); if (r.ok) data = await r.json(); } catch {}
     if (!data) { try { const r = await fetch('/api/stations?t=' + Date.now()); data = await r.json(); } catch {} }
     allStations = data?.stations || data || [];
-    displayedStations = ['volzhsky', 'volgograd'].includes(city.id) ? allStations : generateCityStations(city);
+    console.log('[LOAD] allStations count:', allStations.length);
+    
+    if (['volzhsky', 'volgograd'].includes(city.id)) {
+      displayedStations = allStations;
+      console.log('[LOAD] Using real stations for', city.id);
+    } else {
+      displayedStations = generateCityStations(city);
+      console.log('[LOAD] Generated', displayedStations.length, 'stations for', city.name);
+      console.log('[LOAD] First station:', displayedStations[0]?.name, displayedStations[0]?.lat, displayedStations[0]?.lon);
+    }
+    
     updateBadgeCounts();
     renderMarkers();
+    console.log('[LOAD] Rendered', markers.length, 'markers on map');
     if (isRouteMode && pointA && pointB) calculateAndRenderRoute();
   } catch (err) {
-    console.error('Failed to load stations:', err);
+    console.error('[LOAD] Failed:', err);
   } finally {
     loader.classList.add('hidden');
   }
