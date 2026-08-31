@@ -4,94 +4,76 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Мониторинг АЗС и Навигатор</title>
-  
-  <!-- Telegram WebApp SDK -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-  <!-- Leaflet CSS & JS -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-
-  <!-- Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="./style.css?v=4.0">
+  <link rel="stylesheet" href="./style.css?v=5.0">
 </head>
 <body>
   <div id="app">
-    <!-- Standard Header Bar (Active when not in Route Mode) -->
+    <!-- ============ STANDARD HEADER ============ -->
     <header class="header" id="standard-header">
       <div class="top-action-bar">
-        <button id="btn-city-select" class="city-pill-btn">
+        <button id="btn-city-select" class="city-pill-btn" aria-label="Выбор города">
           <span class="city-icon">📍</span>
           <span id="current-city-name" class="city-name-text">Волжский</span>
           <span class="city-arrow">▾</span>
         </button>
         <div class="city-priority-indicator" id="priority-indicator" title="Приоритетный город">⭐</div>
       </div>
-
-      <!-- Filters Scroll -->
       <div class="filters-scroll">
         <button class="filter-pill active" data-fuel="ALL">
           <span>Все АЗС</span>
           <span class="badge" id="count-all">0</span>
         </button>
         <button class="filter-pill" data-fuel="AI95">
-          <span class="dot dot-blue"></span>
-          <span>АИ-95</span>
+          <span class="dot dot-blue"></span><span>АИ-95</span>
           <span class="badge" id="count-ai95">0</span>
         </button>
         <button class="filter-pill" data-fuel="AI95_PREMIUM">
-          <span class="dot dot-purple"></span>
-          <span>АИ-95+</span>
+          <span class="dot dot-purple"></span><span>АИ-95+</span>
           <span class="badge" id="count-ai95p">0</span>
         </button>
         <button class="filter-pill" data-fuel="AI92">
-          <span class="dot dot-green"></span>
-          <span>АИ-92</span>
+          <span class="dot dot-green"></span><span>АИ-92</span>
           <span class="badge" id="count-ai92">0</span>
         </button>
         <button class="filter-pill" data-fuel="AI100">
-          <span class="dot dot-red"></span>
-          <span>АИ-100</span>
+          <span class="dot dot-red"></span><span>АИ-100</span>
           <span class="badge" id="count-ai100">0</span>
         </button>
         <button class="filter-pill" data-fuel="DIESEL">
-          <span class="dot dot-black"></span>
-          <span>ДТ</span>
+          <span class="dot dot-black"></span><span>ДТ</span>
           <span class="badge" id="count-diesel">0</span>
         </button>
       </div>
     </header>
 
-    <!-- Route Mode Top Panel (Active when in Route Mode) -->
+    <!-- ============ ROUTE MODE HEADER ============ -->
     <div class="route-header hidden" id="route-header">
       <div class="route-header-top">
         <div class="route-title-tag">🧭 Навигатор · Топливо по пути</div>
-        <button class="route-close-btn" id="btn-exit-route" title="Выйти из режима маршрута">&times;</button>
+        <button class="route-close-btn" id="btn-exit-route" title="Выйти" aria-label="Выйти из режима маршрута">&times;</button>
       </div>
-
       <div class="route-points-box">
         <div class="route-point-row" id="row-point-a">
           <div class="point-dot dot-a">А</div>
-          <div class="point-input-box" id="box-point-a">
-            <span class="point-text" id="text-point-a">Мое местоположение (GPS)</span>
-          </div>
-          <button class="btn-point-action" id="btn-set-a-gps" title="Использовать GPS">📍</button>
+          <input type="text" class="route-input" id="input-point-a" placeholder="Откуда — GPS или введите адрес..." autocomplete="off" aria-label="Откуда">
+          <button class="btn-point-action" id="btn-set-a-gps" title="GPS" aria-label="Мое местоположение">📍</button>
+          <div class="search-suggestions" id="suggestions-a"></div>
         </div>
         <div class="route-divider-line"></div>
         <div class="route-point-row" id="row-point-b">
           <div class="point-dot dot-b">Б</div>
-          <div class="point-input-box" id="box-point-b">
-            <span class="point-text placeholder" id="text-point-b">Кликните на карту или выберите АЗС...</span>
-          </div>
-          <button class="btn-point-action" id="btn-clear-b" title="Сбросить точку Б">&times;</button>
+          <input type="text" class="route-input" id="input-point-b" placeholder="Куда — город, адрес или клик на карту..." autocomplete="off" aria-label="Куда">
+          <button class="btn-point-action" id="btn-clear-b" title="Сбросить" aria-label="Сбросить точку Б">&times;</button>
+          <div class="search-suggestions" id="suggestions-b"></div>
         </div>
       </div>
-
-      <!-- Fuel Filter on Route -->
       <div class="route-fuel-filter-row">
         <span class="route-fuel-label">Искать по пути:</span>
         <div class="route-fuel-pills">
@@ -105,32 +87,29 @@
       </div>
     </div>
 
-    <!-- Map Container -->
+    <!-- ============ MAP ============ -->
     <div id="map"></div>
 
-    <!-- Map Controls (Floating Action Buttons) -->
+    <!-- ============ MAP CONTROLS ============ -->
     <div class="map-controls">
-      <button id="btn-toggle-route" class="ctrl-btn fab-route" title="Построить маршрут и найти заправки" aria-label="Построить маршрут">
+      <button id="btn-toggle-route" class="ctrl-btn fab-route" aria-label="Построить маршрут">
         <span style="font-size:18px;">🧭</span>
         <span class="fab-label">Маршрут</span>
       </button>
-      <button id="btn-locate" class="ctrl-btn" title="Мое местоположение" aria-label="Мое местоположение">
+      <button id="btn-locate" class="ctrl-btn" aria-label="Мое местоположение">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="7"/>
-          <line x1="12" y1="1" x2="12" y2="5"/>
-          <line x1="12" y1="19" x2="12" y2="23"/>
-          <line x1="1" y1="12" x2="5" y2="12"/>
-          <line x1="19" y1="12" x2="23" y2="12"/>
+          <circle cx="12" cy="12" r="7"/><line x1="12" y1="1" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="23"/>
+          <line x1="1" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="23" y2="12"/>
         </svg>
       </button>
-      <button id="btn-refresh" class="ctrl-btn" title="Обновить данные" aria-label="Обновить данные">
+      <button id="btn-refresh" class="ctrl-btn" aria-label="Обновить данные">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
         </svg>
       </button>
     </div>
 
-    <!-- Route Summary Bottom Sheet -->
+    <!-- ============ ROUTE SUMMARY SHEET ============ -->
     <div class="route-summary-sheet hidden" id="route-summary-sheet">
       <div class="route-summary-header">
         <div class="route-meta">
@@ -140,12 +119,7 @@
         </div>
         <div class="route-fuel-count-badge" id="route-fuel-count-badge">⛽ 0 АЗС по пути</div>
       </div>
-      
-      <!-- List of Stations Along the Route -->
-      <div class="route-stations-list" id="route-stations-list">
-        <!-- Populated dynamically with stations along corridor -->
-      </div>
-
+      <div class="route-stations-list" id="route-stations-list"></div>
       <div class="route-actions-row">
         <a id="btn-yandex-navi-start" href="#" target="_blank" class="btn-yandex-navi">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
@@ -156,12 +130,9 @@
       </div>
     </div>
 
-    <!-- Bottom Sheet / Drawer for Single Station Details -->
+    <!-- ============ STATION DRAWER ============ -->
     <div id="drawer" class="drawer">
-      <div class="drawer-handle-bar">
-        <div class="drawer-handle"></div>
-      </div>
-      
+      <div class="drawer-handle-bar"><div class="drawer-handle"></div></div>
       <div class="station-header">
         <div class="station-brand-icon" id="station-brand-icon">⛽</div>
         <div class="station-title-group">
@@ -170,19 +141,13 @@
         </div>
         <button id="drawer-close" class="drawer-close" aria-label="Закрыть">&times;</button>
       </div>
-
-      <!-- Live Queue Card -->
       <div class="queue-status-card" id="queue-card">
         <div class="queue-header">
           <span class="queue-label-text">🚦 Очередь на АЗС:</span>
           <span class="queue-badge q-unknown" id="queue-badge">Обычный поток</span>
         </div>
-        <div class="queue-detail" id="queue-detail">
-          🕒 Данные телеметрии дорожного потока
-        </div>
+        <div class="queue-detail" id="queue-detail">🕒 Данные телеметрии</div>
         <div id="queue-warnings" class="queue-warnings"></div>
-
-        <!-- User Crowd-Report Queue Buttons -->
         <div class="report-queue-box">
           <span class="report-title">Вы на этой АЗС? Сообщите очередь:</span>
           <div class="report-buttons">
@@ -192,20 +157,12 @@
           </div>
         </div>
       </div>
-
-      <!-- Fuel Types Grid -->
       <div class="fuels-section">
         <div class="section-title">Наличие топлива и цены</div>
-        <div id="fuels-grid" class="fuels-grid">
-          <!-- Populated dynamically -->
-        </div>
+        <div id="fuels-grid" class="fuels-grid"></div>
       </div>
-
-      <!-- Action Button: Open in Yandex Maps -->
       <div class="station-actions">
-        <button id="btn-route-to-station" class="btn-secondary-route">
-          🧭 Маршрут сюда
-        </button>
+        <button id="btn-route-to-station" class="btn-secondary-route">🧭 Маршрут сюда</button>
         <a id="btn-navigate" href="#" target="_blank" class="action-btn primary-btn">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
             <polygon points="3 11 22 2 13 21 11 13 3 11"/>
@@ -215,7 +172,7 @@
       </div>
     </div>
 
-    <!-- City Selector Bottom Modal -->
+    <!-- ============ CITY MODAL ============ -->
     <div id="city-modal" class="city-modal">
       <div class="city-modal-backdrop" id="city-modal-backdrop"></div>
       <div class="city-modal-sheet">
@@ -224,15 +181,11 @@
           <h3 class="city-modal-title">Выбор города</h3>
           <button class="city-modal-close" id="city-modal-close" aria-label="Закрыть">&times;</button>
         </div>
-
-        <!-- Search Bar -->
         <div class="city-search-box">
           <span class="search-icon">🔍</span>
           <input type="text" id="city-search-input" placeholder="Поиск города..." autocomplete="off" aria-label="Поиск города">
-          <button id="city-search-clear" class="search-clear hidden" aria-label="Очистить поиск">&times;</button>
+          <button id="city-search-clear" class="search-clear hidden" aria-label="Очистить">&times;</button>
         </div>
-
-        <!-- Priority City Switch -->
         <div class="priority-toggle-bar">
           <div class="priority-toggle-info">
             <span class="p-star">⭐</span>
@@ -246,21 +199,17 @@
             <span class="slider round"></span>
           </label>
         </div>
-
-        <!-- Cities List -->
-        <div class="cities-container" id="cities-container">
-          <!-- Populated dynamically -->
-        </div>
+        <div class="cities-container" id="cities-container"></div>
       </div>
     </div>
 
-    <!-- Loading Spinner Overlay -->
+    <!-- ============ LOADER ============ -->
     <div id="loader" class="loader-overlay">
       <div class="spinner"></div>
       <div class="loader-text" id="loader-text">Загрузка данных АЗС...</div>
     </div>
   </div>
 
-  <script src="./app.js?v=4.0"></script>
+  <script src="./app.js?v=5.0"></script>
 </body>
 </html>

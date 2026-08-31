@@ -1,14 +1,19 @@
-// Telegram WebApp initialization
+// ============================================================
+// АЗС Монитор — app.js v5.0
+// Тёмная карта + Навигатор с текстовым поиском (Nominatim)
+// ============================================================
+
+// Telegram WebApp
 const tg = window.Telegram?.WebApp;
 if (tg) {
   tg.ready();
   tg.expand();
-  if (tg.enableClosingConfirmation) {
-    tg.enableClosingConfirmation();
-  }
+  if (tg.enableClosingConfirmation) tg.enableClosingConfirmation();
 }
 
-// Database of Russian Cities
+// ============================================================
+// CITIES DATABASE
+// ============================================================
 const CITIES_DB = [
   { id: 'volzhsky', name: 'Волжский', region: 'Волгоградская обл.', coords: [48.7858, 44.7797], zoom: 13, popular: true },
   { id: 'volgograd', name: 'Волгоград', region: 'Волгоградская обл.', coords: [48.7080, 44.5133], zoom: 12, popular: true },
@@ -49,8 +54,15 @@ const CITIES_DB = [
   { id: 'belgorod', name: 'Белгород', region: 'Белгородская обл.', coords: [50.5997, 36.5983], zoom: 12 }
 ];
 
-// State
-let currentCity = getSavedPriorityCity() || CITIES_DB[0]; // Default: Volzhsky
+// ============================================================
+// STATE
+// ============================================================
+function getSavedPriorityCity() {
+  const id = localStorage.getItem('priority_city_id');
+  return id ? CITIES_DB.find(c => c.id === id) || null : null;
+}
+
+let currentCity = getSavedPriorityCity() || CITIES_DB[0];
 let priorityCityId = localStorage.getItem('priority_city_id') || 'volzhsky';
 let allStations = [];
 let displayedStations = [];
@@ -60,10 +72,10 @@ let userMarker = null;
 let userCoords = null;
 let selectedStation = null;
 
-// Navigator & Route State
+// Navigator state
 let isRouteMode = false;
-let pointA = null; // { lat, lon, label }
-let pointB = null; // { lat, lon, label }
+let pointA = null;
+let pointB = null;
 let markerA = null;
 let markerB = null;
 let routePolyline = null;
@@ -71,79 +83,41 @@ let routeCasingPolyline = null;
 let routeFuelFilter = 'ALL';
 let stationsOnRoute = [];
 
-function getSavedPriorityCity() {
-  const id = localStorage.getItem('priority_city_id');
-  if (!id) return null;
-  return CITIES_DB.find(c => c.id === id) || null;
-}
+// Nominatim debounce timers
+let debounceTimerA = null;
+let debounceTimerB = null;
 
-// Fuel metadata
+// ============================================================
+// FUEL & QUEUE METADATA
+// ============================================================
 const FUEL_INFO = {
-  'AI92': { name: 'АИ-92', emoji: '🟢', class: 'ai92' },
-  'AI95': { name: 'АИ-95', emoji: '🔵', class: 'ai95' },
-  'AI95_PREMIUM': { name: 'АИ-95+ (Экто/G-Drive)', emoji: '🔷', class: 'ai95p' },
-  'AI98': { name: 'АИ-98', emoji: '🟣', class: 'ai98' },
-  'AI100': { name: 'АИ-100', emoji: '🔴', class: 'ai100' },
-  'DIESEL': { name: 'Дизель (ДТ)', emoji: '⚫', class: 'diesel' },
-  'LPG': { name: 'Пропан', emoji: '🟡', class: 'lpg' },
-  'METHANE': { name: 'Метан', emoji: '⚪', class: 'cng' },
+  'AI92': { name: 'АИ-92', emoji: '🟢' },
+  'AI95': { name: 'АИ-95', emoji: '🔵' },
+  'AI95_PREMIUM': { name: 'АИ-95+ (Экто/G-Drive)', emoji: '🔷' },
+  'AI98': { name: 'АИ-98', emoji: '🟣' },
+  'AI100': { name: 'АИ-100', emoji: '🔴' },
+  'DIESEL': { name: 'Дизель (ДТ)', emoji: '⚫' },
+  'LPG': { name: 'Пропан', emoji: '🟡' },
+  'METHANE': { name: 'Метан', emoji: '⚪' },
 };
 
-// Exact Fuel Matcher corresponding 1-to-1 with Telegram Bot categories
 function checkFuelInStock(station, filter) {
-  if (!station || !station.fuels) return false;
-  
-  if (filter === 'ALL') {
-    return Object.values(station.fuels).some(f => f.status === 'IN_STOCK');
-  }
-  
-  if (filter === 'AI95') {
-    const f = station.fuels['AI95'];
-    return f && f.status === 'IN_STOCK';
-  }
-
-  if (filter === 'AI95_PREMIUM') {
-    const f = station.fuels['AI95_PREMIUM'];
-    return f && f.status === 'IN_STOCK';
-  }
-  
-  if (filter === 'AI92') {
-    const f = station.fuels['AI92'];
-    return f && f.status === 'IN_STOCK';
-  }
-  
+  if (!station?.fuels) return false;
+  if (filter === 'ALL') return Object.values(station.fuels).some(f => f.status === 'IN_STOCK');
   if (filter === 'AI100') {
-    const f1 = station.fuels['AI100'];
-    const f2 = station.fuels['AI98'];
-    return (f1 && f1.status === 'IN_STOCK') || (f2 && f2.status === 'IN_STOCK');
+    return ['AI100', 'AI98'].some(k => station.fuels[k]?.status === 'IN_STOCK');
   }
-  
-  if (filter === 'DIESEL') {
-    const f = station.fuels['DIESEL'];
-    return f && f.status === 'IN_STOCK';
-  }
-  
-  const fuel = station.fuels[filter];
-  return fuel && fuel.status === 'IN_STOCK';
+  return station.fuels[filter]?.status === 'IN_STOCK';
 }
 
-// Queue Metadata
 const QUEUE_INFO = {
-  'LOW': { text: 'Свободно (мало машин)', badgeClass: 'q-low', dotClass: 'q-low', emoji: '🟢' },
-  'MEDIUM': { text: 'Средняя (5–10 машин)', badgeClass: 'q-med', dotClass: 'q-med', emoji: '🟡' },
-  'HIGH': { text: 'Большая очередь (затор)', badgeClass: 'q-high', dotClass: 'q-high', emoji: '🔴' },
+  'LOW': { text: 'Свободно', badgeClass: 'q-low', dotClass: 'q-low', emoji: '🟢' },
+  'MEDIUM': { text: 'Средняя', badgeClass: 'q-med', dotClass: 'q-med', emoji: '🟡' },
+  'HIGH': { text: 'Большая очередь', badgeClass: 'q-high', dotClass: 'q-high', emoji: '🔴' },
   'UNKNOWN': { text: 'Обычный поток', badgeClass: 'q-unknown', dotClass: 'q-unknown', emoji: '⚪' }
 };
 
-// Brand Icons
-const BRAND_ICONS = {
-  'лукойл': '🔴',
-  'татнефть': '🟢',
-  'газпром': '🔵',
-  'роснефть': '🟡',
-  'teboil': '🔷',
-};
-
+const BRAND_ICONS = { 'лукойл': '🔴', 'татнефть': '🟢', 'газпром': '🔵', 'роснефть': '🟡', 'teboil': '🔷' };
 function getBrandIcon(name) {
   const lower = (name || '').toLowerCase();
   for (const [brand, icon] of Object.entries(BRAND_ICONS)) {
@@ -153,36 +127,26 @@ function getBrandIcon(name) {
 }
 
 function haptic(type = 'light') {
-  try {
-    if (tg?.HapticFeedback) {
-      tg.HapticFeedback.impactOccurred(type);
-    }
-  } catch (e) {}
+  try { tg?.HapticFeedback?.impactOccurred(type); } catch {}
 }
-
 function hapticNotification(type = 'success') {
-  try {
-    if (tg?.HapticFeedback) {
-      tg.HapticFeedback.notificationOccurred(type);
-    }
-  } catch (e) {}
+  try { tg?.HapticFeedback?.notificationOccurred(type); } catch {}
 }
 
-// Initialize Leaflet Map centered on current city
-const map = L.map('map', {
-  zoomControl: false,
-  attributionControl: false
-}).setView(currentCity.coords, currentCity.zoom);
+// ============================================================
+// LEAFLET MAP — DARK TILES
+// ============================================================
+const map = L.map('map', { zoomControl: false, attributionControl: false })
+  .setView(currentCity.coords, currentCity.zoom);
 
-// Carto Voyager tiles
-const tileUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
-
-L.tileLayer(tileUrl, {
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
   maxZoom: 19,
   subdomains: 'abcd'
 }).addTo(map);
 
-// DOM Elements
+// ============================================================
+// DOM ELEMENTS
+// ============================================================
 const standardHeader = document.getElementById('standard-header');
 const routeHeader = document.getElementById('route-header');
 const routeSummarySheet = document.getElementById('route-summary-sheet');
@@ -198,42 +162,38 @@ const citySearchInput = document.getElementById('city-search-input');
 const citySearchClear = document.getElementById('city-search-clear');
 const citiesContainer = document.getElementById('cities-container');
 
-// Navigator Buttons & Inputs
+// Navigator elements
 const btnToggleRoute = document.getElementById('btn-toggle-route');
 const btnExitRoute = document.getElementById('btn-exit-route');
-const textPointA = document.getElementById('text-point-a');
-const textPointB = document.getElementById('text-point-b');
+const inputPointA = document.getElementById('input-point-a');
+const inputPointB = document.getElementById('input-point-b');
+const suggestionsA = document.getElementById('suggestions-a');
+const suggestionsB = document.getElementById('suggestions-b');
 const btnSetAGps = document.getElementById('btn-set-a-gps');
 const btnClearB = document.getElementById('btn-clear-b');
 const btnRouteToStation = document.getElementById('btn-route-to-station');
 const btnYandexNaviStart = document.getElementById('btn-yandex-navi-start');
 
-// Update City UI header
+// ============================================================
+// CITY HEADER & MODAL
+// ============================================================
 function updateCityHeaderUI() {
   currentCityName.textContent = currentCity.name;
-  const isPriority = (currentCity.id === priorityCityId);
+  const isPriority = currentCity.id === priorityCityId;
   priorityIndicator.style.display = isPriority ? 'flex' : 'none';
   priorityCheckbox.checked = isPriority;
 }
-
 updateCityHeaderUI();
 
-// Open/Close City Modal
 btnCitySelect.addEventListener('click', () => {
   haptic('light');
   renderCitiesList();
-  priorityCheckbox.checked = (currentCity.id === priorityCityId);
+  priorityCheckbox.checked = currentCity.id === priorityCityId;
   cityModal.classList.add('open');
 });
+document.getElementById('city-modal-close').addEventListener('click', () => cityModal.classList.remove('open'));
+document.getElementById('city-modal-backdrop').addEventListener('click', () => cityModal.classList.remove('open'));
 
-document.getElementById('city-modal-close').addEventListener('click', () => {
-  cityModal.classList.remove('open');
-});
-document.getElementById('city-modal-backdrop').addEventListener('click', () => {
-  cityModal.classList.remove('open');
-});
-
-// Priority Switch change
 priorityCheckbox.addEventListener('change', () => {
   hapticNotification('success');
   if (priorityCheckbox.checked) {
@@ -247,13 +207,11 @@ priorityCheckbox.addEventListener('change', () => {
   renderCitiesList();
 });
 
-// City Search
 citySearchInput.addEventListener('input', () => {
   const val = citySearchInput.value.trim();
   citySearchClear.classList.toggle('hidden', !val);
   renderCitiesList(val);
 });
-
 citySearchClear.addEventListener('click', () => {
   citySearchInput.value = '';
   citySearchClear.classList.add('hidden');
@@ -263,45 +221,31 @@ citySearchClear.addEventListener('click', () => {
 function renderCitiesList(filterQuery = '') {
   citiesContainer.innerHTML = '';
   const q = filterQuery.toLowerCase();
-
-  const filtered = CITIES_DB.filter(c => 
-    c.name.toLowerCase().includes(q) || c.region.toLowerCase().includes(q)
-  );
-
-  if (filtered.length === 0) {
-    citiesContainer.innerHTML = '<div style="text-align:center;padding:24px;color:var(--hint-color);font-size:13px;">Город не найден</div>';
+  const filtered = CITIES_DB.filter(c => c.name.toLowerCase().includes(q) || c.region.toLowerCase().includes(q));
+  if (!filtered.length) {
+    citiesContainer.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-dim);font-size:13px;">Город не найден</div>';
     return;
   }
-
-  // Popular section if no query
   if (!filterQuery) {
-    const popularTitle = document.createElement('div');
-    popularTitle.className = 'city-group-title';
-    popularTitle.textContent = 'Популярные города';
-    citiesContainer.appendChild(popularTitle);
-
-    filtered.filter(c => c.popular).forEach(c => {
-      citiesContainer.appendChild(createCityItemElement(c));
-    });
-
-    const allTitle = document.createElement('div');
-    allTitle.className = 'city-group-title';
-    allTitle.textContent = 'Все города России';
-    citiesContainer.appendChild(allTitle);
+    const h1 = document.createElement('div');
+    h1.className = 'city-group-title';
+    h1.textContent = 'Популярные города';
+    citiesContainer.appendChild(h1);
+    filtered.filter(c => c.popular).forEach(c => citiesContainer.appendChild(createCityItem(c)));
+    const h2 = document.createElement('div');
+    h2.className = 'city-group-title';
+    h2.textContent = 'Все города';
+    citiesContainer.appendChild(h2);
   }
-
   filtered.forEach(c => {
     if (!filterQuery && c.popular) return;
-    citiesContainer.appendChild(createCityItemElement(c));
+    citiesContainer.appendChild(createCityItem(c));
   });
 }
 
-function createCityItemElement(city) {
+function createCityItem(city) {
   const item = document.createElement('div');
-  const isActive = (city.id === currentCity.id);
-  const isPriority = (city.id === priorityCityId);
-  item.className = `city-item ${isActive ? 'active' : ''}`;
-
+  item.className = `city-item ${city.id === currentCity.id ? 'active' : ''}`;
   item.innerHTML = `
     <div class="city-item-left">
       <span style="font-size:18px;">📍</span>
@@ -311,15 +255,10 @@ function createCityItemElement(city) {
       </div>
     </div>
     <div class="city-item-right">
-      ${isPriority ? '<span class="city-priority-tag" title="Приоритет">⭐</span>' : ''}
-      ${city.id === 'volzhsky' || city.id === 'volgograd' ? '<span class="city-badge">Онлайн 24/7</span>' : ''}
-    </div>
-  `;
-
-  item.addEventListener('click', () => {
-    selectCity(city);
-  });
-
+      ${city.id === priorityCityId ? '<span class="city-priority-tag">⭐</span>' : ''}
+      ${['volzhsky', 'volgograd'].includes(city.id) ? '<span class="city-badge">Онлайн 24/7</span>' : ''}
+    </div>`;
+  item.addEventListener('click', () => selectCity(city));
   return item;
 }
 
@@ -328,12 +267,13 @@ function selectCity(city) {
   currentCity = city;
   updateCityHeaderUI();
   cityModal.classList.remove('open');
-
   map.flyTo(city.coords, city.zoom, { duration: 1.2 });
   loadStationsForCity(city);
 }
 
-// Standard Filter Pills
+// ============================================================
+// FILTER PILLS
+// ============================================================
 document.querySelectorAll('.filter-pill').forEach(pill => {
   pill.addEventListener('click', () => {
     haptic('medium');
@@ -344,120 +284,85 @@ document.querySelectorAll('.filter-pill').forEach(pill => {
   });
 });
 
-// Route Fuel Filter Pills
 document.querySelectorAll('.rf-pill').forEach(pill => {
   pill.addEventListener('click', () => {
     haptic('medium');
     document.querySelectorAll('.rf-pill').forEach(p => p.classList.remove('active'));
     pill.classList.add('active');
     routeFuelFilter = pill.dataset.rfuel;
-    
-    if (pointA && pointB) {
-      calculateAndRenderRoute();
-    }
+    if (pointA && pointB) calculateAndRenderRoute();
   });
 });
 
-drawerClose.addEventListener('click', () => {
-  closeDrawer();
-});
+// ============================================================
+// DRAWER (Station Details)
+// ============================================================
+drawerClose.addEventListener('click', () => closeDrawer());
 
-// Setup User Report Queue Buttons
 document.querySelectorAll('.report-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     if (!selectedStation) return;
-    const reportVal = btn.dataset.report;
+    const val = btn.dataset.report;
     hapticNotification('success');
-
-    selectedStation.queue_status = reportVal;
+    selectedStation.queue_status = val;
     renderQueueCard(selectedStation);
     updateMarkersVisibility();
-
     btn.textContent = '✅ Принято!';
     setTimeout(() => {
-      if (reportVal === 'LOW') btn.textContent = '🟢 Свободно';
-      else if (reportVal === 'MEDIUM') btn.textContent = '🟡 5-10 машин';
-      else if (reportVal === 'HIGH') btn.textContent = '🔴 Затор';
+      btn.textContent = val === 'LOW' ? '🟢 Свободно' : val === 'MEDIUM' ? '🟡 5-10 машин' : '🔴 Затор';
     }, 2000);
   });
 });
 
 function renderQueueCard(station) {
-  const qStatus = station.queue_status || 'UNKNOWN';
-  const qMeta = QUEUE_INFO[qStatus] || QUEUE_INFO['UNKNOWN'];
-
+  const q = QUEUE_INFO[station.queue_status || 'UNKNOWN'] || QUEUE_INFO.UNKNOWN;
   const badge = document.getElementById('queue-badge');
-  badge.className = `queue-badge ${qMeta.badgeClass}`;
-  badge.textContent = qMeta.text;
-
+  badge.className = `queue-badge ${q.badgeClass}`;
+  badge.textContent = q.text;
   const activity = station.signals_count_per_hour || 0;
-  let detailText = activity > 0 
-    ? `⚡ Активность водителей: ${activity} чел. за последний час` 
+  document.getElementById('queue-detail').textContent = activity > 0
+    ? `⚡ Активность водителей: ${activity} чел./час`
     : '🕒 Данные телеметрии дорожного потока';
-  document.getElementById('queue-detail').textContent = detailText;
-
-  const warningsBox = document.getElementById('queue-warnings');
-  warningsBox.innerHTML = '';
-
+  const warnings = document.getElementById('queue-warnings');
+  warnings.innerHTML = '';
   if (station.cash_only) {
-    const w = document.createElement('div');
-    w.className = 'warning-pill';
-    w.innerHTML = '⚠️ <b>Только наличный расчет</b> (терминалы не работают)';
-    warningsBox.appendChild(w);
+    warnings.innerHTML += '<div class="warning-pill">⚠️ <b>Только наличный расчет</b></div>';
   }
-
   if (station.fuel_limit) {
-    const w = document.createElement('div');
-    w.className = 'warning-pill';
-    w.innerHTML = `⛔ <b>Ограничение:</b> ${station.fuel_limit}`;
-    warningsBox.appendChild(w);
+    warnings.innerHTML += `<div class="warning-pill">⛔ <b>Ограничение:</b> ${station.fuel_limit}</div>`;
   }
 }
 
 function openDrawer(station) {
   selectedStation = station;
   haptic('light');
-
-  const brandIcon = getBrandIcon(station.name);
-  document.getElementById('station-brand-icon').textContent = brandIcon;
+  document.getElementById('station-brand-icon').textContent = getBrandIcon(station.name);
   document.getElementById('station-name').textContent = station.name;
   document.getElementById('station-address').textContent = station.address;
-
   renderQueueCard(station);
-
   const grid = document.getElementById('fuels-grid');
   grid.innerHTML = '';
-
   const fuels = station.fuels || {};
-  const sortedKeys = Object.keys(fuels).sort();
-
-  if (sortedKeys.length === 0) {
-    grid.innerHTML = '<div style="grid-column: span 2; color: var(--hint-color); font-size: 13px;">Данные по типам топлива уточняются</div>';
+  const keys = Object.keys(fuels).sort();
+  if (!keys.length) {
+    grid.innerHTML = '<div style="grid-column:span 2;color:var(--text-dim);font-size:13px;">Данные по типам топлива уточняются</div>';
   } else {
-    for (const key of sortedKeys) {
+    keys.forEach(key => {
       const item = fuels[key];
       const meta = FUEL_INFO[key] || { name: item.name || key, emoji: '⛽' };
       const inStock = item.status === 'IN_STOCK';
-      const statusText = inStock ? 'В наличии' : 'Закончился';
-      const statusClass = inStock ? 'in-stock' : 'out-of-stock';
-      const priceText = item.price_text || (inStock ? 'Цена в чеке' : '—');
-
       const card = document.createElement('div');
-      card.className = `fuel-card ${statusClass}`;
+      card.className = `fuel-card ${inStock ? 'in-stock' : 'out-of-stock'}`;
       card.innerHTML = `
         <div class="fuel-card-top">
           <span class="fuel-card-name">${meta.emoji} ${meta.name}</span>
-          <span class="fuel-status-tag ${statusClass}">${statusText}</span>
+          <span class="fuel-status-tag ${inStock ? 'in-stock' : 'out-of-stock'}">${inStock ? 'В наличии' : 'Нет'}</span>
         </div>
-        <div class="fuel-card-price">${priceText}</div>
-      `;
+        <div class="fuel-card-price">${item.price_text || (inStock ? 'Цена в чеке' : '—')}</div>`;
       grid.appendChild(card);
-    }
+    });
   }
-
-  const navBtn = document.getElementById('btn-navigate');
-  navBtn.href = `https://yandex.ru/maps/?rtext=~${station.lat}%2C${station.lon}&rtt=auto`;
-
+  document.getElementById('btn-navigate').href = `https://yandex.ru/maps/?rtext=~${station.lat}%2C${station.lon}&rtt=auto`;
   drawer.classList.add('open');
 }
 
@@ -466,50 +371,30 @@ function closeDrawer() {
   selectedStation = null;
 }
 
-// "Route Here" button inside drawer
 btnRouteToStation.addEventListener('click', () => {
   if (!selectedStation) return;
-  const target = selectedStation;
+  const st = selectedStation;
   closeDrawer();
   startRouteMode();
-  setPointB(target.lat, target.lon, target.name);
+  setPointB(st.lat, st.lon, st.name);
+  inputPointB.value = st.name;
 });
 
-// Load stations
+// ============================================================
+// STATIONS LOADER
+// ============================================================
 async function loadStationsForCity(city) {
   loader.classList.remove('hidden');
   document.getElementById('loader-text').textContent = `Загрузка АЗС: ${city.name}...`;
-
   try {
     let data = null;
-    try {
-      const res = await fetch('./stations.json?t=' + Date.now());
-      if (res.ok) data = await res.json();
-    } catch (e) {
-      console.warn('Fallback to /api/stations');
-    }
-
-    if (!data) {
-      try {
-        const res = await fetch('/api/stations?t=' + Date.now());
-        data = await res.json();
-      } catch (e) {}
-    }
-
+    try { const r = await fetch('./stations.json?t=' + Date.now()); if (r.ok) data = await r.json(); } catch {}
+    if (!data) { try { const r = await fetch('/api/stations?t=' + Date.now()); data = await r.json(); } catch {} }
     allStations = data?.stations || data || [];
-
-    if (city.id === 'volzhsky' || city.id === 'volgograd') {
-      displayedStations = allStations;
-    } else {
-      displayedStations = generateCityStations(city);
-    }
-
+    displayedStations = ['volzhsky', 'volgograd'].includes(city.id) ? allStations : generateCityStations(city);
     updateBadgeCounts();
     renderMarkers();
-
-    if (isRouteMode && pointA && pointB) {
-      calculateAndRenderRoute();
-    }
+    if (isRouteMode && pointA && pointB) calculateAndRenderRoute();
   } catch (err) {
     console.error('Failed to load stations:', err);
   } finally {
@@ -520,100 +405,64 @@ async function loadStationsForCity(city) {
 function generateCityStations(city) {
   const [cLat, cLon] = city.coords;
   const brands = [
-    { name: 'Лукойл', fuels: { 'AI95': { name: 'АИ-95', status: 'IN_STOCK', price_text: '59.20 ₽' }, 'AI92': { name: 'АИ-92', status: 'IN_STOCK', price_text: '53.80 ₽' }, 'AI100': { name: 'ЭКТО 100', status: 'IN_STOCK', price_text: '71.50 ₽' }, 'DIESEL': { name: 'ДТ ЭКТО', status: 'IN_STOCK', price_text: '65.10 ₽' } } },
-    { name: 'Газпромнефть', fuels: { 'AI95': { name: 'G-Drive 95', status: 'IN_STOCK', price_text: '58.90 ₽' }, 'AI92': { name: 'АИ-92 ОПТИ', status: 'IN_STOCK', price_text: '53.50 ₽' }, 'DIESEL': { name: 'Дизель ОПТИ', status: 'IN_STOCK', price_text: '64.80 ₽' } } },
-    { name: 'Роснефть', fuels: { 'AI95': { name: 'Pulsar 95', status: 'IN_STOCK', price_text: '58.70 ₽' }, 'AI92': { name: 'АИ-92', status: 'IN_STOCK', price_text: '53.40 ₽' }, 'AI100': { name: 'Pulsar 100', status: 'OUT_OF_STOCK', price_text: '70.90 ₽' }, 'DIESEL': { name: 'ДТ Pulsar', status: 'IN_STOCK', price_text: '64.50 ₽' } } },
-    { name: 'Татнефть', fuels: { 'AI95': { name: 'Танеко 95', status: 'IN_STOCK', price_text: '58.80 ₽' }, 'AI92': { name: 'АИ-92', status: 'IN_STOCK', price_text: '53.60 ₽' }, 'DIESEL': { name: 'ДТ Танеко', status: 'IN_STOCK', price_text: '64.90 ₽' } } },
-    { name: 'Teboil', fuels: { 'AI95': { name: 'Teboil 95+', status: 'IN_STOCK', price_text: '59.40 ₽' }, 'AI92': { name: 'Teboil 92', status: 'IN_STOCK', price_text: '53.90 ₽' }, 'AI98': { name: 'Teboil 98', status: 'IN_STOCK', price_text: '69.90 ₽' }, 'DIESEL': { name: 'ДТ', status: 'IN_STOCK', price_text: '65.20 ₽' } } }
+    { name: 'Лукойл', fuels: { AI95: { name: 'АИ-95', status: 'IN_STOCK', price_text: '59.20 ₽' }, AI92: { name: 'АИ-92', status: 'IN_STOCK', price_text: '53.80 ₽' }, AI100: { name: 'ЭКТО 100', status: 'IN_STOCK', price_text: '71.50 ₽' }, DIESEL: { name: 'ДТ', status: 'IN_STOCK', price_text: '65.10 ₽' } } },
+    { name: 'Газпромнефть', fuels: { AI95: { name: 'G-Drive 95', status: 'IN_STOCK', price_text: '58.90 ₽' }, AI92: { name: 'АИ-92', status: 'IN_STOCK', price_text: '53.50 ₽' }, DIESEL: { name: 'ДТ', status: 'IN_STOCK', price_text: '64.80 ₽' } } },
+    { name: 'Роснефть', fuels: { AI95: { name: 'Pulsar 95', status: 'IN_STOCK', price_text: '58.70 ₽' }, AI92: { name: 'АИ-92', status: 'IN_STOCK', price_text: '53.40 ₽' }, DIESEL: { name: 'ДТ', status: 'IN_STOCK', price_text: '64.50 ₽' } } },
+    { name: 'Татнефть', fuels: { AI95: { name: 'Танеко 95', status: 'IN_STOCK', price_text: '58.80 ₽' }, AI92: { name: 'АИ-92', status: 'IN_STOCK', price_text: '53.60 ₽' }, DIESEL: { name: 'ДТ', status: 'IN_STOCK', price_text: '64.90 ₽' } } },
+    { name: 'Teboil', fuels: { AI95: { name: 'Teboil 95+', status: 'IN_STOCK', price_text: '59.40 ₽' }, AI92: { name: 'Teboil 92', status: 'IN_STOCK', price_text: '53.90 ₽' }, DIESEL: { name: 'ДТ', status: 'IN_STOCK', price_text: '65.20 ₽' } } }
   ];
-
-  const offsets = [
-    [0.015, 0.020, 'Северный въезд, 1'],
-    [-0.018, -0.015, 'Центральный проспект, 45'],
-    [0.010, -0.025, 'Западное шоссе, 12'],
-    [-0.022, 0.018, 'Южная объездная, 8'],
-    [0.003, 0.005, 'ул. Ленина, 102']
-  ];
-
-  return brands.map((b, idx) => {
-    const off = offsets[idx];
-    return {
-      id: `${city.id}_st_${idx}`,
-      name: `${b.name}`,
-      address: `${city.name}, ${off[2]}`,
-      lat: cLat + off[0],
-      lon: cLon + off[1],
-      chain: b.name,
-      fuels: b.fuels,
-      cash_only: false,
-      queue_status: idx % 2 === 0 ? 'LOW' : (idx === 1 ? 'MEDIUM' : 'HIGH'),
-      signals_count_per_hour: (idx + 1) * 2,
-      fuel_limit: null
-    };
-  });
+  const offsets = [[0.015,0.020,'Северный въезд, 1'],[-0.018,-0.015,'Центральный пр., 45'],[0.010,-0.025,'Западное шоссе, 12'],[-0.022,0.018,'Южная объездная, 8'],[0.003,0.005,'ул. Ленина, 102']];
+  return brands.map((b, i) => ({
+    id: `${city.id}_st_${i}`, name: b.name, address: `${city.name}, ${offsets[i][2]}`,
+    lat: cLat + offsets[i][0], lon: cLon + offsets[i][1], chain: b.name, fuels: b.fuels,
+    cash_only: false, queue_status: i % 2 === 0 ? 'LOW' : i === 1 ? 'MEDIUM' : 'HIGH',
+    signals_count_per_hour: (i + 1) * 2, fuel_limit: null
+  }));
 }
 
 function updateBadgeCounts() {
   document.getElementById('count-all').textContent = displayedStations.length;
-
-  document.getElementById('count-ai95').textContent = displayedStations.filter(st => checkFuelInStock(st, 'AI95')).length;
-  
+  document.getElementById('count-ai95').textContent = displayedStations.filter(s => checkFuelInStock(s, 'AI95')).length;
   const el95p = document.getElementById('count-ai95p');
-  if (el95p) {
-    el95p.textContent = displayedStations.filter(st => checkFuelInStock(st, 'AI95_PREMIUM')).length;
-  }
-
-  document.getElementById('count-ai92').textContent = displayedStations.filter(st => checkFuelInStock(st, 'AI92')).length;
-  document.getElementById('count-ai100').textContent = displayedStations.filter(st => checkFuelInStock(st, 'AI100')).length;
-  document.getElementById('count-diesel').textContent = displayedStations.filter(st => checkFuelInStock(st, 'DIESEL')).length;
+  if (el95p) el95p.textContent = displayedStations.filter(s => checkFuelInStock(s, 'AI95_PREMIUM')).length;
+  document.getElementById('count-ai92').textContent = displayedStations.filter(s => checkFuelInStock(s, 'AI92')).length;
+  document.getElementById('count-ai100').textContent = displayedStations.filter(s => checkFuelInStock(s, 'AI100')).length;
+  document.getElementById('count-diesel').textContent = displayedStations.filter(s => checkFuelInStock(s, 'DIESEL')).length;
 }
 
+// ============================================================
+// MAP MARKERS
+// ============================================================
 function renderMarkers() {
   markers.forEach(m => map.removeLayer(m.marker));
   markers = [];
-
   displayedStations.forEach(station => {
     if (!station.lat || !station.lon) return;
-
     const marker = createMarker(station);
     marker.addTo(map);
     markers.push({ marker, station });
   });
-
   updateMarkersVisibility();
 }
 
 function createMarker(station) {
-  const brandIcon = getBrandIcon(station.name);
-  const qStatus = station.queue_status || 'UNKNOWN';
-  const qMeta = QUEUE_INFO[qStatus] || QUEUE_INFO['UNKNOWN'];
-  
+  const brand = getBrandIcon(station.name);
+  const q = QUEUE_INFO[station.queue_status || 'UNKNOWN'] || QUEUE_INFO.UNKNOWN;
   const icon = L.divIcon({
     className: 'custom-div-icon',
-    html: `
-      <div class="custom-pin in-stock" id="pin-${station.id}">
-        ${brandIcon}
-        <div class="pin-queue-dot ${qMeta.dotClass}" id="qdot-${station.id}" title="${qMeta.text}"></div>
-      </div>
-    `,
-    iconSize: [36, 36],
-    iconAnchor: [18, 18]
+    html: `<div class="custom-pin in-stock" id="pin-${station.id}">${brand}<div class="pin-queue-dot ${q.dotClass}" id="qdot-${station.id}"></div></div>`,
+    iconSize: [34, 34], iconAnchor: [17, 17]
   });
-
   const marker = L.marker([station.lat, station.lon], { icon });
   marker.on('click', () => {
-    if (isRouteMode && (!pointB || !pointA)) {
-      if (!pointA) {
-        setPointA(station.lat, station.lon, station.name);
-      } else {
-        setPointB(station.lat, station.lon, station.name);
-      }
+    if (isRouteMode && !pointB) {
+      setPointB(station.lat, station.lon, station.name);
+      inputPointB.value = station.name;
       return;
     }
     map.panTo([station.lat, station.lon]);
     openDrawer(station);
   });
-
   return marker;
 }
 
@@ -622,84 +471,123 @@ function updateMarkersVisibility() {
     const el = document.getElementById(`pin-${station.id}`);
     const qdot = document.getElementById(`qdot-${station.id}`);
     if (!el) return;
-
     if (qdot) {
-      const qStatus = station.queue_status || 'UNKNOWN';
-      const qMeta = QUEUE_INFO[qStatus] || QUEUE_INFO['UNKNOWN'];
-      qdot.className = `pin-queue-dot ${qMeta.dotClass}`;
+      const q = QUEUE_INFO[station.queue_status || 'UNKNOWN'] || QUEUE_INFO.UNKNOWN;
+      qdot.className = `pin-queue-dot ${q.dotClass}`;
     }
-
     if (isRouteMode && stationsOnRoute.length > 0) {
-      const isOnRoute = stationsOnRoute.some(s => s.id === station.id);
-      if (isOnRoute) {
-        el.className = 'custom-pin in-stock on-route-pulse';
-        marker.setOpacity(1.0);
-        marker.setZIndexOffset(1000);
-      } else {
-        el.className = 'custom-pin out-of-stock dimmed';
-        marker.setOpacity(0.25);
-        marker.setZIndexOffset(0);
-      }
+      const onRoute = stationsOnRoute.some(s => s.id === station.id);
+      el.className = onRoute ? 'custom-pin in-stock on-route-pulse' : 'custom-pin out-of-stock dimmed';
+      marker.setOpacity(onRoute ? 1.0 : 0.2);
+      marker.setZIndexOffset(onRoute ? 1000 : 0);
       return;
     }
-
     if (currentFilter === 'ALL') {
-      const hasAnyStock = checkFuelInStock(station, 'ALL');
-      el.className = `custom-pin ${hasAnyStock ? 'in-stock' : 'out-of-stock'}`;
+      el.className = `custom-pin ${checkFuelInStock(station, 'ALL') ? 'in-stock' : 'out-of-stock'}`;
       marker.setOpacity(1.0);
     } else {
       const inStock = checkFuelInStock(station, currentFilter);
-
-      if (inStock) {
-        el.className = 'custom-pin in-stock';
-        marker.setOpacity(1.0);
-        marker.setZIndexOffset(100);
-      } else {
-        el.className = 'custom-pin out-of-stock dimmed';
-        marker.setOpacity(0.3);
-        marker.setZIndexOffset(0);
-      }
+      el.className = inStock ? 'custom-pin in-stock' : 'custom-pin out-of-stock dimmed';
+      marker.setOpacity(inStock ? 1.0 : 0.25);
+      marker.setZIndexOffset(inStock ? 100 : 0);
     }
   });
 }
 
-// ==========================================================================
-// Navigator & Route Mode Logic (OSRM Routing Engine + Fuel Corridor)
-// ==========================================================================
+// ============================================================
+// NOMINATIM GEOCODING (OpenStreetMap)
+// ============================================================
+async function searchNominatim(query) {
+  if (!query || query.length < 2) return [];
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&countrycodes=ru&accept-language=ru`;
+    const res = await fetch(url, { headers: { 'User-Agent': 'AZS-Volzhsky-MiniApp/1.0' } });
+    return await res.json();
+  } catch {
+    return [];
+  }
+}
 
+function renderSuggestions(container, results, onSelect) {
+  container.innerHTML = '';
+  if (!results.length) {
+    container.innerHTML = '<div class="suggestion-loading">Ничего не найдено</div>';
+    container.classList.add('visible');
+    return;
+  }
+  results.forEach(r => {
+    const item = document.createElement('div');
+    item.className = 'suggestion-item';
+    const parts = (r.display_name || '').split(',');
+    item.innerHTML = `<div class="suggestion-main">${parts[0]}</div><div class="suggestion-sub">${parts.slice(1, 3).join(',').trim()}</div>`;
+    item.addEventListener('click', () => {
+      onSelect(parseFloat(r.lat), parseFloat(r.lon), parts[0]);
+      container.classList.remove('visible');
+    });
+    container.appendChild(item);
+  });
+  container.classList.add('visible');
+}
+
+function hideSuggestions(container) {
+  container.classList.remove('visible');
+}
+
+// Input A — geocoding with debounce
+inputPointA.addEventListener('input', () => {
+  clearTimeout(debounceTimerA);
+  const q = inputPointA.value.trim();
+  if (q.length < 2) { hideSuggestions(suggestionsA); return; }
+  suggestionsA.innerHTML = '<div class="suggestion-loading">Поиск...</div>';
+  suggestionsA.classList.add('visible');
+  debounceTimerA = setTimeout(async () => {
+    const results = await searchNominatim(q);
+    renderSuggestions(suggestionsA, results, (lat, lon, label) => {
+      setPointA(lat, lon, label);
+      inputPointA.value = label;
+    });
+  }, 400);
+});
+
+// Input B — geocoding with debounce
+inputPointB.addEventListener('input', () => {
+  clearTimeout(debounceTimerB);
+  const q = inputPointB.value.trim();
+  if (q.length < 2) { hideSuggestions(suggestionsB); return; }
+  suggestionsB.innerHTML = '<div class="suggestion-loading">Поиск...</div>';
+  suggestionsB.classList.add('visible');
+  debounceTimerB = setTimeout(async () => {
+    const results = await searchNominatim(q);
+    renderSuggestions(suggestionsB, results, (lat, lon, label) => {
+      setPointB(lat, lon, label);
+      inputPointB.value = label;
+    });
+  }, 400);
+});
+
+// Hide suggestions on blur (delayed to allow click)
+inputPointA.addEventListener('blur', () => setTimeout(() => hideSuggestions(suggestionsA), 200));
+inputPointB.addEventListener('blur', () => setTimeout(() => hideSuggestions(suggestionsB), 200));
+
+// ============================================================
+// ROUTE MODE
+// ============================================================
 btnToggleRoute.addEventListener('click', () => {
   haptic('medium');
-  if (isRouteMode) {
-    exitRouteMode();
-  } else {
-    startRouteMode();
-  }
+  isRouteMode ? exitRouteMode() : startRouteMode();
 });
-
-btnExitRoute.addEventListener('click', () => {
-  haptic('light');
-  exitRouteMode();
-});
-
-btnSetAGps.addEventListener('click', () => {
-  haptic('light');
-  locateAndSetPointA();
-});
-
-btnClearB.addEventListener('click', () => {
-  haptic('light');
-  clearPointB();
-});
+btnExitRoute.addEventListener('click', () => { haptic('light'); exitRouteMode(); });
+btnSetAGps.addEventListener('click', () => { haptic('light'); locateAndSetPointA(); });
+btnClearB.addEventListener('click', () => { haptic('light'); clearPointB(); });
 
 function startRouteMode() {
   isRouteMode = true;
   standardHeader.classList.add('hidden');
   routeHeader.classList.remove('hidden');
   closeDrawer();
-
-  // Set Default Point A to GPS user position or city center
   if (userCoords) {
     setPointA(userCoords.lat, userCoords.lon, 'Мое местоположение (GPS)');
+    inputPointA.value = 'Мое местоположение (GPS)';
   } else {
     locateAndSetPointA();
   }
@@ -710,58 +598,37 @@ function exitRouteMode() {
   routeHeader.classList.add('hidden');
   standardHeader.classList.remove('hidden');
   routeSummarySheet.classList.add('hidden');
-
   clearRouteLines();
   if (markerA) { map.removeLayer(markerA); markerA = null; }
   if (markerB) { map.removeLayer(markerB); markerB = null; }
-  pointA = null;
-  pointB = null;
+  pointA = null; pointB = null;
+  inputPointA.value = '';
+  inputPointB.value = '';
   stationsOnRoute = [];
   updateMarkersVisibility();
 }
 
 function setPointA(lat, lon, label = 'Точка А') {
   pointA = { lat, lon, label };
-  textPointA.textContent = label;
-  textPointA.classList.remove('placeholder');
-
   if (markerA) map.removeLayer(markerA);
-  const iconA = L.divIcon({
-    className: 'custom-waypoint',
-    html: '<div class="waypoint-pin pin-a">А</div>',
-    iconSize: [30, 30],
-    iconAnchor: [15, 15]
-  });
-  markerA = L.marker([lat, lon], { icon: iconA }).addTo(map);
-
-  if (pointB) {
-    calculateAndRenderRoute();
-  }
+  markerA = L.marker([lat, lon], {
+    icon: L.divIcon({ className: 'custom-waypoint', html: '<div class="waypoint-pin pin-a">А</div>', iconSize: [28, 28], iconAnchor: [14, 14] })
+  }).addTo(map);
+  if (pointB) calculateAndRenderRoute();
 }
 
 function setPointB(lat, lon, label = 'Точка Б') {
   pointB = { lat, lon, label };
-  textPointB.textContent = label;
-  textPointB.classList.remove('placeholder');
-
   if (markerB) map.removeLayer(markerB);
-  const iconB = L.divIcon({
-    className: 'custom-waypoint',
-    html: '<div class="waypoint-pin pin-b">Б</div>',
-    iconSize: [30, 30],
-    iconAnchor: [15, 15]
-  });
-  markerB = L.marker([lat, lon], { icon: iconB }).addTo(map);
-
-  if (pointA) {
-    calculateAndRenderRoute();
-  }
+  markerB = L.marker([lat, lon], {
+    icon: L.divIcon({ className: 'custom-waypoint', html: '<div class="waypoint-pin pin-b">Б</div>', iconSize: [28, 28], iconAnchor: [14, 14] })
+  }).addTo(map);
+  if (pointA) calculateAndRenderRoute();
 }
 
 function clearPointB() {
   pointB = null;
-  textPointB.textContent = 'Кликните на карту или выберите АЗС...';
-  textPointB.classList.add('placeholder');
+  inputPointB.value = '';
   if (markerB) { map.removeLayer(markerB); markerB = null; }
   clearRouteLines();
   routeSummarySheet.classList.add('hidden');
@@ -775,87 +642,58 @@ function locateAndSetPointA() {
       pos => {
         userCoords = { lat: pos.coords.latitude, lon: pos.coords.longitude };
         setPointA(userCoords.lat, userCoords.lon, 'Мое местоположение (GPS)');
+        inputPointA.value = 'Мое местоположение (GPS)';
       },
       () => {
-        // Fallback: City Center
-        const [cLat, cLon] = currentCity.coords;
-        setPointA(cLat, cLon, `${currentCity.name} (Центр)`);
+        const [lat, lon] = currentCity.coords;
+        setPointA(lat, lon, `${currentCity.name} (Центр)`);
+        inputPointA.value = `${currentCity.name} (Центр)`;
       },
       { enableHighAccuracy: true }
     );
   } else {
-    const [cLat, cLon] = currentCity.coords;
-    setPointA(cLat, cLon, `${currentCity.name} (Центр)`);
+    const [lat, lon] = currentCity.coords;
+    setPointA(lat, lon, `${currentCity.name} (Центр)`);
+    inputPointA.value = `${currentCity.name} (Центр)`;
   }
 }
 
-// Map Click Listener for setting points in Route Mode
-map.on('click', (e) => {
+// Map click → set route point
+map.on('click', e => {
   if (!isRouteMode) return;
   const { lat, lng } = e.latlng;
-
+  const label = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
   if (!pointA) {
-    setPointA(lat, lng, `Точка: ${lat.toFixed(3)}, ${lng.toFixed(3)}`);
+    setPointA(lat, lng, label);
+    inputPointA.value = label;
   } else {
-    setPointB(lat, lng, `Точка: ${lat.toFixed(3)}, ${lng.toFixed(3)}`);
+    setPointB(lat, lng, label);
+    inputPointB.value = label;
   }
 });
 
-// OSRM Fast Routing API
+// ============================================================
+// OSRM ROUTING + CORRIDOR SCANNER
+// ============================================================
 async function calculateAndRenderRoute() {
   if (!pointA || !pointB) return;
-
   loader.classList.remove('hidden');
-  document.getElementById('loader-text').textContent = 'Построение маршрута и поиск АЗС...';
-
+  document.getElementById('loader-text').textContent = 'Построение маршрута...';
   try {
-    const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${pointA.lon},${pointA.lat};${pointB.lon},${pointB.lat}?overview=full&geometries=geojson`;
-    const res = await fetch(osrmUrl);
+    const url = `https://router.project-osrm.org/route/v1/driving/${pointA.lon},${pointA.lat};${pointB.lon},${pointB.lat}?overview=full&geometries=geojson`;
+    const res = await fetch(url);
     const data = await res.json();
-
-    if (!data.routes || data.routes.length === 0) {
-      alert('Не удалось проложить маршрут между этими точками');
-      return;
-    }
-
+    if (!data.routes?.length) { alert('Не удалось проложить маршрут'); return; }
     const route = data.routes[0];
-    const coords = route.geometry.coordinates; // [[lon, lat], ...]
+    const coords = route.geometry.coordinates;
     const latLngs = coords.map(([lon, lat]) => [lat, lon]);
-
-    // Draw Polyline
     clearRouteLines();
-
-    routeCasingPolyline = L.polyline(latLngs, {
-      color: '#ffffff',
-      weight: 9,
-      opacity: 0.9,
-      lineCap: 'round',
-      lineJoin: 'round'
-    }).addTo(map);
-
-    routePolyline = L.polyline(latLngs, {
-      color: '#2563eb',
-      weight: 6,
-      opacity: 1.0,
-      lineCap: 'round',
-      lineJoin: 'round'
-    }).addTo(map);
-
-    // Zoom to fit route
-    map.fitBounds(routePolyline.getBounds(), {
-      padding: [60, 60],
-      maxZoom: 15
-    });
-
-    // Scan for Gas Stations along Route Corridor (within 800m)
+    routeCasingPolyline = L.polyline(latLngs, { color: '#ffffff', weight: 8, opacity: 0.25, lineCap: 'round', lineJoin: 'round' }).addTo(map);
+    routePolyline = L.polyline(latLngs, { color: '#2ea043', weight: 5, opacity: 1.0, lineCap: 'round', lineJoin: 'round' }).addTo(map);
+    map.fitBounds(routePolyline.getBounds(), { padding: [60, 60], maxZoom: 15 });
     stationsOnRoute = findStationsAlongCorridor(coords, routeFuelFilter);
-
-    // Render Route Bottom Sheet
     renderRouteSummary(route.distance, route.duration, stationsOnRoute);
-
-    // Update marker pins
     updateMarkersVisibility();
-
   } catch (err) {
     console.error('Routing error:', err);
   } finally {
@@ -868,187 +706,118 @@ function clearRouteLines() {
   if (routeCasingPolyline) { map.removeLayer(routeCasingPolyline); routeCasingPolyline = null; }
 }
 
-// Distance from point to line segment in meters
 function distToSegmentInMeters(pLat, pLon, aLat, aLon, bLat, bLon) {
   const x = (bLon - aLon) * Math.cos((aLat + bLat) * Math.PI / 360);
   const y = bLat - aLat;
   const lenSq = x * x + y * y;
-
   if (lenSq === 0) {
     const dx = (pLon - aLon) * Math.cos((aLat + pLat) * Math.PI / 360);
     const dy = pLat - aLat;
     return Math.sqrt(dx * dx + dy * dy) * 111320;
   }
-
   const px = (pLon - aLon) * Math.cos((aLat + pLat) * Math.PI / 360);
   const py = pLat - aLat;
   const u = Math.max(0, Math.min(1, (px * x + py * y) / lenSq));
-
-  const projX = u * x;
-  const projY = u * y;
-  const distSq = (px - projX) * (px - projX) + (py - projY) * (py - projY);
-  return Math.sqrt(distSq) * 111320;
+  const dx = px - u * x, dy = py - u * y;
+  return Math.sqrt(dx * dx + dy * dy) * 111320;
 }
 
-// Find stations within 800m corridor of the route that have selected fuel IN_STOCK
 function findStationsAlongCorridor(routeCoords, filter) {
-  const corridorMaxMeters = 850;
+  const maxDist = 850;
   const found = [];
-
   displayedStations.forEach(station => {
     if (!checkFuelInStock(station, filter)) return;
-
-    let minDistance = Infinity;
-    let closestSegmentIdx = 0;
-
+    let minD = Infinity, segIdx = 0;
     for (let i = 0; i < routeCoords.length - 1; i++) {
-      const [aLon, aLat] = routeCoords[i];
-      const [bLon, bLat] = routeCoords[i + 1];
-      const d = distToSegmentInMeters(station.lat, station.lon, aLat, aLon, bLat, bLon);
-      if (d < minDistance) {
-        minDistance = d;
-        closestSegmentIdx = i;
-      }
+      const d = distToSegmentInMeters(station.lat, station.lon, routeCoords[i][1], routeCoords[i][0], routeCoords[i+1][1], routeCoords[i+1][0]);
+      if (d < minD) { minD = d; segIdx = i; }
     }
-
-    if (minDistance <= corridorMaxMeters) {
-      // Calculate distance along route to this station
-      let distFromStart = 0;
-      for (let i = 0; i < closestSegmentIdx; i++) {
-        const [lon1, lat1] = routeCoords[i];
-        const [lon2, lat2] = routeCoords[i + 1];
-        const dx = (lon2 - lon1) * Math.cos((lat1 + lat2) * Math.PI / 360);
-        const dy = lat2 - lat1;
-        distFromStart += Math.sqrt(dx * dx + dy * dy) * 111320;
+    if (minD <= maxDist) {
+      let dist = 0;
+      for (let i = 0; i < segIdx; i++) {
+        const dx = (routeCoords[i+1][0] - routeCoords[i][0]) * Math.cos((routeCoords[i][1] + routeCoords[i+1][1]) * Math.PI / 360);
+        const dy = routeCoords[i+1][1] - routeCoords[i][1];
+        dist += Math.sqrt(dx * dx + dy * dy) * 111320;
       }
-
-      found.push({
-        ...station,
-        corridorDistanceMeters: Math.round(minDistance),
-        distAlongRouteMeters: Math.round(distFromStart)
-      });
+      found.push({ ...station, corridorDistanceMeters: Math.round(minD), distAlongRouteMeters: Math.round(dist) });
     }
   });
-
-  // Sort by order along the route
-  found.sort((a, b) => a.distAlongRouteMeters - b.distAlongRouteMeters);
-  return found;
+  return found.sort((a, b) => a.distAlongRouteMeters - b.distAlongRouteMeters);
 }
 
-function renderRouteSummary(distanceMeters, durationSeconds, stationsList) {
-  const km = (distanceMeters / 1000).toFixed(1);
-  const mins = Math.max(1, Math.round(durationSeconds / 60));
-
+function renderRouteSummary(distM, durS, list) {
+  const km = (distM / 1000).toFixed(1);
+  const mins = Math.max(1, Math.round(durS / 60));
   document.getElementById('route-dist-text').textContent = `${km} км`;
   document.getElementById('route-time-text').textContent = `~${mins} мин`;
-
-  const badge = document.getElementById('route-fuel-count-badge');
-  badge.textContent = `⛽ ${stationsList.length} АЗС с топливом`;
-
-  const listContainer = document.getElementById('route-stations-list');
-  listContainer.innerHTML = '';
-
-  if (stationsList.length === 0) {
-    listContainer.innerHTML = `
-      <div style="text-align:center;padding:12px;color:var(--hint-color);font-size:12px;">
-        В коридоре маршрута нет АЗС с выбранным топливом в наличии. Попробуйте выбрать другое топливо или расширить маршрут.
-      </div>
-    `;
+  document.getElementById('route-fuel-count-badge').textContent = `⛽ ${list.length} АЗС с топливом`;
+  const container = document.getElementById('route-stations-list');
+  container.innerHTML = '';
+  if (!list.length) {
+    container.innerHTML = '<div style="text-align:center;padding:12px;color:var(--text-dim);font-size:12px;">Нет АЗС с выбранным топливом по маршруту</div>';
   } else {
-    stationsList.forEach((st, idx) => {
-      const brandIcon = getBrandIcon(st.name);
-      const qStatus = st.queue_status || 'UNKNOWN';
-      const qMeta = QUEUE_INFO[qStatus] || QUEUE_INFO['UNKNOWN'];
-      const kmFromStart = (st.distAlongRouteMeters / 1000).toFixed(1);
-
-      // Best fuel price
-      let priceDisplay = 'В наличии';
-      if (routeFuelFilter !== 'ALL' && st.fuels?.[routeFuelFilter]?.price_text) {
-        priceDisplay = st.fuels[routeFuelFilter].price_text;
-      } else {
-        const anyPrice = Object.values(st.fuels || {}).find(f => f.price_text)?.price_text;
-        if (anyPrice) priceDisplay = anyPrice;
-      }
-
+    list.forEach((st, idx) => {
+      const q = QUEUE_INFO[st.queue_status || 'UNKNOWN'] || QUEUE_INFO.UNKNOWN;
+      const kmFrom = (st.distAlongRouteMeters / 1000).toFixed(1);
+      let price = 'В наличии';
+      if (routeFuelFilter !== 'ALL' && st.fuels?.[routeFuelFilter]?.price_text) price = st.fuels[routeFuelFilter].price_text;
+      else { const p = Object.values(st.fuels || {}).find(f => f.price_text)?.price_text; if (p) price = p; }
       const item = document.createElement('div');
       item.className = 'route-station-item';
       item.innerHTML = `
         <div class="rsi-left">
-          <span class="rsi-icon">${brandIcon}</span>
+          <span class="rsi-icon">${getBrandIcon(st.name)}</span>
           <div class="rsi-info">
             <div class="rsi-name">${idx + 1}. ${st.name}</div>
-            <div class="rsi-dist">📍 Через ${kmFromStart} км · ${st.address}</div>
+            <div class="rsi-dist">📍 Через ${kmFrom} км</div>
           </div>
         </div>
         <div class="rsi-right">
-          <span class="rsi-queue-badge ${qMeta.badgeClass}">${qMeta.emoji} ${qMeta.text.split(' ')[0]}</span>
-          <span class="rsi-price">${priceDisplay}</span>
-        </div>
-      `;
-
-      item.addEventListener('click', () => {
-        haptic('light');
-        map.panTo([st.lat, st.lon]);
-        openDrawer(st);
-      });
-
-      listContainer.appendChild(item);
+          <span class="rsi-queue-badge ${q.badgeClass}">${q.emoji} ${q.text.split(' ')[0]}</span>
+          <span class="rsi-price">${price}</span>
+        </div>`;
+      item.addEventListener('click', () => { haptic('light'); map.panTo([st.lat, st.lon]); openDrawer(st); });
+      container.appendChild(item);
     });
   }
-
-  // Configure Yandex Navigator Start button
   btnYandexNaviStart.href = `https://yandex.ru/maps/?rtext=${pointA.lat}%2C${pointA.lon}~${pointB.lat}%2C${pointB.lon}&rtt=auto`;
-
   routeSummarySheet.classList.remove('hidden');
 }
 
-// Locate User button
+// ============================================================
+// LOCATE & REFRESH
+// ============================================================
 document.getElementById('btn-locate').addEventListener('click', () => {
   haptic('medium');
-  if (!navigator.geolocation) {
-    alert('Геолокация не поддерживается вашим устройством');
-    return;
-  }
-
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      const { latitude, longitude } = pos.coords;
-      userCoords = { lat: latitude, lon: longitude };
-      map.setView([latitude, longitude], 15);
-
-      if (userMarker) {
-        userMarker.setLatLng([latitude, longitude]);
-      } else {
-        const userIcon = L.divIcon({
-          className: 'user-pin-container',
-          html: `<div style="width:16px;height:16px;background:#2563eb;border:3px solid #fff;border-radius:50%;box-shadow:0 0 10px rgba(37,99,235,0.8);"></div>`,
-          iconSize: [16, 16],
-          iconAnchor: [8, 8]
-        });
-        userMarker = L.marker([latitude, longitude], { icon: userIcon }).addTo(map);
-      }
-
-      if (isRouteMode && (!pointA || pointA.label.includes('GPS'))) {
-        setPointA(latitude, longitude, 'Мое местоположение (GPS)');
-      }
-    },
-    err => {
-      console.warn('Geolocation error:', err);
-    },
-    { enableHighAccuracy: true }
-  );
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(pos => {
+    const { latitude: lat, longitude: lon } = pos.coords;
+    userCoords = { lat, lon };
+    map.setView([lat, lon], 15);
+    if (userMarker) userMarker.setLatLng([lat, lon]);
+    else {
+      userMarker = L.marker([lat, lon], {
+        icon: L.divIcon({
+          className: 'user-pin',
+          html: '<div style="width:14px;height:14px;background:#2ea043;border:3px solid #fff;border-radius:50%;box-shadow:0 0 12px rgba(46,160,67,0.8);"></div>',
+          iconSize: [14, 14], iconAnchor: [7, 7]
+        })
+      }).addTo(map);
+    }
+    if (isRouteMode && (!pointA || pointA.label.includes('GPS'))) {
+      setPointA(lat, lon, 'Мое местоположение (GPS)');
+      inputPointA.value = 'Мое местоположение (GPS)';
+    }
+  }, () => {}, { enableHighAccuracy: true });
 });
 
-// Refresh button
 document.getElementById('btn-refresh').addEventListener('click', () => {
   haptic('medium');
   loadStationsForCity(currentCity);
 });
 
-// Auto-refresh every 60 seconds while open
-setInterval(() => {
-  loadStationsForCity(currentCity);
-}, 60000);
+// Auto-refresh every 60s
+setInterval(() => loadStationsForCity(currentCity), 60000);
 
 // Initial load
 loadStationsForCity(currentCity);
