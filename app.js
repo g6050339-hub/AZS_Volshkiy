@@ -384,9 +384,13 @@ btnRouteToStation.addEventListener('click', () => {
 // STATIONS LOADER
 // ============================================================
 async function loadStationsForCity(city) {
-  loader.classList.remove('hidden');
-  document.getElementById('loader-text').textContent = `Загрузка АЗС: ${city.name}...`;
-  console.log('[LOAD] Loading city:', city.id, city.name);
+  // During navigation: silent data refresh only (no loader, no marker re-render)
+  const silent = naviActive;
+  if (!silent) {
+    loader.classList.remove('hidden');
+    document.getElementById('loader-text').textContent = `Загрузка АЗС: ${city.name}...`;
+  }
+  console.log('[LOAD] Loading city:', city.id, city.name, silent ? '(silent)' : '');
   try {
     let data = null;
     try { const r = await fetch('./stations.json?t=' + Date.now()); if (r.ok) data = await r.json(); } catch {}
@@ -396,21 +400,24 @@ async function loadStationsForCity(city) {
     
     if (['volzhsky', 'volgograd'].includes(city.id)) {
       displayedStations = allStations;
-      console.log('[LOAD] Using real parser data for', city.id);
     } else {
-      document.getElementById('loader-text').textContent = `Поиск реальных АЗС: ${city.name}...`;
+      if (!silent) document.getElementById('loader-text').textContent = `Поиск реальных АЗС: ${city.name}...`;
       displayedStations = await fetchRealStations(city);
-      console.log('[LOAD] API returned', displayedStations.length, 'stations for', city.name);
     }
     
     updateBadgeCounts();
-    renderMarkers();
-    console.log('[LOAD] Rendered', markers.length, 'markers on map');
-    if (isRouteMode && pointA && pointB) calculateAndRenderRoute();
+    
+    if (!silent) {
+      renderMarkers();
+      console.log('[LOAD] Rendered', markers.length, 'markers on map');
+      if (isRouteMode && pointA && pointB) calculateAndRenderRoute();
+    } else {
+      console.log('[LOAD] Silent refresh done, data updated');
+    }
   } catch (err) {
     console.error('[LOAD] Failed:', err);
   } finally {
-    loader.classList.add('hidden');
+    if (!silent) loader.classList.add('hidden');
   }
 }
 
@@ -952,10 +959,8 @@ document.getElementById('btn-refresh').addEventListener('click', () => {
   loadStationsForCity(currentCity);
 });
 
-// Auto-refresh every 60s (paused during navigation)
-const autoRefreshId = setInterval(() => {
-  if (!naviActive) loadStationsForCity(currentCity);
-}, 60000);
+// Auto-refresh every 60s (silent during navigation)
+const autoRefreshId = setInterval(() => loadStationsForCity(currentCity), 60000);
 
 // Initial load
 loadStationsForCity(currentCity);
