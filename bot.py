@@ -12,7 +12,9 @@ from parser import VolzhskyFuelParser
 from keyboards import (
     get_main_keyboard,
     get_subscriptions_keyboard,
-    get_webapp_inline_keyboard
+    get_webapp_inline_keyboard,
+    get_cities_keyboard,
+    get_city_by_id,
 )
 from notifier import (
     format_current_availability,
@@ -163,6 +165,133 @@ async def handle_all_stations(message: Message):
 
     text = format_all_stations_list(stations)
     await wait_msg.edit_text(text, parse_mode=ParseMode.HTML)
+
+
+@router.message(F.text == "🏙 Заправки по городам")
+@router.message(Command("cities"))
+async def handle_cities(message: Message):
+    """Shows city selection keyboard."""
+    text = (
+        "🏙 <b>Выберите город</b>\n\n"
+        "Нажмите на город, чтобы получить информацию о наличии топлива "
+        "на заправках в этом городе в реальном времени."
+    )
+    await message.answer(
+        text=text,
+        parse_mode=ParseMode.HTML,
+        reply_markup=get_cities_keyboard(page=0)
+    )
+
+
+@router.callback_query(F.data.startswith("city_page:"))
+async def callback_city_page(call: CallbackQuery):
+    """Handles city pagination."""
+    page = int(call.data.split(":")[1])
+    try:
+        await call.message.edit_reply_markup(reply_markup=get_cities_keyboard(page=page))
+    except Exception:
+        pass
+    await call.answer()
+
+
+@router.callback_query(F.data.startswith("city:"))
+async def callback_city_select(call: CallbackQuery):
+    """Fetches and displays gas stations for the selected city."""
+    city_id = call.data.split(":")[1]
+    city = get_city_by_id(city_id)
+    if not city:
+        await call.answer("Город не найден", show_alert=True)
+        return
+
+    await call.answer(f"⏳ Загружаю АЗС: {city['name']}...")
+
+    try:
+        await call.message.edit_text(
+            f"⏳ <i>Опрашиваю заправки в городе {city['emoji']} {city['name']}...</i>",
+            parse_mode=ParseMode.HTML
+        )
+    except Exception:
+        pass
+
+    try:
+        stations = await fuel_parser.fetch_gas_stations(
+            lat=city["lat"], lon=city["lon"], spn_lon=0.15, spn_lat=0.15
+        )
+    except Exception as e:
+        logger.error(f"Failed to fetch stations for {city['name']}: {e}")
+        stations = []
+
+    if not stations:
+        back_kb = get_cities_keyboard(page=0)
+        await call.message.edit_text(
+            f"⚠️ <i>Не удалось получить данные АЗС для {city['name']}. Попробуйте позже.</i>",
+            parse_mode=ParseMode.HTML,
+            reply_markup=back_kb
+        )
+        return
+
+    text = format_city_stations_report(city, stations)
+
+    from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+    back_btn = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="◀️ Назад к списку городов", callback_data="city_page:0")]
+    ])
+
+    # Split into chunks if too long (Telegram limit ~4096 chars)
+    if len(text) > 4000:
+        text = text[:3950] + "\n\n<i>... и ещё станции. Откройте карту для полного списка.</i>"
+
+    await call.message.edit_text(
+        text=text,
+        parse_mode=ParseMode.HTML,
+        reply_markup=back_btn,
+        disable_web_page_preview=True
+    )
+
+
+def format_city_stations_report(city: dict, stations) -> str:
+    """Formats fuel availability report for a specific city."""
+    from datetime import datetime
+    from config import FUEL_LABELS, FUEL_EMOJIS
+
+    now_str = datetime.now().strftime("%d.%m.%Y %H:%M")
+
+    # Count fuel types in stock
+    fuel_counts = {}
+    for st in stations:
+        for ftype, fitem in st.fuels.items():
+            if fitem.status == "IN_STOCK":
+                fuel_counts[ftype] = fuel_counts.get(ftype, 0) + 1
+
+    lines = [
+        f"{city['emoji']} <b>АЗС в городе {city['name']}</b>",
+        f"🕒 <i>Обновлено: {now_str}</i>",
+        f"📍 Найдено станций: <b>{len(stations)}</b>\n",
+    ]
+
+    # Summary by fuel type
+    if fuel_counts:
+        lines.append("<b>📊 Наличие по видам топлива:</b>")
+        for ftype, count in sorted(fuel_counts.items()):
+            label = FUEL_LABELS.get(ftype, ftype)
+            emoji = FUEL_EMOJIS.get(ftype, "⛽")
+            lines.append(f"  {emoji} {label}: <b>{count}</b> АЗС")
+        lines.append("")
+
+    # List stations
+    lines.append(f"<b>⛽ Список АЗС ({len(stations)}):</b>")
+    for i, st in enumerate(stations, 1):
+        in_stock = [f.name for f in st.in_stock_fuels]
+        in_stock_str = f" ✅ {', '.join(in_stock)}" if in_stock else " ❌ Нет данных"
+        price_parts = []
+        for f in st.in_stock_fuels:
+            if f.price_text:
+                price_parts.append(f"{f.name}: {f.price_text}")
+        price_str = f" | 💰 {'; '.join(price_parts)}" if price_parts else ""
+        lines.append(f"{i}. <b>{st.name}</b> — {st.address}{in_stock_str}{price_str}")
+
+    lines.append(f"\n💡 <i>Нажмите «📱 Открыть карту» для маршрутов и деталей.</i>")
+    return "\n".join(lines)
 
 
 @router.message(F.text == "ℹ️ О боте")
