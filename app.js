@@ -417,8 +417,33 @@ async function loadStationsForCity(city) {
 // ============================================================
 // REAL DATA API — Real gas stations from Orange Pi backend
 // ============================================================
-const API_BASE_URL = 'https://defined-achieve-chorus-hoped.trycloudflare.com'; // Cloudflare Tunnel to Orange Pi
+let API_BASE_URL = ''; // Loaded dynamically from tunnel_url.json
 const realStationsCache = {}; // cityId -> stations[]
+
+// Load tunnel URL on startup
+async function loadTunnelUrl() {
+  try {
+    const res = await fetch('./tunnel_url.json?t=' + Date.now());
+    if (res.ok) {
+      const data = await res.json();
+      API_BASE_URL = data.api_url;
+      console.log('[API] Tunnel URL loaded:', API_BASE_URL);
+      return true;
+    }
+  } catch (e) {}
+  // Fallback: try local server
+  try {
+    const res = await fetch('/api/stations?t=' + Date.now());
+    if (res.ok) {
+      API_BASE_URL = '';  // Use relative path
+      console.log('[API] Using local server');
+      return true;
+    }
+  } catch (e) {}
+  console.warn('[API] No API backend available');
+  return false;
+}
+loadTunnelUrl();
 
 async function fetchRealStations(city) {
   // Return from cache if available
