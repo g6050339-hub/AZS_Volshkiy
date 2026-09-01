@@ -398,7 +398,7 @@ async function loadStationsForCity(city) {
     allStations = data?.stations || data || [];
     console.log('[LOAD] allStations count:', allStations.length);
     
-    if (['volzhsky', 'volgograd'].includes(city.id)) {
+    if (city.id === 'volzhsky') {
       displayedStations = allStations;
     } else {
       if (!silent) document.getElementById('loader-text').textContent = `Поиск реальных АЗС: ${city.name}...`;
