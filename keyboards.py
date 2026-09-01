@@ -19,7 +19,7 @@ def get_main_keyboard() -> ReplyKeyboardMarkup:
         buttons.append([
             KeyboardButton(
                 text="📱 Открыть карту (Mini App)",
-                web_app=WebAppInfo(url=settings.WEBAPP_URL + "?v=8.0")
+                web_app=WebAppInfo(url=settings.WEBAPP_URL + "?v=9.0")
             )
         ])
 
@@ -48,7 +48,7 @@ def get_webapp_inline_keyboard() -> InlineKeyboardMarkup:
     if settings.WEBAPP_URL.startswith("https://"):
         btn = InlineKeyboardButton(
             text="🗺 Открыть интерактивную карту",
-            web_app=WebAppInfo(url=settings.WEBAPP_URL + "?v=8.0")
+            web_app=WebAppInfo(url=settings.WEBAPP_URL + "?v=9.0")
         )
         return InlineKeyboardMarkup(inline_keyboard=[[btn]])
     else:

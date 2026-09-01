@@ -952,8 +952,10 @@ document.getElementById('btn-refresh').addEventListener('click', () => {
   loadStationsForCity(currentCity);
 });
 
-// Auto-refresh every 60s
-setInterval(() => loadStationsForCity(currentCity), 60000);
+// Auto-refresh every 60s (paused during navigation)
+const autoRefreshId = setInterval(() => {
+  if (!naviActive) loadStationsForCity(currentCity);
+}, 60000);
 
 // Initial load
 loadStationsForCity(currentCity);
@@ -965,7 +967,12 @@ let naviActive = false;
 let naviWatchId = null;
 let naviUserMarker = null;
 let naviLastPos = null;
-let naviRouteCoords = null; // OSRM route coords [lon, lat][]
+let naviRouteCoords = null;
+let naviHeadingUp = true; // camera follows heading by default
+let naviCurrentHeading = 0;
+let naviSmoothedHeading = 0;
+let naviWakeLock = null;
+let naviGpsRetryTimer = null;
 
 const naviHud = document.getElementById('navi-hud');
 const naviSpeedEl = document.getElementById('navi-speed');
@@ -983,6 +990,47 @@ document.getElementById('btn-stop-navi').addEventListener('click', () => {
   haptic('medium');
   stopNavigation();
 });
+document.getElementById('btn-heading-toggle')?.addEventListener('click', () => {
+  haptic('light');
+  naviHeadingUp = !naviHeadingUp;
+  const btn = document.getElementById('btn-heading-toggle');
+  const label = document.getElementById('navi-heading-label');
+  btn.classList.toggle('active', naviHeadingUp);
+  btn.textContent = naviHeadingUp ? '🧭' : '🗺';
+  if (label) label.textContent = naviHeadingUp ? 'По направлению' : 'Север сверху';
+  if (!naviHeadingUp) {
+    // Reset rotation
+    const mapEl = document.getElementById('map');
+    mapEl.style.transform = '';
+    // Counter-rotate markers back
+    document.querySelectorAll('.leaflet-marker-icon, .leaflet-popup').forEach(el => {
+      el.style.transform = el.style.transform.replace(/rotate\(-?[\d.]+deg\)\s*$/, '');
+    });
+  }
+});
+
+async function acquireWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      naviWakeLock = await navigator.wakeLock.request('screen');
+      console.log('[NAVI] Wake Lock acquired');
+      naviWakeLock.addEventListener('release', () => {
+        console.log('[NAVI] Wake Lock released');
+        // Re-acquire if still navigating
+        if (naviActive) acquireWakeLock();
+      });
+    }
+  } catch (e) {
+    console.warn('[NAVI] Wake Lock failed:', e);
+  }
+}
+
+function releaseWakeLock() {
+  if (naviWakeLock) {
+    naviWakeLock.release();
+    naviWakeLock = null;
+  }
+}
 
 function startNavigation() {
   if (!pointA || !pointB || !routePolyline) {
@@ -995,6 +1043,7 @@ function startNavigation() {
   }
 
   naviActive = true;
+  naviHeadingUp = true;
   naviRouteCoords = routePolyline.getLatLngs().map(ll => [ll.lng, ll.lat]);
 
   // Hide route summary, show HUD
@@ -1007,20 +1056,50 @@ function startNavigation() {
     el => el.classList.add('navi-hidden-temp')
   );
 
-  // Zoom to user or route start
-  map.setZoom(16);
+  // Zoom closer for navi
+  map.setZoom(17);
 
-  // Start GPS tracking
-  naviWatchId = navigator.geolocation.watchPosition(
-    onNaviPosition,
-    err => console.warn('[NAVI] GPS error:', err),
-    { enableHighAccuracy: true, maximumAge: 2000, timeout: 10000 }
-  );
+  // Prevent screen from sleeping
+  acquireWakeLock();
+
+  // Start GPS tracking with retry on error
+  startGpsWatch();
 
   // Also get initial position
   navigator.geolocation.getCurrentPosition(onNaviPosition, () => {}, { enableHighAccuracy: true });
 
+  // Update heading toggle button state
+  const btn = document.getElementById('btn-heading-toggle');
+  if (btn) { btn.classList.add('active'); btn.textContent = '🧭'; }
+
   console.log('[NAVI] Navigation started');
+}
+
+function startGpsWatch() {
+  if (naviWatchId !== null) {
+    navigator.geolocation.clearWatch(naviWatchId);
+  }
+  naviWatchId = navigator.geolocation.watchPosition(
+    pos => {
+      // Clear retry timer on success
+      if (naviGpsRetryTimer) { clearTimeout(naviGpsRetryTimer); naviGpsRetryTimer = null; }
+      onNaviPosition(pos);
+    },
+    err => {
+      console.warn('[NAVI] GPS error:', err.code, err.message);
+      // Auto-retry GPS after 3 seconds
+      if (naviActive && !naviGpsRetryTimer) {
+        naviGpsRetryTimer = setTimeout(() => {
+          naviGpsRetryTimer = null;
+          if (naviActive) {
+            console.log('[NAVI] Retrying GPS...');
+            startGpsWatch();
+          }
+        }, 3000);
+      }
+    },
+    { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 }
+  );
 }
 
 function stopNavigation() {
@@ -1029,6 +1108,10 @@ function stopNavigation() {
   if (naviWatchId !== null) {
     navigator.geolocation.clearWatch(naviWatchId);
     naviWatchId = null;
+  }
+  if (naviGpsRetryTimer) {
+    clearTimeout(naviGpsRetryTimer);
+    naviGpsRetryTimer = null;
   }
 
   if (naviUserMarker) {
@@ -1039,6 +1122,14 @@ function stopNavigation() {
   naviHud.classList.add('hidden');
   naviLastPos = null;
   naviRouteCoords = null;
+
+  // Release wake lock
+  releaseWakeLock();
+
+  // Reset map rotation
+  const mapEl = document.getElementById('map');
+  mapEl.style.transform = '';
+  mapEl.style.transition = '';
 
   // Restore UI
   document.querySelector('.route-header')?.classList.remove('hidden');
@@ -1057,21 +1148,37 @@ function onNaviPosition(pos) {
   const lat = pos.coords.latitude;
   const lon = pos.coords.longitude;
   const speed = pos.coords.speed; // m/s, can be null
-  const heading = pos.coords.heading; // degrees, can be null
+  const heading = pos.coords.heading; // degrees from north, can be null
+  const accuracy = pos.coords.accuracy;
+
+  // Calculate heading from movement if GPS heading unavailable
+  let effectiveHeading = heading;
+  if ((effectiveHeading == null || effectiveHeading === 0) && naviLastPos && speed > 0.5) {
+    effectiveHeading = bearingBetween(naviLastPos.lat, naviLastPos.lon, lat, lon);
+  }
+
+  // Smooth heading to avoid jitter
+  if (effectiveHeading != null && effectiveHeading > 0) {
+    naviSmoothedHeading = lerpAngle(naviSmoothedHeading, effectiveHeading, 0.3);
+    naviCurrentHeading = naviSmoothedHeading;
+  }
 
   // Update speed display
   const kmh = (speed && speed > 0) ? Math.round(speed * 3.6) : 0;
   naviSpeedEl.textContent = kmh;
 
-  // Update/create user marker
+  // Update/create user marker (arrow showing direction)
+  const arrowRotation = naviHeadingUp ? 0 : naviCurrentHeading; // If map rotates, arrow points up
   if (naviUserMarker) {
     naviUserMarker.setLatLng([lat, lon]);
+    const arrowEl = naviUserMarker.getElement()?.querySelector('.navi-arrow');
+    if (arrowEl) arrowEl.style.transform = `rotate(${arrowRotation}deg)`;
   } else {
     naviUserMarker = L.marker([lat, lon], {
       icon: L.divIcon({
         className: 'navi-user-marker',
-        html: '<div class="navi-user-dot"></div>',
-        iconSize: [20, 20], iconAnchor: [10, 10]
+        html: `<div class="navi-arrow" style="transform:rotate(${arrowRotation}deg)"></div>`,
+        iconSize: [32, 32], iconAnchor: [16, 16]
       }),
       zIndexOffset: 9999
     }).addTo(map);
@@ -1079,6 +1186,11 @@ function onNaviPosition(pos) {
 
   // Auto-center map on user position
   map.panTo([lat, lon], { animate: true, duration: 0.5 });
+
+  // Rotate map if heading-up mode
+  if (naviHeadingUp && naviCurrentHeading > 0) {
+    rotateMap(naviCurrentHeading);
+  }
 
   // Calculate distance to destination
   if (pointB) {
@@ -1090,8 +1202,8 @@ function onNaviPosition(pos) {
     }
     naviDestLabelEl.textContent = pointB.label || 'До финиша';
 
-    // Check if arrived (within 100m)
-    if (distToDest < 0.1) {
+    // Check if arrived (within 150m)
+    if (distToDest < 0.15) {
       haptic('heavy');
       stopNavigation();
       alert('🏁 Вы прибыли!');
@@ -1102,7 +1214,25 @@ function onNaviPosition(pos) {
   // Find nearest station ahead
   updateNearestStation(lat, lon);
 
-  naviLastPos = { lat, lon, heading };
+  naviLastPos = { lat, lon, heading: naviCurrentHeading, timestamp: Date.now() };
+}
+
+// Rotate map container so heading points up (like a real navigator)
+function rotateMap(heading) {
+  const mapEl = document.getElementById('map');
+  mapEl.style.transition = 'transform 0.4s ease-out';
+  mapEl.style.transformOrigin = 'center center';
+  mapEl.style.transform = `rotate(${-heading}deg) scale(1.15)`;
+
+  // Counter-rotate all markers and popups so text stays readable
+  document.querySelectorAll('.leaflet-marker-icon').forEach(el => {
+    if (!el.classList.contains('navi-user-marker')) {
+      // Remove old counter-rotation, add new
+      el.style.transition = 'transform 0.4s ease-out';
+      const base = el.style.transform.replace(/rotate\(-?[\d.]+deg\)\s*$/, '').trim();
+      el.style.transform = base + ` rotate(${heading}deg)`;
+    }
+  });
 }
 
 function updateNearestStation(userLat, userLon) {
@@ -1132,7 +1262,6 @@ function updateNearestStation(userLat, userLon) {
     } else {
       naviStationDistEl.textContent = `${nearestDist.toFixed(1)} км`;
     }
-    // Show fuel status
     const fuelKeys = Object.keys(nearest.fuels || {});
     const inStock = fuelKeys.filter(k => nearest.fuels[k]?.status === 'IN_STOCK');
     naviStationFuelEl.textContent = inStock.length > 0
@@ -1141,6 +1270,7 @@ function updateNearestStation(userLat, userLon) {
   }
 }
 
+// Utility: Haversine distance in km
 function haversineKm(lat1, lon1, lat2, lon2) {
   const R = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -1150,3 +1280,21 @@ function haversineKm(lat1, lon1, lat2, lon2) {
             Math.sin(dLon/2) * Math.sin(dLon/2);
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
+
+// Utility: bearing from point A to point B in degrees
+function bearingBetween(lat1, lon1, lat2, lon2) {
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const y = Math.sin(dLon) * Math.cos(lat2 * Math.PI / 180);
+  const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
+            Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos(dLon);
+  return ((Math.atan2(y, x) * 180 / Math.PI) + 360) % 360;
+}
+
+// Utility: smooth angle interpolation (handles 0/360 wraparound)
+function lerpAngle(from, to, t) {
+  let diff = to - from;
+  while (diff > 180) diff -= 360;
+  while (diff < -180) diff += 360;
+  return ((from + diff * t) + 360) % 360;
+}
+
