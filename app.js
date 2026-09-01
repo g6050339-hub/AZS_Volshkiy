@@ -417,7 +417,7 @@ async function loadStationsForCity(city) {
 // ============================================================
 // REAL DATA API — Real gas stations from Orange Pi backend
 // ============================================================
-const API_BASE_URL = 'https://volzhskyfuel.loca.lt'; // Tunneled to Orange Pi
+const API_BASE_URL = 'https://defined-achieve-chorus-hoped.trycloudflare.com'; // Cloudflare Tunnel to Orange Pi
 const realStationsCache = {}; // cityId -> stations[]
 
 async function fetchRealStations(city) {
@@ -433,7 +433,7 @@ async function fetchRealStations(city) {
   console.log('[API] Fetching real stations for', city.name);
 
   try {
-    const res = await fetch(url, { headers: { 'Bypass-Tunnel-Reminder': 'true' } });
+    const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     
@@ -465,7 +465,7 @@ async function fetchRouteStations(routeCoords) {
     const url = `${API_BASE_URL}/api/stations?lat=${lat}&lon=${lon}&spn=0.3`;
     
     promises.push(
-      fetch(url, { headers: { 'Bypass-Tunnel-Reminder': 'true' } })
+      fetch(url)
         .then(r => r.json())
         .then(data => {
           if (data.status === 'ok' && data.stations) {
