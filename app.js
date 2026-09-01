@@ -957,3 +957,196 @@ setInterval(() => loadStationsForCity(currentCity), 60000);
 
 // Initial load
 loadStationsForCity(currentCity);
+
+// ============================================================
+// IN-APP NAVIGATION MODE
+// ============================================================
+let naviActive = false;
+let naviWatchId = null;
+let naviUserMarker = null;
+let naviLastPos = null;
+let naviRouteCoords = null; // OSRM route coords [lon, lat][]
+
+const naviHud = document.getElementById('navi-hud');
+const naviSpeedEl = document.getElementById('navi-speed');
+const naviDestDistEl = document.getElementById('navi-dest-dist');
+const naviDestLabelEl = document.getElementById('navi-dest-label');
+const naviStationNameEl = document.getElementById('navi-station-name');
+const naviStationDistEl = document.getElementById('navi-station-dist');
+const naviStationFuelEl = document.getElementById('navi-station-fuel');
+
+document.getElementById('btn-start-navi').addEventListener('click', () => {
+  haptic('heavy');
+  startNavigation();
+});
+document.getElementById('btn-stop-navi').addEventListener('click', () => {
+  haptic('medium');
+  stopNavigation();
+});
+
+function startNavigation() {
+  if (!pointA || !pointB || !routePolyline) {
+    alert('Сначала постройте маршрут');
+    return;
+  }
+  if (!navigator.geolocation) {
+    alert('Геолокация не поддерживается');
+    return;
+  }
+
+  naviActive = true;
+  naviRouteCoords = routePolyline.getLatLngs().map(ll => [ll.lng, ll.lat]);
+
+  // Hide route summary, show HUD
+  routeSummarySheet.classList.add('hidden');
+  naviHud.classList.remove('hidden');
+
+  // Hide UI elements for clean navi view
+  document.querySelector('.route-header')?.classList.add('hidden');
+  document.querySelectorAll('.ctrl-btn, .route-fab, .fuel-filter-bar, .city-badge-header').forEach(
+    el => el.classList.add('navi-hidden-temp')
+  );
+
+  // Zoom to user or route start
+  map.setZoom(16);
+
+  // Start GPS tracking
+  naviWatchId = navigator.geolocation.watchPosition(
+    onNaviPosition,
+    err => console.warn('[NAVI] GPS error:', err),
+    { enableHighAccuracy: true, maximumAge: 2000, timeout: 10000 }
+  );
+
+  // Also get initial position
+  navigator.geolocation.getCurrentPosition(onNaviPosition, () => {}, { enableHighAccuracy: true });
+
+  console.log('[NAVI] Navigation started');
+}
+
+function stopNavigation() {
+  naviActive = false;
+
+  if (naviWatchId !== null) {
+    navigator.geolocation.clearWatch(naviWatchId);
+    naviWatchId = null;
+  }
+
+  if (naviUserMarker) {
+    map.removeLayer(naviUserMarker);
+    naviUserMarker = null;
+  }
+
+  naviHud.classList.add('hidden');
+  naviLastPos = null;
+  naviRouteCoords = null;
+
+  // Restore UI
+  document.querySelector('.route-header')?.classList.remove('hidden');
+  document.querySelectorAll('.navi-hidden-temp').forEach(el => el.classList.remove('navi-hidden-temp'));
+  routeSummarySheet.classList.remove('hidden');
+
+  // Fit map back to route
+  if (routePolyline) map.fitBounds(routePolyline.getBounds(), { padding: [60, 60] });
+
+  console.log('[NAVI] Navigation stopped');
+}
+
+function onNaviPosition(pos) {
+  if (!naviActive) return;
+
+  const lat = pos.coords.latitude;
+  const lon = pos.coords.longitude;
+  const speed = pos.coords.speed; // m/s, can be null
+  const heading = pos.coords.heading; // degrees, can be null
+
+  // Update speed display
+  const kmh = (speed && speed > 0) ? Math.round(speed * 3.6) : 0;
+  naviSpeedEl.textContent = kmh;
+
+  // Update/create user marker
+  if (naviUserMarker) {
+    naviUserMarker.setLatLng([lat, lon]);
+  } else {
+    naviUserMarker = L.marker([lat, lon], {
+      icon: L.divIcon({
+        className: 'navi-user-marker',
+        html: '<div class="navi-user-dot"></div>',
+        iconSize: [20, 20], iconAnchor: [10, 10]
+      }),
+      zIndexOffset: 9999
+    }).addTo(map);
+  }
+
+  // Auto-center map on user position
+  map.panTo([lat, lon], { animate: true, duration: 0.5 });
+
+  // Calculate distance to destination
+  if (pointB) {
+    const distToDest = haversineKm(lat, lon, pointB.lat, pointB.lon);
+    if (distToDest < 1) {
+      naviDestDistEl.textContent = `${Math.round(distToDest * 1000)} м`;
+    } else {
+      naviDestDistEl.textContent = `${distToDest.toFixed(1)} км`;
+    }
+    naviDestLabelEl.textContent = pointB.label || 'До финиша';
+
+    // Check if arrived (within 100m)
+    if (distToDest < 0.1) {
+      haptic('heavy');
+      stopNavigation();
+      alert('🏁 Вы прибыли!');
+      return;
+    }
+  }
+
+  // Find nearest station ahead
+  updateNearestStation(lat, lon);
+
+  naviLastPos = { lat, lon, heading };
+}
+
+function updateNearestStation(userLat, userLon) {
+  const pool = stationsOnRoute.length > 0 ? stationsOnRoute : displayedStations;
+  if (!pool.length) {
+    naviStationNameEl.textContent = 'Нет АЗС по маршруту';
+    naviStationDistEl.textContent = '';
+    naviStationFuelEl.textContent = '';
+    return;
+  }
+
+  let nearest = null;
+  let nearestDist = Infinity;
+
+  pool.forEach(st => {
+    const d = haversineKm(userLat, userLon, st.lat, st.lon);
+    if (d < nearestDist) {
+      nearestDist = d;
+      nearest = st;
+    }
+  });
+
+  if (nearest) {
+    naviStationNameEl.textContent = nearest.name || 'АЗС';
+    if (nearestDist < 1) {
+      naviStationDistEl.textContent = `${Math.round(nearestDist * 1000)} м`;
+    } else {
+      naviStationDistEl.textContent = `${nearestDist.toFixed(1)} км`;
+    }
+    // Show fuel status
+    const fuelKeys = Object.keys(nearest.fuels || {});
+    const inStock = fuelKeys.filter(k => nearest.fuels[k]?.status === 'IN_STOCK');
+    naviStationFuelEl.textContent = inStock.length > 0
+      ? inStock.map(k => nearest.fuels[k].name || k).slice(0, 3).join(', ')
+      : 'Нет данных';
+  }
+}
+
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}

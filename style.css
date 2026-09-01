@@ -1105,6 +1105,104 @@ input:checked + .slider:before {
 }
 
 /* ============================================================
+   NAVIGATION HUD
+   ============================================================ */
+.btn-start-navi {
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 20px; border-radius: var(--radius-pill);
+  background: var(--accent-gradient); color: #fff;
+  font-weight: 700; font-size: 14px; border: none; cursor: pointer;
+  box-shadow: 0 0 16px var(--accent-glow);
+  transition: transform 0.15s;
+}
+.btn-start-navi:active { transform: scale(0.95); }
+
+.navi-hud {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 2000;
+  display: flex; flex-direction: column;
+  background: linear-gradient(180deg, rgba(13,17,23,0.97) 0%, rgba(13,17,23,0.92) 100%);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  padding: 12px 16px; padding-top: max(env(safe-area-inset-top), 12px);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+}
+
+.navi-hud-top {
+  display: flex; align-items: center; gap: 12px;
+}
+
+.navi-speed-box {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 3px solid var(--accent);
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+.navi-speed-val {
+  font-size: 22px; font-weight: 800; color: var(--accent-bright);
+  line-height: 1;
+}
+.navi-speed-unit {
+  font-size: 9px; color: var(--text-sec); font-weight: 600;
+  text-transform: uppercase;
+}
+
+.navi-destination {
+  flex: 1; display: flex; flex-direction: column; gap: 2px;
+}
+.navi-dest-label {
+  font-size: 12px; color: var(--text-sec); font-weight: 500;
+}
+.navi-dest-dist {
+  font-size: 22px; font-weight: 800; color: var(--text);
+}
+
+.btn-stop-navi {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--red); color: #fff;
+  border: none; font-size: 18px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 8px rgba(218,54,51,0.5);
+}
+
+.navi-next-station {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 10px; padding: 10px 12px;
+  background: var(--bg-card); border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+.navi-station-icon {
+  font-size: 24px; width: 36px; text-align: center;
+}
+.navi-station-info { flex: 1; }
+.navi-station-name {
+  font-size: 13px; font-weight: 600; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;
+}
+.navi-station-dist {
+  font-size: 12px; color: var(--accent-bright); font-weight: 700;
+}
+.navi-station-fuel {
+  font-size: 11px; color: var(--text-sec); font-weight: 600;
+  text-align: right; min-width: 50px;
+}
+
+/* User GPS pulsing dot for navigation */
+.navi-user-dot {
+  width: 20px; height: 20px;
+  background: var(--blue);
+  border: 3px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 20px rgba(56,139,253,0.7);
+  animation: navi-pulse 2s ease-in-out infinite;
+}
+@keyframes navi-pulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(56,139,253,0.5); }
+  50% { box-shadow: 0 0 25px rgba(56,139,253,0.9); }
+}
+
+/* ============================================================
    UTILITY
    ============================================================ */
 .hidden { display: none !important; }

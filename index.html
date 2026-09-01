@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./style.css?v=7.1">
+  <link rel="stylesheet" href="./style.css?v=8.0">
 </head>
 <body>
   <div id="app">
@@ -124,12 +124,41 @@
       </div>
       <div class="route-stations-list" id="route-stations-list"></div>
       <div class="route-actions-row">
+        <button id="btn-start-navi" class="btn-start-navi">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+          </svg>
+          <span>▶ Поехали!</span>
+        </button>
         <a id="btn-yandex-navi-start" href="#" target="_blank" class="btn-yandex-navi">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
             <polygon points="3 11 22 2 13 21 11 13 3 11"/>
           </svg>
-          <span>Старт в Яндекс.Навигаторе</span>
+          <span>Яндекс.Нави</span>
         </a>
+      </div>
+    </div>
+
+    <!-- ============ NAVIGATION HUD ============ -->
+    <div id="navi-hud" class="navi-hud hidden">
+      <div class="navi-hud-top">
+        <div class="navi-speed-box">
+          <span class="navi-speed-val" id="navi-speed">0</span>
+          <span class="navi-speed-unit">км/ч</span>
+        </div>
+        <div class="navi-destination">
+          <div class="navi-dest-label" id="navi-dest-label">До финиша</div>
+          <div class="navi-dest-dist" id="navi-dest-dist">-- км</div>
+        </div>
+        <button id="btn-stop-navi" class="btn-stop-navi" aria-label="Остановить навигацию">✕</button>
+      </div>
+      <div class="navi-next-station" id="navi-next-station">
+        <div class="navi-station-icon">⛽</div>
+        <div class="navi-station-info">
+          <div class="navi-station-name" id="navi-station-name">Ближайшая АЗС</div>
+          <div class="navi-station-dist" id="navi-station-dist">-- км</div>
+        </div>
+        <div class="navi-station-fuel" id="navi-station-fuel">--</div>
       </div>
     </div>
 
@@ -213,6 +242,6 @@
     </div>
   </div>
 
-  <script src="./app.js?v=7.1"></script>
+  <script src="./app.js?v=8.0"></script>
 </body>
 </html>
