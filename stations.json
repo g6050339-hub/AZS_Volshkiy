@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 22,
-  "updated_at": 1788242726,
+  "updated_at": 1788242911,
   "stations": [
     {
       "id": "1817417962",
@@ -12,11 +12,11 @@
       "chain": "Лукойл",
       "yandex_url": "https://yandex.ru/maps/org/1817417962",
       "cash_only": false,
-      "queue_status": "HIGH",
-      "queue_label": "🔴 Большая очередь",
+      "queue_status": "MEDIUM",
+      "queue_label": "🟡 Средняя очередь",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788238843,
+      "last_signal_timestamp": 1788239129,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -134,7 +134,7 @@
       "queue_label": "🟢 Свободно",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788238843,
+      "last_signal_timestamp": 1788239129,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -484,8 +484,8 @@
       "chain": "Газпром",
       "yandex_url": "https://yandex.ru/maps/org/1068326550",
       "cash_only": false,
-      "queue_status": "UNKNOWN",
-      "queue_label": "⚪ Обычный поток",
+      "queue_status": "MEDIUM",
+      "queue_label": "🟡 Средняя очередь",
       "signals_count_per_hour": 0,
       "fuel_limit": null,
       "last_signal_timestamp": 1788197582,
@@ -602,8 +602,8 @@
       "chain": "Лукойл",
       "yandex_url": "https://yandex.ru/maps/org/1045653331",
       "cash_only": false,
-      "queue_status": "HIGH",
-      "queue_label": "🔴 Большая очередь",
+      "queue_status": "UNKNOWN",
+      "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
       "last_signal_timestamp": 1788238430,
@@ -724,7 +724,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788238843,
+      "last_signal_timestamp": 1788239129,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -779,8 +779,8 @@
       "chain": "Лукойл",
       "yandex_url": "https://yandex.ru/maps/org/38302429993",
       "cash_only": false,
-      "queue_status": "MEDIUM",
-      "queue_label": "🟡 Средняя очередь",
+      "queue_status": "UNKNOWN",
+      "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
       "last_signal_timestamp": 1788240005,
