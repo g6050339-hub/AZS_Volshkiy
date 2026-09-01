@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 22,
-  "updated_at": 1788268514,
+  "updated_at": 1788268701,
   "stations": [
     {
       "id": "1817417962",
@@ -73,7 +73,7 @@
       "cash_only": false,
       "queue_status": "HIGH",
       "queue_label": "🔴 Большая очередь",
-      "signals_count_per_hour": 3,
+      "signals_count_per_hour": 1,
       "fuel_limit": null,
       "last_signal_timestamp": 1788265244,
       "fuels": {
@@ -132,9 +132,9 @@
       "cash_only": false,
       "queue_status": "HIGH",
       "queue_label": "🔴 Большая очередь",
-      "signals_count_per_hour": 2,
+      "signals_count_per_hour": 3,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788266264,
+      "last_signal_timestamp": 1788267513,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -248,8 +248,8 @@
       "chain": "Татнефть",
       "yandex_url": "https://yandex.ru/maps/org/1100266843",
       "cash_only": false,
-      "queue_status": "UNKNOWN",
-      "queue_label": "⚪ Обычный поток",
+      "queue_status": "MEDIUM",
+      "queue_label": "🟡 Средняя очередь",
       "signals_count_per_hour": 2,
       "fuel_limit": null,
       "last_signal_timestamp": 1788266615,
@@ -257,7 +257,7 @@
         "AI92": {
           "fuel_type": "AI92",
           "name": "92",
-          "status": "UNCERTAIN",
+          "status": "IN_STOCK",
           "price_text": null,
           "price_value": null
         },
@@ -307,11 +307,11 @@
       "chain": "Татнефть",
       "yandex_url": "https://yandex.ru/maps/org/1396829568",
       "cash_only": false,
-      "queue_status": "UNKNOWN",
-      "queue_label": "⚪ Обычный поток",
+      "queue_status": "MEDIUM",
+      "queue_label": "🟡 Средняя очередь",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788264165,
+      "last_signal_timestamp": 1788267596,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -351,7 +351,7 @@
         "DIESEL": {
           "fuel_type": "DIESEL",
           "name": "ДТ",
-          "status": "OUT_OF_STOCK",
+          "status": "UNCERTAIN",
           "price_text": null,
           "price_value": null
         }
@@ -368,7 +368,7 @@
       "cash_only": false,
       "queue_status": "UNKNOWN",
       "queue_label": "⚪ Обычный поток",
-      "signals_count_per_hour": 3,
+      "signals_count_per_hour": 2,
       "fuel_limit": null,
       "last_signal_timestamp": 1788266586,
       "fuels": {
@@ -547,7 +547,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788264165,
+      "last_signal_timestamp": 1788264929,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -724,7 +724,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788264165,
+      "last_signal_timestamp": 1788264929,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -783,7 +783,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788264165,
+      "last_signal_timestamp": 1788264929,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -842,7 +842,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788264165,
+      "last_signal_timestamp": 1788264929,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -1253,9 +1253,9 @@
       "cash_only": false,
       "queue_status": "UNKNOWN",
       "queue_label": "⚪ Обычный поток",
-      "signals_count_per_hour": 1,
+      "signals_count_per_hour": 0,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788264165,
+      "last_signal_timestamp": 1788260101,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -1267,7 +1267,7 @@
         "AI95": {
           "fuel_type": "AI95",
           "name": "95",
-          "status": "IN_STOCK",
+          "status": "UNCERTAIN",
           "price_text": null,
           "price_value": null
         },
