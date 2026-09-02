@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 22,
-  "updated_at": 1788319231,
+  "updated_at": 1788319420,
   "stations": [
     {
       "id": "1817417962",
@@ -779,11 +779,11 @@
       "chain": "Лукойл",
       "yandex_url": "https://yandex.ru/maps/org/38302429993",
       "cash_only": false,
-      "queue_status": "UNKNOWN",
-      "queue_label": "⚪ Обычный поток",
+      "queue_status": "HIGH",
+      "queue_label": "🔴 Большая очередь",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788314311,
+      "last_signal_timestamp": 1788315531,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
