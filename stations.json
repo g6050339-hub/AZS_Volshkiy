@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 25,
-  "updated_at": 1788376993,
+  "updated_at": 1788377030,
   "stations": [
     {
       "id": "1817417962",
@@ -193,7 +193,7 @@
       "queue_label": "🟢 Свободно",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788373174,
+      "last_signal_timestamp": 1788373366,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -370,7 +370,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788373174,
+      "last_signal_timestamp": 1788373366,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -478,7 +478,7 @@
     {
       "id": "1068326550",
       "name": "Газпром",
-      "address": "просп. имени Ленина, 308Д, Волжский",
+      "address": "Волжский, просп. имени Ленина, 308Д",
       "lat": 48.759076,
       "lon": 44.786378,
       "chain": "Газпром",
@@ -606,7 +606,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788373174,
+      "last_signal_timestamp": 1788373366,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -724,7 +724,7 @@
       "queue_label": "🔴 Большая очередь",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788373174,
+      "last_signal_timestamp": 1788373366,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -1076,9 +1076,9 @@
       "cash_only": false,
       "queue_status": "UNKNOWN",
       "queue_label": "⚪ Обычный поток",
-      "signals_count_per_hour": 1,
+      "signals_count_per_hour": 2,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788376158,
+      "last_signal_timestamp": 1788376607,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
