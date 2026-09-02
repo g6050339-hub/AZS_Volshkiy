@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 22,
-  "updated_at": 1788357205,
+  "updated_at": 1788357397,
   "stations": [
     {
       "id": "1817417962",
@@ -16,7 +16,7 @@
       "queue_label": "🔴 Большая очередь",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788353543,
+      "last_signal_timestamp": 1788353687,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -75,7 +75,7 @@
       "queue_label": "🔴 Большая очередь",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788353543,
+      "last_signal_timestamp": 1788353687,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -132,9 +132,9 @@
       "cash_only": false,
       "queue_status": "HIGH",
       "queue_label": "🔴 Большая очередь",
-      "signals_count_per_hour": 10,
+      "signals_count_per_hour": 11,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788355862,
+      "last_signal_timestamp": 1788356734,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -193,7 +193,7 @@
       "queue_label": "🟢 Свободно",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788353543,
+      "last_signal_timestamp": 1788353687,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -351,7 +351,7 @@
         "DIESEL": {
           "fuel_type": "DIESEL",
           "name": "ДТ",
-          "status": "IN_STOCK",
+          "status": "UNCERTAIN",
           "price_text": null,
           "price_value": null
         }
@@ -484,8 +484,8 @@
       "chain": "Газпром",
       "yandex_url": "https://yandex.ru/maps/org/1068326550",
       "cash_only": false,
-      "queue_status": "LOW",
-      "queue_label": "🟢 Свободно",
+      "queue_status": "UNKNOWN",
+      "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 0,
       "fuel_limit": null,
       "last_signal_timestamp": 1788345981,
@@ -663,9 +663,9 @@
       "cash_only": false,
       "queue_status": "HIGH",
       "queue_label": "🔴 Большая очередь",
-      "signals_count_per_hour": 1,
+      "signals_count_per_hour": 2,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788353812,
+      "last_signal_timestamp": 1788356685,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -724,7 +724,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788353316,
+      "last_signal_timestamp": 1788353687,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -783,7 +783,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788353316,
+      "last_signal_timestamp": 1788353687,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -842,7 +842,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788353543,
+      "last_signal_timestamp": 1788353687,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
