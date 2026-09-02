@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 25,
-  "updated_at": 1788363185,
+  "updated_at": 1788363372,
   "stations": [
     {
       "id": "1817417962",
@@ -543,8 +543,8 @@
       "chain": "Лукойл",
       "yandex_url": "https://yandex.ru/maps/org/1166376984",
       "cash_only": false,
-      "queue_status": "UNKNOWN",
-      "queue_label": "⚪ Обычный поток",
+      "queue_status": "LOW",
+      "queue_label": "🟢 Свободно",
       "signals_count_per_hour": 4,
       "fuel_limit": null,
       "last_signal_timestamp": 1788360687,
@@ -832,7 +832,7 @@
     {
       "id": "1754761481",
       "name": "Газпром",
-      "address": "Заволжская ул., 2А, Волжский",
+      "address": "Волжский, Заволжская ул., 2А",
       "lat": 48.820531,
       "lon": 44.761469,
       "chain": "Газпром",
@@ -1019,7 +1019,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788359372,
+      "last_signal_timestamp": 1788359564,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -1369,8 +1369,8 @@
       "chain": "Татнефть",
       "yandex_url": "https://yandex.ru/maps/org/1403855927",
       "cash_only": false,
-      "queue_status": "HIGH",
-      "queue_label": "🔴 Большая очередь",
+      "queue_status": "UNKNOWN",
+      "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
       "last_signal_timestamp": 1788361986,
