@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 25,
-  "updated_at": 1788383484,
+  "updated_at": 1788383521,
   "stations": [
     {
       "id": "1817417962",
@@ -16,7 +16,7 @@
       "queue_label": "🟢 Свободно",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788379766,
+      "last_signal_timestamp": 1788379890,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -49,7 +49,7 @@
         "AI100": {
           "fuel_type": "AI100",
           "name": "100",
-          "status": "OUT_OF_STOCK",
+          "status": "IN_STOCK",
           "price_text": null,
           "price_value": null
         },
@@ -75,7 +75,7 @@
       "queue_label": "🟢 Свободно",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788379766,
+      "last_signal_timestamp": 1788379890,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -252,7 +252,7 @@
       "queue_label": "🔴 Большая очередь",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788379766,
+      "last_signal_timestamp": 1788379890,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -311,7 +311,7 @@
       "queue_label": "🔴 Большая очередь",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788379766,
+      "last_signal_timestamp": 1788379890,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -547,7 +547,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788379766,
+      "last_signal_timestamp": 1788379890,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -960,7 +960,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788379766,
+      "last_signal_timestamp": 1788379890,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
