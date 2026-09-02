@@ -107,22 +107,34 @@ async def handle_open_map(message: Message):
 
 @router.message(F.text == "🔍 Наличие сейчас")
 async def handle_check_now(message: Message):
-    """Fetches and sends live fuel availability."""
+    """Fetches and sends live fuel availability for user's selected city."""
     user = message.from_user
     if not user:
         return
 
-    wait_msg = await message.answer("⏳ <i>Опрашиваю заправки Волжского в реальном времени...</i>", parse_mode=ParseMode.HTML)
-
     user_profile = await db.get_user(user.id)
     subscribed_fuels = user_profile.get("subscribed_fuels", []) if user_profile else None
+    city_id = user_profile.get("selected_city", "volzhsky") if user_profile else "volzhsky"
+    city = get_city_by_id(city_id)
+    city_name = city["name"] if city else "Волжский"
 
-    stations = await fuel_parser.fetch_gas_stations()
+    wait_msg = await message.answer(
+        f"⏳ <i>Опрашиваю заправки {city_name} в реальном времени...</i>",
+        parse_mode=ParseMode.HTML
+    )
+
+    if city:
+        stations = await fuel_parser.fetch_gas_stations(
+            lat=city["lat"], lon=city["lon"], spn_lon=0.15, spn_lat=0.15
+        )
+    else:
+        stations = await fuel_parser.fetch_gas_stations()
+
     if not stations:
         await wait_msg.edit_text("⚠️ <i>Не удалось получить данные с сервера. Попробуйте через минуту.</i>", parse_mode=ParseMode.HTML)
         return
 
-    report = format_current_availability(stations, user_fuels=subscribed_fuels)
+    report = format_current_availability(stations, user_fuels=subscribed_fuels, city_name=city_name)
     await wait_msg.edit_text(report, parse_mode=ParseMode.HTML)
 
 
@@ -196,14 +208,17 @@ async def callback_city_page(call: CallbackQuery):
 
 @router.callback_query(F.data.startswith("city:"))
 async def callback_city_select(call: CallbackQuery):
-    """Fetches and displays gas stations for the selected city."""
+    """Fetches and displays gas stations for the selected city AND saves it as user's default."""
     city_id = call.data.split(":")[1]
     city = get_city_by_id(city_id)
     if not city:
         await call.answer("Город не найден", show_alert=True)
         return
 
-    await call.answer(f"⏳ Загружаю АЗС: {city['name']}...")
+    # Save selected city to database
+    await db.set_user_city(call.from_user.id, city_id)
+
+    await call.answer(f"🏙 {city['name']} — теперь ваш город!")
 
     try:
         await call.message.edit_text(

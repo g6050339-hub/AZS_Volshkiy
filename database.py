@@ -30,9 +30,17 @@ class Database:
                     first_name TEXT,
                     subscribed_fuels TEXT NOT NULL,
                     notifications_enabled INTEGER NOT NULL DEFAULT 1,
+                    selected_city TEXT NOT NULL DEFAULT 'volzhsky',
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """)
+
+            # Migration: add selected_city column if missing (existing databases)
+            try:
+                await db.execute("ALTER TABLE users ADD COLUMN selected_city TEXT NOT NULL DEFAULT 'volzhsky'")
+                logger.info("Migrated: added selected_city column to users table.")
+            except Exception:
+                pass  # Column already exists
 
             await db.execute("""
                 CREATE TABLE IF NOT EXISTS station_snapshots (
@@ -42,9 +50,16 @@ class Database:
                     lat REAL,
                     lon REAL,
                     fuels_json TEXT NOT NULL,
+                    city TEXT NOT NULL DEFAULT 'volzhsky',
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """)
+
+            # Migration: add city column to station_snapshots if missing
+            try:
+                await db.execute("ALTER TABLE station_snapshots ADD COLUMN city TEXT NOT NULL DEFAULT 'volzhsky'")
+            except Exception:
+                pass
 
             await db.execute("""
                 CREATE TABLE IF NOT EXISTS events (
@@ -77,6 +92,7 @@ class Database:
                     "first_name": user["first_name"],
                     "subscribed_fuels": user["subscribed_fuels"].split(",") if user["subscribed_fuels"] else [],
                     "notifications_enabled": bool(user["notifications_enabled"]),
+                    "selected_city": user["selected_city"] if "selected_city" in user.keys() else "volzhsky",
                 }
 
             # Create new user
@@ -97,6 +113,7 @@ class Database:
                 "first_name": first_name,
                 "subscribed_fuels": DEFAULT_FUELS.copy(),
                 "notifications_enabled": True,
+                "selected_city": "volzhsky",
             }
 
     async def get_user(self, user_id: int) -> Optional[Dict[str, Any]]:
@@ -113,7 +130,17 @@ class Database:
                 "first_name": user["first_name"],
                 "subscribed_fuels": user["subscribed_fuels"].split(",") if user["subscribed_fuels"] else [],
                 "notifications_enabled": bool(user["notifications_enabled"]),
+                "selected_city": user["selected_city"] if "selected_city" in user.keys() else "volzhsky",
             }
+
+    async def set_user_city(self, user_id: int, city_id: str):
+        """Sets the user's selected city."""
+        async with aiosqlite.connect(self.db_path) as db:
+            await db.execute(
+                "UPDATE users SET selected_city = ? WHERE user_id = ?",
+                (city_id, user_id)
+            )
+            await db.commit()
 
     async def toggle_fuel_subscription(self, user_id: int, fuel_type: str) -> List[str]:
         """Toggles subscription for a specific fuel type."""
@@ -147,8 +174,8 @@ class Database:
             await db.commit()
         return enabled
 
-    async def get_subscribed_users(self, fuel_type: str) -> List[Dict[str, Any]]:
-        """Returns all users who have enabled notifications, subscribed to this fuel type, and are authorized."""
+    async def get_subscribed_users(self, fuel_type: str, city_id: str = None) -> List[Dict[str, Any]]:
+        """Returns all users who have enabled notifications, subscribed to this fuel type, and optionally filtered by city."""
         allowed = settings.allowed_users
         async with aiosqlite.connect(self.db_path) as db:
             db.row_factory = aiosqlite.Row
@@ -161,14 +188,26 @@ class Database:
                 if allowed and uid not in allowed:
                     continue
                 subscribed = row["subscribed_fuels"].split(",") if row["subscribed_fuels"] else []
+                user_city = row["selected_city"] if "selected_city" in row.keys() else "volzhsky"
                 if fuel_type in subscribed:
+                    # If city_id specified, only include users watching that city
+                    if city_id and user_city != city_id:
+                        continue
                     results.append({
                         "user_id": uid,
                         "chat_id": row["chat_id"],
                         "username": row["username"],
-                        "first_name": row["first_name"]
+                        "first_name": row["first_name"],
+                        "selected_city": user_city,
                     })
             return results
+
+    async def get_unique_cities(self) -> List[str]:
+        """Returns list of unique selected cities across all users."""
+        async with aiosqlite.connect(self.db_path) as db:
+            cursor = await db.execute("SELECT DISTINCT selected_city FROM users")
+            rows = await cursor.fetchall()
+            return [r[0] for r in rows if r[0]]
 
     async def get_all_active_users(self) -> List[Dict[str, Any]]:
         async with aiosqlite.connect(self.db_path) as db:
@@ -181,7 +220,8 @@ class Database:
                 "username": r["username"],
                 "first_name": r["first_name"],
                 "subscribed_fuels": r["subscribed_fuels"].split(",") if r["subscribed_fuels"] else [],
-                "notifications_enabled": bool(r["notifications_enabled"])
+                "notifications_enabled": bool(r["notifications_enabled"]),
+                "selected_city": r["selected_city"] if "selected_city" in r.keys() else "volzhsky",
             } for r in rows]
 
     async def process_stations_snapshot(self, stations: List[GasStation]) -> List[Dict[str, Any]]:

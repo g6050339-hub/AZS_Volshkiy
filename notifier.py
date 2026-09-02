@@ -15,7 +15,7 @@ from keyboards import get_station_link_keyboard
 logger = logging.getLogger(__name__)
 
 
-def format_appeared_alert(event: Dict[str, Any]) -> str:
+def format_appeared_alert(event: Dict[str, Any], city_name: str = "Волжский") -> str:
     """Formats alert when fuel becomes IN_STOCK with queue information."""
     station: GasStation = event["station"]
     fuel_type = event["fuel_type"]
@@ -30,7 +30,8 @@ def format_appeared_alert(event: Dict[str, Any]) -> str:
     cash_str = "\n⚠️ <b>Оплата:</b> Только наличные!" if station.cash_only else ""
 
     text = (
-        f"⚡ <b>ТОПЛИВО ПОЯВИЛОСЬ НА АЗС!</b>\n\n"
+        f"⚡ <b>ТОПЛИВО ПОЯВИЛОСЬ НА АЗС!</b>\n"
+        f"📍 <b>Город:</b> {city_name}\n\n"
         f"⛽ <b>{station.name}</b>\n"
         f"📍 <b>Адрес:</b> {station.address}\n"
         f"{emoji} <b>В наличии:</b> {fuel_label}{price_info}"
@@ -42,7 +43,7 @@ def format_appeared_alert(event: Dict[str, Any]) -> str:
     return text
 
 
-def format_depleted_alert(event: Dict[str, Any]) -> str:
+def format_depleted_alert(event: Dict[str, Any], city_name: str = "Волжский") -> str:
     """Formats alert when fuel becomes OUT_OF_STOCK."""
     station: GasStation = event["station"]
     fuel_type = event["fuel_type"]
@@ -52,7 +53,8 @@ def format_depleted_alert(event: Dict[str, Any]) -> str:
     now_str = datetime.now().strftime("%H:%M")
 
     text = (
-        f"⚠️ <b>ТОПЛИВО ЗАКОНЧИЛОСЬ</b>\n\n"
+        f"⚠️ <b>ТОПЛИВО ЗАКОНЧИЛОСЬ</b>\n"
+        f"📍 <b>Город:</b> {city_name}\n\n"
         f"⛽ <b>{station.name}</b>\n"
         f"📍 <b>Адрес:</b> {station.address}\n"
         f"❌ <b>Закончилось:</b> {emoji} {fuel_label}\n\n"
@@ -61,8 +63,8 @@ def format_depleted_alert(event: Dict[str, Any]) -> str:
     return text
 
 
-def format_current_availability(stations: List[GasStation], user_fuels: Optional[List[str]] = None) -> str:
-    """Formats current summary of all available fuels in Volzhsky with queue badges."""
+def format_current_availability(stations: List[GasStation], user_fuels: Optional[List[str]] = None, city_name: str = "Волжский") -> str:
+    """Formats current summary of all available fuels with queue badges."""
     now_str = datetime.now().strftime("%d.%m.%Y %H:%M")
     
     # Group available stations by fuel type
@@ -79,13 +81,13 @@ def format_current_availability(stations: List[GasStation], user_fuels: Optional
 
     if not by_fuel:
         return (
-            f"📊 <b>Сводка по наличию топлива в Волжском</b>\n"
+            f"📊 <b>Сводка по наличию топлива в {city_name}</b>\n"
             f"<i>По состоянию на: {now_str}</i>\n\n"
             f"❌ К сожалению, по выбранным категориям активного топлива в наличии не найдено."
         )
 
     lines = [
-        f"📊 <b>Наличие топлива в Волжском</b>",
+        f"📊 <b>Наличие топлива в {city_name}</b>",
         f"🕒 <i>Обновлено: {now_str}</i>\n"
     ]
 
@@ -119,8 +121,8 @@ def format_all_stations_list(stations: List[GasStation]) -> str:
     return "\n".join(lines)
 
 
-async def broadcast_event(bot: Bot, event: Dict[str, Any]):
-    """Sends event notification to all relevant subscribers."""
+async def broadcast_event(bot: Bot, event: Dict[str, Any], city_id: str = "volzhsky", city_name: str = "Волжский"):
+    """Sends event notification to all relevant subscribers in the given city."""
     event_type = event["event_type"]
     fuel_type = event["fuel_type"]
     station: GasStation = event["station"]
@@ -128,15 +130,16 @@ async def broadcast_event(bot: Bot, event: Dict[str, Any]):
     if event_type == "DEPLETED" and not settings.NOTIFY_ON_DEPLETED:
         return
 
-    subscribers = await db.get_subscribed_users(fuel_type)
+    # Only notify users watching this specific city
+    subscribers = await db.get_subscribed_users(fuel_type, city_id=city_id)
     if not subscribers:
-        logger.info(f"No subscribers found for fuel {fuel_type}")
+        logger.info(f"No subscribers found for fuel {fuel_type} in {city_name}")
         return
 
     if event_type == "APPEARED":
-        text = format_appeared_alert(event)
+        text = format_appeared_alert(event, city_name=city_name)
     else:
-        text = format_depleted_alert(event)
+        text = format_depleted_alert(event, city_name=city_name)
 
     reply_markup = get_station_link_keyboard(station.navigator_url, station.yandex_url)
 
@@ -155,4 +158,4 @@ async def broadcast_event(bot: Bot, event: Dict[str, Any]):
         except Exception as e:
             logger.error(f"Failed to send alert to user {chat_id}: {e}")
 
-    logger.info(f"Broadcasted {event_type} for {fuel_type} on {station.name} to {sent_count} users.")
+    logger.info(f"Broadcasted {event_type} for {fuel_type} on {station.name} ({city_name}) to {sent_count} users.")

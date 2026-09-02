@@ -62,13 +62,16 @@ async def sync_stations_json(stations):
 
 async def fuel_monitor_loop(bot: Bot):
     """
-    Background worker that checks gas station fuel availability periodically (every 3 minutes)
-    and broadcasts alerts to Telegram users upon changes.
+    Background worker that checks gas station fuel availability periodically.
+    Monitors ALL cities selected by users, not just Volzhsky.
     """
     parser = VolzhskyFuelParser()
     logger.info(f"Starting fuel monitor loop. Check interval: {settings.CHECK_INTERVAL_SECONDS}s")
 
-    # Initial run to populate database without spamming alerts
+    # Import city lookup
+    from keyboards import get_city_by_id
+
+    # Initial run for default city (Volzhsky) to populate database
     try:
         initial_stations = await parser.fetch_gas_stations()
         if initial_stations:
@@ -81,26 +84,53 @@ async def fuel_monitor_loop(bot: Bot):
     while True:
         try:
             await asyncio.sleep(settings.CHECK_INTERVAL_SECONDS)
-            logger.info("Checking gas stations for fuel availability updates...")
-            
-            stations = await parser.fetch_gas_stations()
-            if not stations:
-                logger.warning("No stations returned from parser, skipping cycle.")
-                continue
 
-            # Update database and detect changes
-            events = await db.process_stations_snapshot(stations)
+            # Get all unique cities users are watching
+            cities = await db.get_unique_cities()
+            if not cities:
+                cities = ["volzhsky"]
             
-            # Sync fresh stations.json
-            await sync_stations_json(stations)
+            logger.info(f"Checking {len(cities)} cities: {', '.join(cities)}")
 
-            if events:
-                logger.info(f"Detected {len(events)} fuel availability change events!")
-                for ev in events:
-                    logger.info(f"Event: {ev['event_type']} - {ev['fuel_type']} on {ev['station'].name}")
-                    await broadcast_event(bot, ev)
-            else:
-                logger.info("No status changes detected in this cycle.")
+            for city_id in cities:
+                try:
+                    city = get_city_by_id(city_id)
+                    if city:
+                        stations = await parser.fetch_gas_stations(
+                            lat=city["lat"], lon=city["lon"],
+                            spn_lon=0.15, spn_lat=0.15
+                        )
+                        city_name = city["name"]
+                    else:
+                        # Fallback to default Volzhsky
+                        stations = await parser.fetch_gas_stations()
+                        city_name = "Волжский"
+
+                    if not stations:
+                        logger.warning(f"No stations for {city_name}, skipping.")
+                        continue
+
+                    # For Volzhsky — also sync stations.json (used by web)
+                    if city_id == "volzhsky":
+                        await sync_stations_json(stations)
+
+                    # Detect changes
+                    events = await db.process_stations_snapshot(stations)
+
+                    if events:
+                        logger.info(f"[{city_name}] {len(events)} fuel changes detected!")
+                        for ev in events:
+                            logger.info(f"  {ev['event_type']}: {ev['fuel_type']} @ {ev['station'].name}")
+                            await broadcast_event(bot, ev, city_id=city_id, city_name=city_name)
+                    else:
+                        logger.info(f"[{city_name}] No changes.")
+
+                    # Small delay between cities to not overload Yandex
+                    if len(cities) > 1:
+                        await asyncio.sleep(5)
+
+                except Exception as e:
+                    logger.error(f"Error monitoring city {city_id}: {e}")
 
         except asyncio.CancelledError:
             logger.info("Fuel monitor loop cancelled.")
