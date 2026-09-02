@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 22,
-  "updated_at": 1788357965,
+  "updated_at": 1788358152,
   "stations": [
     {
       "id": "1817417962",
@@ -12,11 +12,11 @@
       "chain": "Лукойл",
       "yandex_url": "https://yandex.ru/maps/org/1817417962",
       "cash_only": false,
-      "queue_status": "HIGH",
-      "queue_label": "🔴 Большая очередь",
+      "queue_status": "MEDIUM",
+      "queue_label": "🟡 Средняя очередь",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788354280,
+      "last_signal_timestamp": 1788354457,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -71,11 +71,11 @@
       "chain": "Лукойл",
       "yandex_url": "https://yandex.ru/maps/org/1044580373",
       "cash_only": false,
-      "queue_status": "HIGH",
-      "queue_label": "🔴 Большая очередь",
+      "queue_status": "UNKNOWN",
+      "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788354280,
+      "last_signal_timestamp": 1788354457,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -193,7 +193,7 @@
       "queue_label": "🟢 Свободно",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788354280,
+      "last_signal_timestamp": 1788354457,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -425,8 +425,8 @@
       "chain": "Лукойл",
       "yandex_url": "https://yandex.ru/maps/org/1902867491",
       "cash_only": false,
-      "queue_status": "UNKNOWN",
-      "queue_label": "⚪ Обычный поток",
+      "queue_status": "LOW",
+      "queue_label": "🟢 Свободно",
       "signals_count_per_hour": 0,
       "fuel_limit": null,
       "last_signal_timestamp": 1788349891,
@@ -547,7 +547,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788354280,
+      "last_signal_timestamp": 1788354457,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -606,7 +606,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788354280,
+      "last_signal_timestamp": 1788354457,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -724,7 +724,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788354280,
+      "last_signal_timestamp": 1788354457,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -783,7 +783,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788354280,
+      "last_signal_timestamp": 1788354457,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -842,7 +842,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788354280,
+      "last_signal_timestamp": 1788354457,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
