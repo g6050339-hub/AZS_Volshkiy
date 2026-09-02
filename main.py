@@ -60,22 +60,58 @@ async def sync_stations_json(stations):
         logger.debug(f"Sync stations info: {e}")
 
 
+async def check_city(bot: Bot, parser, city_id: str, get_city_by_id_fn):
+    """Checks one city for fuel changes and broadcasts events."""
+    try:
+        city = get_city_by_id_fn(city_id)
+        if city:
+            stations = await parser.fetch_gas_stations(
+                lat=city["lat"], lon=city["lon"],
+                spn_lon=0.15, spn_lat=0.15
+            )
+            city_name = city["name"]
+        else:
+            stations = await parser.fetch_gas_stations()
+            city_name = "Волжский"
+
+        if not stations:
+            logger.warning(f"No stations for {city_name}, skipping.")
+            return
+
+        # For Volzhsky — also sync stations.json (used by web)
+        if city_id == "volzhsky":
+            await sync_stations_json(stations)
+
+        # Detect changes
+        events = await db.process_stations_snapshot(stations)
+
+        if events:
+            logger.info(f"[{city_name}] {len(events)} fuel changes detected!")
+            for ev in events:
+                logger.info(f"  {ev['event_type']}: {ev['fuel_type']} @ {ev['station'].name}")
+                await broadcast_event(bot, ev, city_id=city_id, city_name=city_name)
+        else:
+            logger.debug(f"[{city_name}] No changes.")
+
+    except Exception as e:
+        logger.error(f"Error monitoring city {city_id}: {e}")
+
+
 async def fuel_monitor_loop(bot: Bot):
     """
-    Background worker that checks gas station fuel availability periodically.
-    Monitors ALL cities selected by users, not just Volzhsky.
+    Background worker — checks all user-selected cities in PARALLEL every 30 seconds.
+    Fast notifications: fuel change detected within ~35 seconds of it appearing.
     """
     parser = VolzhskyFuelParser()
     logger.info(f"Starting fuel monitor loop. Check interval: {settings.CHECK_INTERVAL_SECONDS}s")
 
-    # Import city lookup
     from keyboards import get_city_by_id
 
-    # Initial run for default city (Volzhsky) to populate database
+    # Initial run for Volzhsky to populate database (no alerts)
     try:
         initial_stations = await parser.fetch_gas_stations()
         if initial_stations:
-            logger.info(f"Initial scan loaded {len(initial_stations)} gas stations in Volzhsky.")
+            logger.info(f"Initial scan: {len(initial_stations)} stations in Volzhsky.")
             await db.process_stations_snapshot(initial_stations)
             await sync_stations_json(initial_stations)
     except Exception as e:
@@ -89,48 +125,14 @@ async def fuel_monitor_loop(bot: Bot):
             cities = await db.get_unique_cities()
             if not cities:
                 cities = ["volzhsky"]
-            
-            logger.info(f"Checking {len(cities)} cities: {', '.join(cities)}")
 
-            for city_id in cities:
-                try:
-                    city = get_city_by_id(city_id)
-                    if city:
-                        stations = await parser.fetch_gas_stations(
-                            lat=city["lat"], lon=city["lon"],
-                            spn_lon=0.15, spn_lat=0.15
-                        )
-                        city_name = city["name"]
-                    else:
-                        # Fallback to default Volzhsky
-                        stations = await parser.fetch_gas_stations()
-                        city_name = "Волжский"
+            logger.info(f"[MONITOR] Checking {len(cities)} cities in parallel: {', '.join(cities)}")
 
-                    if not stations:
-                        logger.warning(f"No stations for {city_name}, skipping.")
-                        continue
-
-                    # For Volzhsky — also sync stations.json (used by web)
-                    if city_id == "volzhsky":
-                        await sync_stations_json(stations)
-
-                    # Detect changes
-                    events = await db.process_stations_snapshot(stations)
-
-                    if events:
-                        logger.info(f"[{city_name}] {len(events)} fuel changes detected!")
-                        for ev in events:
-                            logger.info(f"  {ev['event_type']}: {ev['fuel_type']} @ {ev['station'].name}")
-                            await broadcast_event(bot, ev, city_id=city_id, city_name=city_name)
-                    else:
-                        logger.info(f"[{city_name}] No changes.")
-
-                    # Small delay between cities to not overload Yandex
-                    if len(cities) > 1:
-                        await asyncio.sleep(5)
-
-                except Exception as e:
-                    logger.error(f"Error monitoring city {city_id}: {e}")
+            # Run ALL cities simultaneously — no 5s delay between them
+            await asyncio.gather(
+                *[check_city(bot, parser, city_id, get_city_by_id) for city_id in cities],
+                return_exceptions=True
+            )
 
         except asyncio.CancelledError:
             logger.info("Fuel monitor loop cancelled.")
