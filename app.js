@@ -245,19 +245,18 @@ function renderCitiesList(filterQuery = '') {
 
 function createCityItem(city) {
   const item = document.createElement('div');
-  item.className = `city-item ${city.id === currentCity.id ? 'active' : ''}`;
+  const isSelected = city.id === currentCity.id;
+  item.className = `city-item${isSelected ? ' selected' : ''}`;
+  const emoji = city.emoji || '📍';
+  const starBadge = city.id === priorityCityId ? '<span class="city-item-check">⭐</span>' : '';
+  const checkBadge = isSelected ? '<span class="city-item-check" style="color:var(--accent)">✓</span>' : '';
   item.innerHTML = `
+    <span class="city-item-emoji">${emoji}</span>
     <div class="city-item-info">
-      <span style="font-size:18px;">📍</span>
-      <div>
-        <div class="city-item-name">${city.name}</div>
-        <div class="city-item-region">${city.region}</div>
-      </div>
+      <div class="city-item-name">${city.name}</div>
+      <div class="city-item-region">${city.region}</div>
     </div>
-    <div class="">
-      ${city.id === priorityCityId ? '<span class="city-item-check">⭐</span>' : ''}
-      ${['volzhsky', 'volgograd'].includes(city.id) ? '<span class="city-badge">Онлайн 24/7</span>' : ''}
-    </div>`;
+    ${starBadge}${checkBadge}`;
   item.addEventListener('click', () => selectCity(city));
   return item;
 }
