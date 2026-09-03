@@ -1,40 +1,24 @@
 #!/bin/bash
-# start_tunnel.sh — Starts cloudflared and saves the URL to tunnel_url.json
+# Start cloudflared, capture tunnel URL, push to GitHub on each restart
+cd /root/AZS_Volshkiy
 
-REPO_DIR="/root/AZS_Volshkiy"
-LOG_FILE="/tmp/cf_tunnel.log"
-
-# Kill any existing tunnel processes
-pkill -f "cloudflared tunnel" 2>/dev/null
+# Kill any old cloudflared
+pkill -f 'cloudflared tunnel' 2>/dev/null
 sleep 1
 
-# Start cloudflared in background
-cloudflared tunnel --url http://localhost:8080 > "$LOG_FILE" 2>&1 &
-CF_PID=$!
-
-# Wait for URL to appear
-for i in $(seq 1 15); do
-    URL=$(grep -oP 'https://[a-z0-9-]+\.trycloudflare\.com' "$LOG_FILE" 2>/dev/null | head -1)
-    if [ -n "$URL" ]; then
-        break
+# Start cloudflared and capture URL from its output
+cloudflared tunnel --url http://localhost:8080 --no-autoupdate 2>&1 | while IFS= read -r line; do
+  echo "$line"
+  if echo "$line" | grep -q 'trycloudflare.com'; then
+    TUNNEL_URL=$(echo "$line" | grep -oP 'https://[a-zA-Z0-9._-]+\.trycloudflare\.com')
+    if [ -n "$TUNNEL_URL" ]; then
+      echo "Tunnel URL captured: $TUNNEL_URL"
+      echo "{\"api_url\": \"$TUNNEL_URL\", \"updated\": \"$(date -Iseconds)\"}" > /root/AZS_Volshkiy/tunnel_url.json
+      (
+        cd /root/AZS_Volshkiy
+        git add tunnel_url.json
+        git diff --staged --quiet || (git commit -m "Update tunnel URL: $TUNNEL_URL" && git push origin main)
+      ) &
     fi
-    sleep 1
+  fi
 done
-
-if [ -z "$URL" ]; then
-    echo "ERROR: Could not get tunnel URL after 15 seconds"
-    cat "$LOG_FILE"
-    exit 1
-fi
-
-echo "Tunnel URL: $URL"
-
-# Save URL to JSON file in repo
-echo "{\"api_url\": \"$URL\", \"updated\": \"$(date -Iseconds)\"}" > "$REPO_DIR/tunnel_url.json"
-
-# Push to GitHub Pages
-cd "$REPO_DIR"
-git add tunnel_url.json
-git diff --staged --quiet || (git commit -m "Update tunnel URL: $URL" && git push origin main)
-
-echo "Done! Tunnel is running with PID $CF_PID at $URL"
