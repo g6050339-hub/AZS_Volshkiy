@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 25,
-  "updated_at": 1788448892,
+  "updated_at": 1788448928,
   "stations": [
     {
       "id": "1817417962",
@@ -14,9 +14,9 @@
       "cash_only": false,
       "queue_status": "UNKNOWN",
       "queue_label": "⚪ Обычный поток",
-      "signals_count_per_hour": 2,
+      "signals_count_per_hour": 3,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788447109,
+      "last_signal_timestamp": 1788447798,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -75,7 +75,7 @@
       "queue_label": "🟢 Свободно",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788444666,
+      "last_signal_timestamp": 1788445290,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -250,7 +250,7 @@
       "cash_only": false,
       "queue_status": "UNKNOWN",
       "queue_label": "⚪ Обычный поток",
-      "signals_count_per_hour": 5,
+      "signals_count_per_hour": 4,
       "fuel_limit": null,
       "last_signal_timestamp": 1788446410,
       "fuels": {
@@ -545,9 +545,9 @@
       "cash_only": false,
       "queue_status": "LOW",
       "queue_label": "🟢 Свободно",
-      "signals_count_per_hour": 2,
+      "signals_count_per_hour": 3,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788445753,
+      "last_signal_timestamp": 1788448199,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -665,19 +665,19 @@
       "queue_label": "🔴 Большая очередь",
       "signals_count_per_hour": 4,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788447556,
+      "last_signal_timestamp": 1788448185,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
           "name": "92",
-          "status": "UNCERTAIN",
+          "status": "OUT_OF_STOCK",
           "price_text": null,
           "price_value": null
         },
         "AI95": {
           "fuel_type": "AI95",
           "name": "95",
-          "status": "UNCERTAIN",
+          "status": "OUT_OF_STOCK",
           "price_text": null,
           "price_value": null
         },
