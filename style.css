@@ -783,3 +783,49 @@ input:checked + .slider::before { transform: translateX(20px); background: #fff;
 }
 .leaflet-popup-tip { background: var(--surface); }
 .leaflet-popup-close-button { color: var(--text2) !important; }
+
+/* ============================================================
+   LIGHT THEME — body.theme-light
+   ============================================================ */
+body.theme-light {
+  --bg:         #f6f8fa;
+  --surface:    #ffffff;
+  --surface2:   #f0f2f5;
+  --border:     rgba(0,0,0,0.08);
+  --border2:    rgba(0,0,0,0.13);
+  --text:       #1c1e21;
+  --text2:      #65676b;
+  --sheet-bg:   rgba(255,255,255,0.92);
+}
+
+body.theme-light .leaflet-tile-pane {
+  filter: brightness(1.0) saturate(1.0) !important;
+}
+
+body.theme-light .station-marker.has-fuel {
+  background: #1a7a2e;
+  border-color: #3fb950;
+}
+body.theme-light .station-marker.no-fuel {
+  background: #c92a2a;
+  border-color: #f85149;
+}
+
+body.theme-light .fab-btn {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+body.theme-light .bottom-sheet,
+body.theme-light .top-bar .city-pill-btn,
+body.theme-light .top-bar .icon-btn {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+
+body.theme-light .spinner {
+  border-color: rgba(0,0,0,0.1);
+  border-top-color: var(--accent);
+}
+
+body.theme-light .loader-overlay {
+  background: #f6f8fa;
+}

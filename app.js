@@ -134,16 +134,66 @@ function hapticNotification(type = 'success') {
 }
 
 // ============================================================
-// LEAFLET MAP — DARK TILES
+// LEAFLET MAP + THEME SWITCHER
 // ============================================================
 const map = L.map('map', { zoomControl: false, attributionControl: false })
   .setView(currentCity.coords, currentCity.zoom);
 
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-  maxZoom: 19,
-  subdomains: 'abcd',
-  attribution: ''
-}).addTo(map);
+// MAP THEMES
+// ============================================================
+const MAP_THEMES = {
+  dark: {
+    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    label: '🌙 Тёмная',
+    icon: '🌙',
+    subdomains: 'abcd',
+    tileFilter: 'brightness(0.85) saturate(0.9)',
+    cssClass: 'theme-dark'
+  },
+  light: {
+    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+    label: '☀️ Светлая',
+    icon: '☀️',
+    subdomains: 'abcd',
+    tileFilter: 'brightness(1.0) saturate(1.0)',
+    cssClass: 'theme-light'
+  }
+};
+
+let currentTheme = localStorage.getItem('map_theme') || 'dark';
+let tileLayerRef = null;
+
+function applyTheme(themeKey) {
+  currentTheme = themeKey;
+  localStorage.setItem('map_theme', themeKey);
+  const theme = MAP_THEMES[themeKey];
+
+  // Swap tile layer
+  if (tileLayerRef) map.removeLayer(tileLayerRef);
+  tileLayerRef = L.tileLayer(theme.url, {
+    maxZoom: 19,
+    subdomains: theme.subdomains,
+    attribution: ''
+  });
+  tileLayerRef.addTo(map);
+  // Move tile layer to bottom
+  tileLayerRef.setZIndex(0);
+
+  // Update CSS filter on tile pane
+  const tilePanes = document.querySelectorAll('.leaflet-tile-pane');
+  tilePanes.forEach(p => p.style.filter = theme.tileFilter);
+
+  // Update app body class for UI adjustments
+  document.body.className = theme.cssClass;
+
+  // Update toggle button icon
+  const btn = document.getElementById('btn-theme-toggle');
+  if (btn) btn.textContent = themeKey === 'dark' ? '☀️' : '🌙';
+  if (btn) btn.title = themeKey === 'dark' ? 'Переключить на светлую' : 'Переключить на тёмную';
+}
+
+// Init with saved theme
+applyTheme(currentTheme);
 
 // Remove any watermark / "API key required" overlays that tile providers inject
 function removeWatermarks() {
@@ -157,7 +207,6 @@ function removeWatermarks() {
     }
   });
 }
-// Run once after map loads and watch for new elements
 setTimeout(removeWatermarks, 500);
 setTimeout(removeWatermarks, 2000);
 const _wmObserver = new MutationObserver(removeWatermarks);
@@ -997,9 +1046,16 @@ document.getElementById('btn-locate').addEventListener('click', () => {
   }, () => {}, { enableHighAccuracy: true });
 });
 
-document.getElementById('btn-refresh').addEventListener('click', () => {
+document.getElementById('btn-refresh')?.addEventListener('click', () => {
   haptic('medium');
   loadStationsForCity(currentCity);
+});
+
+// Theme toggle
+document.getElementById('btn-theme-toggle')?.addEventListener('click', () => {
+  haptic('light');
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  applyTheme(newTheme);
 });
 
 // Auto-refresh every 60s (silent during navigation)
