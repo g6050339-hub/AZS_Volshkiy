@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 25,
-  "updated_at": 1788475853,
+  "updated_at": 1788475889,
   "stations": [
     {
       "id": "1817417962",
@@ -1066,65 +1066,6 @@
       }
     },
     {
-      "id": "185045030546",
-      "name": "АЗС",
-      "address": "Волжский, просп. Металлургов, 11",
-      "lat": 48.801878,
-      "lon": 44.787483,
-      "chain": null,
-      "yandex_url": "https://yandex.ru/maps/org/185045030546",
-      "cash_only": false,
-      "queue_status": "LOW",
-      "queue_label": "🟢 Свободно",
-      "signals_count_per_hour": 0,
-      "fuel_limit": null,
-      "last_signal_timestamp": null,
-      "fuels": {
-        "AI92": {
-          "fuel_type": "AI92",
-          "name": "92",
-          "status": "UNKNOWN",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI95": {
-          "fuel_type": "AI95",
-          "name": "95",
-          "status": "UNKNOWN",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI95_PREMIUM": {
-          "fuel_type": "AI95_PREMIUM",
-          "name": "95+",
-          "status": "UNKNOWN",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI98": {
-          "fuel_type": "AI98",
-          "name": "98",
-          "status": "UNKNOWN",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI100": {
-          "fuel_type": "AI100",
-          "name": "100",
-          "status": "UNKNOWN",
-          "price_text": null,
-          "price_value": null
-        },
-        "DIESEL": {
-          "fuel_type": "DIESEL",
-          "name": "ДТ",
-          "status": "UNKNOWN",
-          "price_text": null,
-          "price_value": null
-        }
-      }
-    },
-    {
       "id": "1933105753",
       "name": "Татнефть",
       "address": "Волжский, ул. Александрова, 54В",
@@ -1178,6 +1119,65 @@
           "fuel_type": "DIESEL",
           "name": "ДТ",
           "status": "UNCERTAIN",
+          "price_text": null,
+          "price_value": null
+        }
+      }
+    },
+    {
+      "id": "185045030546",
+      "name": "АЗС",
+      "address": "Волжский, просп. Металлургов, 11",
+      "lat": 48.801878,
+      "lon": 44.787483,
+      "chain": null,
+      "yandex_url": "https://yandex.ru/maps/org/185045030546",
+      "cash_only": false,
+      "queue_status": "LOW",
+      "queue_label": "🟢 Свободно",
+      "signals_count_per_hour": 0,
+      "fuel_limit": null,
+      "last_signal_timestamp": null,
+      "fuels": {
+        "AI92": {
+          "fuel_type": "AI92",
+          "name": "92",
+          "status": "UNKNOWN",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI95": {
+          "fuel_type": "AI95",
+          "name": "95",
+          "status": "UNKNOWN",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI95_PREMIUM": {
+          "fuel_type": "AI95_PREMIUM",
+          "name": "95+",
+          "status": "UNKNOWN",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI98": {
+          "fuel_type": "AI98",
+          "name": "98",
+          "status": "UNKNOWN",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI100": {
+          "fuel_type": "AI100",
+          "name": "100",
+          "status": "UNKNOWN",
+          "price_text": null,
+          "price_value": null
+        },
+        "DIESEL": {
+          "fuel_type": "DIESEL",
+          "name": "ДТ",
+          "status": "UNKNOWN",
           "price_text": null,
           "price_value": null
         }
