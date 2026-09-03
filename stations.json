@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 25,
-  "updated_at": 1788476353,
+  "updated_at": 1788476388,
   "stations": [
     {
       "id": "1817417962",
@@ -795,7 +795,7 @@
         "AI95": {
           "fuel_type": "AI95",
           "name": "95",
-          "status": "UNCERTAIN",
+          "status": "UNKNOWN",
           "price_text": null,
           "price_value": null
         },
