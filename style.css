@@ -52,6 +52,14 @@ html, body {
 .leaflet-tile-pane { filter: brightness(0.85) saturate(0.9); }
 .leaflet-control-zoom { display: none !important; }
 .leaflet-control-attribution { display: none !important; }
+.leaflet-control-container .leaflet-bottom { display: none !important; }
+/* Hide any API key required / watermark overlays */
+.leaflet-pane > img[src*="watermark"],
+.leaflet-overlay-pane iframe,
+[class*="api-key"],
+[class*="watermark"],
+[id*="watermark"],
+[class*="branding"] { display: none !important; }
 
 /* ---------- TOP BAR (floating) ---------- */
 .top-bar {

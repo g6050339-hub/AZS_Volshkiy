@@ -141,8 +141,27 @@ const map = L.map('map', { zoomControl: false, attributionControl: false })
 
 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
   maxZoom: 19,
-  subdomains: 'abcd'
+  subdomains: 'abcd',
+  attribution: ''
 }).addTo(map);
+
+// Remove any watermark / "API key required" overlays that tile providers inject
+function removeWatermarks() {
+  document.querySelectorAll(
+    '.leaflet-control-attribution, [class*="watermark"], [id*="watermark"], ' +
+    '[class*="api-key"], [class*="branding"], [class*="logo"]'
+  ).forEach(el => {
+    if (el.textContent.includes('API') || el.textContent.includes('KEY') ||
+        el.textContent.includes('©') || el.tagName === 'A') {
+      el.style.display = 'none';
+    }
+  });
+}
+// Run once after map loads and watch for new elements
+setTimeout(removeWatermarks, 500);
+setTimeout(removeWatermarks, 2000);
+const _wmObserver = new MutationObserver(removeWatermarks);
+_wmObserver.observe(document.getElementById('map'), { childList: true, subtree: true });
 
 // ============================================================
 // DOM ELEMENTS
@@ -223,17 +242,17 @@ function renderCitiesList(filterQuery = '') {
   const q = filterQuery.toLowerCase();
   const filtered = CITIES_DB.filter(c => c.name.toLowerCase().includes(q) || c.region.toLowerCase().includes(q));
   if (!filtered.length) {
-    citiesContainer.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text2);font-size:13px;">Город не найден</div>';
+    citiesContainer.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-dim);font-size:13px;">Город не найден</div>';
     return;
   }
   if (!filterQuery) {
     const h1 = document.createElement('div');
-    h1.className = 'city-section-label';
+    h1.className = 'city-group-title';
     h1.textContent = 'Популярные города';
     citiesContainer.appendChild(h1);
     filtered.filter(c => c.popular).forEach(c => citiesContainer.appendChild(createCityItem(c)));
     const h2 = document.createElement('div');
-    h2.className = 'city-section-label';
+    h2.className = 'city-group-title';
     h2.textContent = 'Все города';
     citiesContainer.appendChild(h2);
   }
@@ -245,18 +264,19 @@ function renderCitiesList(filterQuery = '') {
 
 function createCityItem(city) {
   const item = document.createElement('div');
-  const isSelected = city.id === currentCity.id;
-  item.className = `city-item${isSelected ? ' selected' : ''}`;
-  const emoji = city.emoji || '📍';
-  const starBadge = city.id === priorityCityId ? '<span class="city-item-check">⭐</span>' : '';
-  const checkBadge = isSelected ? '<span class="city-item-check" style="color:var(--accent)">✓</span>' : '';
+  item.className = `city-item ${city.id === currentCity.id ? 'active' : ''}`;
   item.innerHTML = `
-    <span class="city-item-emoji">${emoji}</span>
-    <div class="city-item-info">
-      <div class="city-item-name">${city.name}</div>
-      <div class="city-item-region">${city.region}</div>
+    <div class="city-item-left">
+      <span style="font-size:18px;">📍</span>
+      <div>
+        <div class="city-item-name">${city.name}</div>
+        <div class="city-item-region">${city.region}</div>
+      </div>
     </div>
-    ${starBadge}${checkBadge}`;
+    <div class="city-item-right">
+      ${city.id === priorityCityId ? '<span class="city-priority-tag">⭐</span>' : ''}
+      ${['volzhsky', 'volgograd'].includes(city.id) ? '<span class="city-badge">Онлайн 24/7</span>' : ''}
+    </div>`;
   item.addEventListener('click', () => selectCity(city));
   return item;
 }
@@ -920,7 +940,7 @@ function renderRouteSummary(distM, durS, list) {
   const container = document.getElementById('route-stations-list');
   container.innerHTML = '';
   if (!list.length) {
-    container.innerHTML = '<div style="text-align:center;padding:12px;color:var(--text2);font-size:12px;">Нет АЗС с выбранным топливом по маршруту</div>';
+    container.innerHTML = '<div style="text-align:center;padding:12px;color:var(--text-dim);font-size:12px;">Нет АЗС с выбранным топливом по маршруту</div>';
   } else {
     list.forEach((st, idx) => {
       const q = QUEUE_INFO[st.queue_status || 'UNKNOWN'] || QUEUE_INFO.UNKNOWN;
@@ -1080,7 +1100,7 @@ function startNavigation() {
 
   // Hide UI elements for clean navi view
   document.querySelector('.route-header')?.classList.add('hidden');
-  document.querySelectorAll('.fab-btn, .top-bar').forEach(
+  document.querySelectorAll('.ctrl-btn, .route-fab, .fuel-filter-bar, .city-badge-header').forEach(
     el => el.classList.add('navi-hidden-temp')
   );
 
