@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 25,
-  "updated_at": 1788466298,
+  "updated_at": 1788466336,
   "stations": [
     {
       "id": "1817417962",
@@ -606,7 +606,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788462508,
+      "last_signal_timestamp": 1788462633,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
