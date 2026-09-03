@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Мониторинг АЗС и Навигатор</title>
+  <title>АЗС Монитор</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -14,47 +14,30 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./style.css?v=10.0">
+  <link rel="stylesheet" href="./style.css?v=11.0">
 </head>
 <body>
   <div id="app">
-    <!-- ============ STANDARD HEADER ============ -->
-    <header class="header" id="standard-header">
-      <div class="top-action-bar">
-        <button id="btn-city-select" class="city-pill-btn" aria-label="Выбор города">
-          <span class="city-icon">📍</span>
-          <span id="current-city-name" class="city-name-text">Волжский</span>
-          <span class="city-arrow">▾</span>
-        </button>
+
+    <!-- ============ MAP (full screen) ============ -->
+    <div id="map"></div>
+
+    <!-- ============ TOP BAR ============ -->
+    <div class="top-bar" id="standard-header">
+      <button id="btn-city-select" class="city-pill-btn" aria-label="Выбор города">
+        <span class="city-icon">📍</span>
+        <span id="current-city-name" class="city-name-text">Волжский</span>
+        <span class="city-arrow">▾</span>
+      </button>
+      <div class="top-bar-right">
         <div class="city-priority-indicator" id="priority-indicator" title="Приоритетный город">⭐</div>
-      </div>
-      <div class="filters-scroll">
-        <button class="filter-pill active" data-fuel="ALL">
-          <span>Все АЗС</span>
-          <span class="badge" id="count-all">0</span>
-        </button>
-        <button class="filter-pill" data-fuel="AI95">
-          <span class="dot dot-blue"></span><span>АИ-95</span>
-          <span class="badge" id="count-ai95">0</span>
-        </button>
-        <button class="filter-pill" data-fuel="AI95_PREMIUM">
-          <span class="dot dot-purple"></span><span>АИ-95+</span>
-          <span class="badge" id="count-ai95p">0</span>
-        </button>
-        <button class="filter-pill" data-fuel="AI92">
-          <span class="dot dot-green"></span><span>АИ-92</span>
-          <span class="badge" id="count-ai92">0</span>
-        </button>
-        <button class="filter-pill" data-fuel="AI100">
-          <span class="dot dot-red"></span><span>АИ-100</span>
-          <span class="badge" id="count-ai100">0</span>
-        </button>
-        <button class="filter-pill" data-fuel="DIESEL">
-          <span class="dot dot-black"></span><span>ДТ</span>
-          <span class="badge" id="count-diesel">0</span>
+        <button id="btn-refresh" class="icon-btn" aria-label="Обновить данные">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+          </svg>
         </button>
       </div>
-    </header>
+    </div>
 
     <!-- ============ ROUTE MODE HEADER ============ -->
     <div class="route-header hidden" id="route-header">
@@ -65,14 +48,14 @@
       <div class="route-points-box">
         <div class="route-point-row" id="row-point-a">
           <div class="point-dot dot-a">А</div>
-          <input type="text" class="route-input" id="input-point-a" placeholder="Откуда — GPS или введите адрес..." autocomplete="off" aria-label="Откуда">
+          <input type="text" class="route-input" id="input-point-a" placeholder="Откуда — GPS или адрес..." autocomplete="off" aria-label="Откуда">
           <button class="btn-point-action" id="btn-set-a-gps" title="GPS" aria-label="Мое местоположение">📍</button>
           <div class="search-suggestions" id="suggestions-a"></div>
         </div>
         <div class="route-divider-line"></div>
         <div class="route-point-row" id="row-point-b">
           <div class="point-dot dot-b">Б</div>
-          <input type="text" class="route-input" id="input-point-b" placeholder="Куда — город, адрес или клик на карту..." autocomplete="off" aria-label="Куда">
+          <input type="text" class="route-input" id="input-point-b" placeholder="Куда — адрес или тап на карту..." autocomplete="off" aria-label="Куда">
           <button class="btn-point-action" id="btn-clear-b" title="Сбросить" aria-label="Сбросить точку Б">&times;</button>
           <div class="search-suggestions" id="suggestions-b"></div>
         </div>
@@ -90,26 +73,46 @@
       </div>
     </div>
 
-    <!-- ============ MAP ============ -->
-    <div id="map"></div>
+    <!-- ============ FAB CONTROLS (right side) ============ -->
+    <div class="fab-group">
+      <button id="btn-locate" class="fab-btn" aria-label="Моё местоположение">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2">
+          <circle cx="12" cy="12" r="7"/><line x1="12" y1="1" x2="12" y2="5"/>
+          <line x1="12" y1="19" x2="12" y2="23"/><line x1="1" y1="12" x2="5" y2="12"/>
+          <line x1="19" y1="12" x2="23" y2="12"/>
+        </svg>
+      </button>
+      <button id="btn-toggle-route" class="fab-btn fab-route" aria-label="Построить маршрут">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2">
+          <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+        </svg>
+      </button>
+    </div>
 
-    <!-- ============ MAP CONTROLS ============ -->
-    <div class="map-controls">
-      <button id="btn-toggle-route" class="ctrl-btn fab-route" aria-label="Построить маршрут">
-        <span style="font-size:18px;">🧭</span>
-        <span class="fab-label">Маршрут</span>
-      </button>
-      <button id="btn-locate" class="ctrl-btn" aria-label="Мое местоположение">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="7"/><line x1="12" y1="1" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="23"/>
-          <line x1="1" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="23" y2="12"/>
-        </svg>
-      </button>
-      <button id="btn-refresh" class="ctrl-btn" aria-label="Обновить данные">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
-        </svg>
-      </button>
+    <!-- ============ BOTTOM SHEET ============ -->
+    <div class="bottom-sheet" id="bottom-sheet">
+      <div class="sheet-handle-wrap"><div class="sheet-handle"></div></div>
+      <!-- Fuel filter pills -->
+      <div class="filters-scroll">
+        <button class="filter-pill active" data-fuel="ALL">
+          Все <span class="pill-count" id="count-all">0</span>
+        </button>
+        <button class="filter-pill" data-fuel="DIESEL">
+          <span class="dot dot-diesel"></span>ДТ <span class="pill-count" id="count-diesel">0</span>
+        </button>
+        <button class="filter-pill" data-fuel="AI92">
+          <span class="dot dot-92"></span>АИ-92 <span class="pill-count" id="count-ai92">0</span>
+        </button>
+        <button class="filter-pill" data-fuel="AI95">
+          <span class="dot dot-95"></span>АИ-95 <span class="pill-count" id="count-ai95">0</span>
+        </button>
+        <button class="filter-pill" data-fuel="AI95_PREMIUM">
+          <span class="dot dot-95p"></span>95+ <span class="pill-count" id="count-ai95p">0</span>
+        </button>
+        <button class="filter-pill" data-fuel="AI100">
+          <span class="dot dot-100"></span>АИ-100 <span class="pill-count" id="count-ai100">0</span>
+        </button>
+      </div>
     </div>
 
     <!-- ============ ROUTE SUMMARY SHEET ============ -->
@@ -125,13 +128,13 @@
       <div class="route-stations-list" id="route-stations-list"></div>
       <div class="route-actions-row">
         <button id="btn-start-navi" class="btn-start-navi">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
             <polygon points="3 11 22 2 13 21 11 13 3 11"/>
           </svg>
-          <span>▶ Поехали!</span>
+          <span>Поехали!</span>
         </button>
         <a id="btn-yandex-navi-start" href="#" target="_blank" class="btn-yandex-navi">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
             <polygon points="3 11 22 2 13 21 11 13 3 11"/>
           </svg>
           <span>Яндекс.Нави</span>
@@ -179,7 +182,7 @@
       </div>
       <div class="queue-status-card" id="queue-card">
         <div class="queue-header">
-          <span class="queue-label-text">🚦 Очередь на АЗС:</span>
+          <span class="queue-label-text">🚦 Очередь:</span>
           <span class="queue-badge q-unknown" id="queue-badge">Обычный поток</span>
         </div>
         <div class="queue-detail" id="queue-detail">🕒 Данные телеметрии</div>
@@ -188,7 +191,7 @@
           <span class="report-title">Вы на этой АЗС? Сообщите очередь:</span>
           <div class="report-buttons">
             <button class="report-btn" data-report="LOW">🟢 Свободно</button>
-            <button class="report-btn" data-report="MEDIUM">🟡 5-10 машин</button>
+            <button class="report-btn" data-report="MEDIUM">🟡 5–10 машин</button>
             <button class="report-btn" data-report="HIGH">🔴 Затор</button>
           </div>
         </div>
@@ -200,7 +203,7 @@
       <div class="station-actions">
         <button id="btn-route-to-station" class="btn-secondary-route">🧭 Маршрут сюда</button>
         <a id="btn-navigate" href="#" target="_blank" class="action-btn primary-btn">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
             <polygon points="3 11 22 2 13 21 11 13 3 11"/>
           </svg>
           <span>В Яндекс.Карты</span>
@@ -244,8 +247,8 @@
       <div class="spinner"></div>
       <div class="loader-text" id="loader-text">Загрузка данных АЗС...</div>
     </div>
-  </div>
 
-  <script src="./app.js?v=10.0"></script>
+  </div>
+  <script src="./app.js?v=11.0"></script>
 </body>
 </html>

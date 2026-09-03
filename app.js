@@ -1,5 +1,5 @@
 // ============================================================
-// АЗС Монитор — app.js v5.0
+// АЗС Монитор — app.js v11.0
 // Тёмная карта + Навигатор с текстовым поиском (Nominatim)
 // ============================================================
 
@@ -191,8 +191,8 @@ btnCitySelect.addEventListener('click', () => {
   priorityCheckbox.checked = currentCity.id === priorityCityId;
   cityModal.classList.add('open');
 });
-document.getElementById('city-modal-close')?.addEventListener('click', () => cityModal.classList.remove('open'));
-document.getElementById('city-modal-backdrop')?.addEventListener('click', () => cityModal.classList.remove('open'));
+document.getElementById('city-modal-close').addEventListener('click', () => cityModal.classList.remove('open'));
+document.getElementById('city-modal-backdrop').addEventListener('click', () => cityModal.classList.remove('open'));
 
 priorityCheckbox.addEventListener('change', () => {
   hapticNotification('success');
@@ -545,12 +545,13 @@ function renderMarkers() {
 }
 
 function createMarker(station) {
-  const brand = getBrandIcon(station.name);
-  const q = QUEUE_INFO[station.queue_status || 'UNKNOWN'] || QUEUE_INFO.UNKNOWN;
+  const hasFuel = checkFuelInStock(station, 'ALL');
+  const label = getMarkerLabel(station);
+  const cls = hasFuel ? 'station-marker has-fuel' : 'station-marker no-fuel';
   const icon = L.divIcon({
-    className: 'custom-div-icon',
-    html: `<div class="custom-pin in-stock" id="pin-${station.id}">${brand}<div class="pin-queue-dot ${q.dotClass}" id="qdot-${station.id}"></div></div>`,
-    iconSize: [34, 34], iconAnchor: [17, 17]
+    className: '',
+    html: `<div class="${cls}" id="pin-${station.id}">${label}</div>`,
+    iconSize: [32, 32], iconAnchor: [16, 16]
   });
   const marker = L.marker([station.lat, station.lon], { icon });
   marker.on('click', () => {
@@ -565,29 +566,45 @@ function createMarker(station) {
   return marker;
 }
 
+function getMarkerLabel(station) {
+  // Show first available fuel type as short label
+  const priority = ['AI92','AI95','AI95_PREMIUM','AI100','DIESEL','LPG'];
+  for (const f of priority) {
+    if (station.fuels?.[f]?.status === 'IN_STOCK') {
+      if (f === 'DIESEL') return 'ДТ';
+      if (f === 'AI92') return '92';
+      if (f === 'AI95') return '95';
+      if (f === 'AI95_PREMIUM') return '95+';
+      if (f === 'AI100') return '100';
+      if (f === 'LPG') return 'ГАЗ';
+    }
+  }
+  return '✕';
+}
+
 function updateMarkersVisibility() {
   markers.forEach(({ marker, station }) => {
     const el = document.getElementById(`pin-${station.id}`);
-    const qdot = document.getElementById(`qdot-${station.id}`);
     if (!el) return;
-    if (qdot) {
-      const q = QUEUE_INFO[station.queue_status || 'UNKNOWN'] || QUEUE_INFO.UNKNOWN;
-      qdot.className = `pin-queue-dot ${q.dotClass}`;
-    }
+
     if (isRouteMode && stationsOnRoute.length > 0) {
       const onRoute = stationsOnRoute.some(s => s.id === station.id);
-      el.className = onRoute ? 'custom-pin in-stock on-route-pulse' : 'custom-pin out-of-stock dimmed';
-      marker.setOpacity(onRoute ? 1.0 : 0.2);
+      el.className = onRoute ? 'station-marker has-fuel selected' : 'station-marker no-fuel';
+      marker.setOpacity(onRoute ? 1.0 : 0.15);
       marker.setZIndexOffset(onRoute ? 1000 : 0);
       return;
     }
+
     if (currentFilter === 'ALL') {
-      el.className = `custom-pin ${checkFuelInStock(station, 'ALL') ? 'in-stock' : 'out-of-stock'}`;
+      const has = checkFuelInStock(station, 'ALL');
+      el.className = `station-marker ${has ? 'has-fuel' : 'no-fuel'}`;
+      el.textContent = getMarkerLabel(station);
       marker.setOpacity(1.0);
     } else {
       const inStock = checkFuelInStock(station, currentFilter);
-      el.className = inStock ? 'custom-pin in-stock' : 'custom-pin out-of-stock dimmed';
-      marker.setOpacity(inStock ? 1.0 : 0.25);
+      el.className = `station-marker ${inStock ? 'has-fuel' : 'no-fuel'}`;
+      el.textContent = getMarkerLabel(station);
+      marker.setOpacity(inStock ? 1.0 : 0.18);
       marker.setZIndexOffset(inStock ? 100 : 0);
     }
   });
@@ -930,7 +947,7 @@ function renderRouteSummary(distM, durS, list) {
 // ============================================================
 // LOCATE & REFRESH
 // ============================================================
-document.getElementById('btn-locate')?.addEventListener('click', () => {
+document.getElementById('btn-locate').addEventListener('click', () => {
   haptic('medium');
   if (!navigator.geolocation) return;
   navigator.geolocation.getCurrentPosition(pos => {
@@ -954,7 +971,7 @@ document.getElementById('btn-locate')?.addEventListener('click', () => {
   }, () => {}, { enableHighAccuracy: true });
 });
 
-document.getElementById('btn-refresh')?.addEventListener('click', () => {
+document.getElementById('btn-refresh').addEventListener('click', () => {
   haptic('medium');
   loadStationsForCity(currentCity);
 });
