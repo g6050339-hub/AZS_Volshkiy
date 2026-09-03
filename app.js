@@ -191,8 +191,8 @@ btnCitySelect.addEventListener('click', () => {
   priorityCheckbox.checked = currentCity.id === priorityCityId;
   cityModal.classList.add('open');
 });
-document.getElementById('city-modal-close').addEventListener('click', () => cityModal.classList.remove('open'));
-document.getElementById('city-modal-backdrop').addEventListener('click', () => cityModal.classList.remove('open'));
+document.getElementById('city-modal-close')?.addEventListener('click', () => cityModal.classList.remove('open'));
+document.getElementById('city-modal-backdrop')?.addEventListener('click', () => cityModal.classList.remove('open'));
 
 priorityCheckbox.addEventListener('change', () => {
   hapticNotification('success');
@@ -930,7 +930,7 @@ function renderRouteSummary(distM, durS, list) {
 // ============================================================
 // LOCATE & REFRESH
 // ============================================================
-document.getElementById('btn-locate').addEventListener('click', () => {
+document.getElementById('btn-locate')?.addEventListener('click', () => {
   haptic('medium');
   if (!navigator.geolocation) return;
   navigator.geolocation.getCurrentPosition(pos => {
@@ -954,7 +954,7 @@ document.getElementById('btn-locate').addEventListener('click', () => {
   }, () => {}, { enableHighAccuracy: true });
 });
 
-document.getElementById('btn-refresh').addEventListener('click', () => {
+document.getElementById('btn-refresh')?.addEventListener('click', () => {
   haptic('medium');
   loadStationsForCity(currentCity);
 });
@@ -987,11 +987,11 @@ const naviStationNameEl = document.getElementById('navi-station-name');
 const naviStationDistEl = document.getElementById('navi-station-dist');
 const naviStationFuelEl = document.getElementById('navi-station-fuel');
 
-document.getElementById('btn-start-navi').addEventListener('click', () => {
+document.getElementById('btn-start-navi')?.addEventListener('click', () => {
   haptic('heavy');
   startNavigation();
 });
-document.getElementById('btn-stop-navi').addEventListener('click', () => {
+document.getElementById('btn-stop-navi')?.addEventListener('click', () => {
   haptic('medium');
   stopNavigation();
 });
