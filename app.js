@@ -223,17 +223,17 @@ function renderCitiesList(filterQuery = '') {
   const q = filterQuery.toLowerCase();
   const filtered = CITIES_DB.filter(c => c.name.toLowerCase().includes(q) || c.region.toLowerCase().includes(q));
   if (!filtered.length) {
-    citiesContainer.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-dim);font-size:13px;">Город не найден</div>';
+    citiesContainer.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text2);font-size:13px;">Город не найден</div>';
     return;
   }
   if (!filterQuery) {
     const h1 = document.createElement('div');
-    h1.className = 'city-group-title';
+    h1.className = 'city-section-label';
     h1.textContent = 'Популярные города';
     citiesContainer.appendChild(h1);
     filtered.filter(c => c.popular).forEach(c => citiesContainer.appendChild(createCityItem(c)));
     const h2 = document.createElement('div');
-    h2.className = 'city-group-title';
+    h2.className = 'city-section-label';
     h2.textContent = 'Все города';
     citiesContainer.appendChild(h2);
   }
@@ -247,15 +247,15 @@ function createCityItem(city) {
   const item = document.createElement('div');
   item.className = `city-item ${city.id === currentCity.id ? 'active' : ''}`;
   item.innerHTML = `
-    <div class="city-item-left">
+    <div class="city-item-info">
       <span style="font-size:18px;">📍</span>
       <div>
         <div class="city-item-name">${city.name}</div>
         <div class="city-item-region">${city.region}</div>
       </div>
     </div>
-    <div class="city-item-right">
-      ${city.id === priorityCityId ? '<span class="city-priority-tag">⭐</span>' : ''}
+    <div class="">
+      ${city.id === priorityCityId ? '<span class="city-item-check">⭐</span>' : ''}
       ${['volzhsky', 'volgograd'].includes(city.id) ? '<span class="city-badge">Онлайн 24/7</span>' : ''}
     </div>`;
   item.addEventListener('click', () => selectCity(city));
@@ -340,28 +340,35 @@ function openDrawer(station) {
   document.getElementById('station-name').textContent = station.name;
   document.getElementById('station-address').textContent = station.address;
   renderQueueCard(station);
+
   const grid = document.getElementById('fuels-grid');
   grid.innerHTML = '';
   const fuels = station.fuels || {};
   const keys = Object.keys(fuels).sort();
+
   if (!keys.length) {
-    grid.innerHTML = '<div style="grid-column:span 2;color:var(--text-dim);font-size:13px;">Данные по типам топлива уточняются</div>';
+    grid.innerHTML = '<div style="grid-column:span 2;color:var(--text2);font-size:13px;padding:8px 0;">Данные по типам топлива уточняются</div>';
   } else {
     keys.forEach(key => {
       const item = fuels[key];
       const meta = FUEL_INFO[key] || { name: item.name || key, emoji: '⛽' };
       const inStock = item.status === 'IN_STOCK';
       const card = document.createElement('div');
-      card.className = `fuel-card ${inStock ? 'in-stock' : 'out-of-stock'}`;
+      card.className = `fuel-card ${inStock ? 'in-stock' : 'out-stock'}`;
+      const price = item.price_text
+        ? `<div class="fuel-price">${item.price_text}</div>`
+        : `<div class="fuel-price no-price">${inStock ? 'Цена в чеке' : 'Нет в наличии'}</div>`;
       card.innerHTML = `
         <div class="fuel-card-top">
-          <span class="fuel-card-name">${meta.emoji} ${meta.name}</span>
-          <span class="fuel-status-tag ${inStock ? 'in-stock' : 'out-of-stock'}">${inStock ? 'В наличии' : 'Нет'}</span>
+          <span class="fuel-emoji">${meta.emoji}</span>
+          <span class="fuel-status-dot ${inStock ? 'in' : 'out'}"></span>
         </div>
-        <div class="fuel-card-price">${item.price_text || (inStock ? 'Цена в чеке' : '—')}</div>`;
+        <div class="fuel-name">${meta.name}</div>
+        ${price}`;
       grid.appendChild(card);
     });
   }
+
   document.getElementById('btn-navigate').href = `https://yandex.ru/maps/?rtext=~${station.lat}%2C${station.lon}&rtt=auto`;
   drawer.classList.add('open');
 }
@@ -914,7 +921,7 @@ function renderRouteSummary(distM, durS, list) {
   const container = document.getElementById('route-stations-list');
   container.innerHTML = '';
   if (!list.length) {
-    container.innerHTML = '<div style="text-align:center;padding:12px;color:var(--text-dim);font-size:12px;">Нет АЗС с выбранным топливом по маршруту</div>';
+    container.innerHTML = '<div style="text-align:center;padding:12px;color:var(--text2);font-size:12px;">Нет АЗС с выбранным топливом по маршруту</div>';
   } else {
     list.forEach((st, idx) => {
       const q = QUEUE_INFO[st.queue_status || 'UNKNOWN'] || QUEUE_INFO.UNKNOWN;
@@ -1074,7 +1081,7 @@ function startNavigation() {
 
   // Hide UI elements for clean navi view
   document.querySelector('.route-header')?.classList.add('hidden');
-  document.querySelectorAll('.ctrl-btn, .route-fab, .fuel-filter-bar, .city-badge-header').forEach(
+  document.querySelectorAll('.fab-btn, .top-bar').forEach(
     el => el.classList.add('navi-hidden-temp')
   );
 
