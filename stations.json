@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 25,
-  "updated_at": 1788519044,
+  "updated_at": 1788519080,
   "stations": [
     {
       "id": "1817417962",
@@ -434,7 +434,7 @@
         "AI92": {
           "fuel_type": "AI92",
           "name": "92",
-          "status": "IN_STOCK",
+          "status": "OUT_OF_STOCK",
           "price_text": null,
           "price_value": null
         },
@@ -722,9 +722,9 @@
       "cash_only": false,
       "queue_status": "MEDIUM",
       "queue_label": "🟡 Средняя очередь",
-      "signals_count_per_hour": 0,
+      "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": null,
+      "last_signal_timestamp": 1788517949,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -1192,8 +1192,8 @@
       "chain": null,
       "yandex_url": "https://yandex.ru/maps/org/1053748068",
       "cash_only": false,
-      "queue_status": "LOW",
-      "queue_label": "🟢 Свободно",
+      "queue_status": "UNKNOWN",
+      "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 0,
       "fuel_limit": null,
       "last_signal_timestamp": null,
@@ -1237,65 +1237,6 @@
           "fuel_type": "DIESEL",
           "name": "ДТ",
           "status": "UNKNOWN",
-          "price_text": null,
-          "price_value": null
-        }
-      }
-    },
-    {
-      "id": "1028093616",
-      "name": "Роснефть",
-      "address": "Волгоград, Латошинская ул., 44",
-      "lat": 48.858768,
-      "lon": 44.649987,
-      "chain": "Роснефть",
-      "yandex_url": "https://yandex.ru/maps/org/1028093616",
-      "cash_only": false,
-      "queue_status": "UNKNOWN",
-      "queue_label": "⚪ Обычный поток",
-      "signals_count_per_hour": 1,
-      "fuel_limit": null,
-      "last_signal_timestamp": 1788515370,
-      "fuels": {
-        "AI92": {
-          "fuel_type": "AI92",
-          "name": "92",
-          "status": "UNCERTAIN",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI95": {
-          "fuel_type": "AI95",
-          "name": "95",
-          "status": "UNKNOWN",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI95_PREMIUM": {
-          "fuel_type": "AI95_PREMIUM",
-          "name": "95+",
-          "status": "UNKNOWN",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI98": {
-          "fuel_type": "AI98",
-          "name": "98",
-          "status": "OUT_OF_STOCK",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI100": {
-          "fuel_type": "AI100",
-          "name": "100",
-          "status": "OUT_OF_STOCK",
-          "price_text": null,
-          "price_value": null
-        },
-        "DIESEL": {
-          "fuel_type": "DIESEL",
-          "name": "ДТ",
-          "status": "IN_STOCK",
           "price_text": null,
           "price_value": null
         }
@@ -1373,7 +1314,7 @@
       "queue_label": "🔴 Большая очередь",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788514820,
+      "last_signal_timestamp": 1788515370,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -1472,6 +1413,44 @@
         "DIESEL": {
           "fuel_type": "DIESEL",
           "name": "ДТ",
+          "status": "UNKNOWN",
+          "price_text": null,
+          "price_value": null
+        }
+      }
+    },
+    {
+      "id": "1694797776",
+      "name": "Капелька",
+      "address": "ул. имени Ф.Г. Логинова, 4А, Волжский",
+      "lat": 48.81483,
+      "lon": 44.736457,
+      "chain": null,
+      "yandex_url": "https://yandex.ru/maps/org/1694797776",
+      "cash_only": false,
+      "queue_status": "UNKNOWN",
+      "queue_label": "⚪ Обычный поток",
+      "signals_count_per_hour": 0,
+      "fuel_limit": null,
+      "last_signal_timestamp": null,
+      "fuels": {
+        "DIESEL": {
+          "fuel_type": "DIESEL",
+          "name": "ДТ",
+          "status": "UNKNOWN",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI95": {
+          "fuel_type": "AI95",
+          "name": "АИ-95",
+          "status": "UNKNOWN",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI92": {
+          "fuel_type": "AI92",
+          "name": "АИ-92",
           "status": "UNKNOWN",
           "price_text": null,
           "price_value": null
