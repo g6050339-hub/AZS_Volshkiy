@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 25,
-  "updated_at": 1788517022,
+  "updated_at": 1788517058,
   "stations": [
     {
       "id": "1817417962",
@@ -14,7 +14,7 @@
       "cash_only": false,
       "queue_status": "HIGH",
       "queue_label": "🔴 Большая очередь",
-      "signals_count_per_hour": 2,
+      "signals_count_per_hour": 1,
       "fuel_limit": null,
       "last_signal_timestamp": 1788515309,
       "fuels": {
@@ -73,9 +73,9 @@
       "cash_only": false,
       "queue_status": "HIGH",
       "queue_label": "🔴 Большая очередь",
-      "signals_count_per_hour": 1,
+      "signals_count_per_hour": 2,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788512668,
+      "last_signal_timestamp": 1788515637,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -661,8 +661,8 @@
       "chain": "Татнефть",
       "yandex_url": "https://yandex.ru/maps/org/30406389541",
       "cash_only": false,
-      "queue_status": "HIGH",
-      "queue_label": "🔴 Большая очередь",
+      "queue_status": "MEDIUM",
+      "queue_label": "🟡 Средняя очередь",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
       "last_signal_timestamp": 1788514638,
@@ -670,7 +670,7 @@
         "AI92": {
           "fuel_type": "AI92",
           "name": "92",
-          "status": "UNCERTAIN",
+          "status": "IN_STOCK",
           "price_text": null,
           "price_value": null
         },
