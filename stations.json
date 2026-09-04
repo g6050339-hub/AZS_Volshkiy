@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 25,
-  "updated_at": 1788542457,
+  "updated_at": 1788542499,
   "stations": [
     {
       "id": "1817417962",
@@ -488,7 +488,7 @@
       "queue_label": "🔴 Большая очередь",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788538349,
+      "last_signal_timestamp": 1788538773,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -665,7 +665,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788538349,
+      "last_signal_timestamp": 1788538773,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -1074,11 +1074,11 @@
       "chain": "Газпром",
       "yandex_url": "https://yandex.ru/maps/org/190378037547",
       "cash_only": false,
-      "queue_status": "MEDIUM",
-      "queue_label": "🟡 Средняя очередь",
+      "queue_status": "HIGH",
+      "queue_label": "🔴 Большая очередь",
       "signals_count_per_hour": 5,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788539890,
+      "last_signal_timestamp": 1788541602,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -1373,7 +1373,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788538349,
+      "last_signal_timestamp": 1788538773,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
