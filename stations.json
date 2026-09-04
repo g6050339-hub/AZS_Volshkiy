@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 25,
-  "updated_at": 1788535222,
+  "updated_at": 1788535257,
   "stations": [
     {
       "id": "1817417962",
@@ -427,9 +427,9 @@
       "cash_only": false,
       "queue_status": "LOW",
       "queue_label": "🟢 Свободно",
-      "signals_count_per_hour": 3,
+      "signals_count_per_hour": 2,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788531735,
+      "last_signal_timestamp": 1788534079,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -783,7 +783,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788529416,
+      "last_signal_timestamp": 1788531501,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -899,14 +899,14 @@
       "cash_only": false,
       "queue_status": "HIGH",
       "queue_label": "🔴 Большая очередь",
-      "signals_count_per_hour": 0,
+      "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": null,
+      "last_signal_timestamp": 1788532879,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
           "name": "92",
-          "status": "UNKNOWN",
+          "status": "UNCERTAIN",
           "price_text": null,
           "price_value": null
         },
@@ -1369,11 +1369,11 @@
       "chain": "Татнефть",
       "yandex_url": "https://yandex.ru/maps/org/1403855927",
       "cash_only": false,
-      "queue_status": "HIGH",
-      "queue_label": "🔴 Большая очередь",
-      "signals_count_per_hour": 1,
+      "queue_status": "UNKNOWN",
+      "queue_label": "⚪ Обычный поток",
+      "signals_count_per_hour": 0,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788529416,
+      "last_signal_timestamp": 1788527244,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -1413,7 +1413,7 @@
         "DIESEL": {
           "fuel_type": "DIESEL",
           "name": "ДТ",
-          "status": "IN_STOCK",
+          "status": "UNCERTAIN",
           "price_text": null,
           "price_value": null
         }
