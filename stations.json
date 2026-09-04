@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 25,
-  "updated_at": 1788518112,
+  "updated_at": 1788518148,
   "stations": [
     {
       "id": "1817417962",
@@ -1243,65 +1243,6 @@
       }
     },
     {
-      "id": "1028093616",
-      "name": "Роснефть",
-      "address": "Волгоград, Латошинская ул., 44",
-      "lat": 48.858768,
-      "lon": 44.649987,
-      "chain": "Роснефть",
-      "yandex_url": "https://yandex.ru/maps/org/1028093616",
-      "cash_only": false,
-      "queue_status": "UNKNOWN",
-      "queue_label": "⚪ Обычный поток",
-      "signals_count_per_hour": 1,
-      "fuel_limit": null,
-      "last_signal_timestamp": 1788514292,
-      "fuels": {
-        "AI92": {
-          "fuel_type": "AI92",
-          "name": "92",
-          "status": "UNCERTAIN",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI95": {
-          "fuel_type": "AI95",
-          "name": "95",
-          "status": "UNKNOWN",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI95_PREMIUM": {
-          "fuel_type": "AI95_PREMIUM",
-          "name": "95+",
-          "status": "UNKNOWN",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI98": {
-          "fuel_type": "AI98",
-          "name": "98",
-          "status": "OUT_OF_STOCK",
-          "price_text": null,
-          "price_value": null
-        },
-        "AI100": {
-          "fuel_type": "AI100",
-          "name": "100",
-          "status": "OUT_OF_STOCK",
-          "price_text": null,
-          "price_value": null
-        },
-        "DIESEL": {
-          "fuel_type": "DIESEL",
-          "name": "ДТ",
-          "status": "IN_STOCK",
-          "price_text": null,
-          "price_value": null
-        }
-      }
-    },
-    {
       "id": "130148620265",
       "name": "Бензобот",
       "address": "Волжский, просп. Металлургов, 15А",
@@ -1430,6 +1371,65 @@
       "cash_only": false,
       "queue_status": "UNKNOWN",
       "queue_label": "⚪ Обычный поток",
+      "signals_count_per_hour": 0,
+      "fuel_limit": null,
+      "last_signal_timestamp": null,
+      "fuels": {
+        "AI92": {
+          "fuel_type": "AI92",
+          "name": "92",
+          "status": "UNKNOWN",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI95": {
+          "fuel_type": "AI95",
+          "name": "95",
+          "status": "UNKNOWN",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI95_PREMIUM": {
+          "fuel_type": "AI95_PREMIUM",
+          "name": "95+",
+          "status": "OUT_OF_STOCK",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI98": {
+          "fuel_type": "AI98",
+          "name": "98",
+          "status": "OUT_OF_STOCK",
+          "price_text": null,
+          "price_value": null
+        },
+        "AI100": {
+          "fuel_type": "AI100",
+          "name": "100",
+          "status": "OUT_OF_STOCK",
+          "price_text": null,
+          "price_value": null
+        },
+        "DIESEL": {
+          "fuel_type": "DIESEL",
+          "name": "ДТ",
+          "status": "UNKNOWN",
+          "price_text": null,
+          "price_value": null
+        }
+      }
+    },
+    {
+      "id": "30092387635",
+      "name": "VipOil",
+      "address": "Волгоград, ул. Николая Отрады, 15Д",
+      "lat": 48.820555,
+      "lon": 44.634128,
+      "chain": "VipOil",
+      "yandex_url": "https://yandex.ru/maps/org/30092387635",
+      "cash_only": false,
+      "queue_status": "LOW",
+      "queue_label": "🟢 Свободно",
       "signals_count_per_hour": 0,
       "fuel_limit": null,
       "last_signal_timestamp": null,
