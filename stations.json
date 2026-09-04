@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 25,
-  "updated_at": 1788490770,
+  "updated_at": 1788490806,
   "stations": [
     {
       "id": "1817417962",
@@ -493,7 +493,7 @@
         "AI92": {
           "fuel_type": "AI92",
           "name": "92",
-          "status": "UNCERTAIN",
+          "status": "UNKNOWN",
           "price_text": null,
           "price_value": null
         },
@@ -606,7 +606,7 @@
       "queue_label": "🟢 Свободно",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788486821,
+      "last_signal_timestamp": 1788487120,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
