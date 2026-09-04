@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 25,
-  "updated_at": 1788516081,
+  "updated_at": 1788516117,
   "stations": [
     {
       "id": "1817417962",
@@ -193,7 +193,7 @@
       "queue_label": "🟢 Свободно",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788512076,
+      "last_signal_timestamp": 1788515022,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -543,16 +543,16 @@
       "chain": "Лукойл",
       "yandex_url": "https://yandex.ru/maps/org/1166376984",
       "cash_only": false,
-      "queue_status": "UNKNOWN",
-      "queue_label": "⚪ Обычный поток",
-      "signals_count_per_hour": 1,
+      "queue_status": "HIGH",
+      "queue_label": "🔴 Большая очередь",
+      "signals_count_per_hour": 3,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788513876,
+      "last_signal_timestamp": 1788515163,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
           "name": "92",
-          "status": "IN_STOCK",
+          "status": "OUT_OF_STOCK",
           "price_text": null,
           "price_value": null
         },
@@ -1074,11 +1074,11 @@
       "chain": "Татнефть",
       "yandex_url": "https://yandex.ru/maps/org/1933105753",
       "cash_only": false,
-      "queue_status": "UNKNOWN",
-      "queue_label": "⚪ Обычный поток",
+      "queue_status": "MEDIUM",
+      "queue_label": "🟡 Средняя очередь",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788512076,
+      "last_signal_timestamp": 1788512447,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -1251,11 +1251,11 @@
       "chain": "Роснефть",
       "yandex_url": "https://yandex.ru/maps/org/1028093616",
       "cash_only": false,
-      "queue_status": "LOW",
-      "queue_label": "🟢 Свободно",
-      "signals_count_per_hour": 1,
+      "queue_status": "UNKNOWN",
+      "queue_label": "⚪ Обычный поток",
+      "signals_count_per_hour": 0,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788512076,
+      "last_signal_timestamp": 1788507573,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -1267,14 +1267,14 @@
         "AI95": {
           "fuel_type": "AI95",
           "name": "95",
-          "status": "OUT_OF_STOCK",
+          "status": "UNKNOWN",
           "price_text": null,
           "price_value": null
         },
         "AI95_PREMIUM": {
           "fuel_type": "AI95_PREMIUM",
           "name": "95+",
-          "status": "OUT_OF_STOCK",
+          "status": "UNKNOWN",
           "price_text": null,
           "price_value": null
         },
@@ -1295,7 +1295,7 @@
         "DIESEL": {
           "fuel_type": "DIESEL",
           "name": "ДТ",
-          "status": "IN_STOCK",
+          "status": "UNCERTAIN",
           "price_text": null,
           "price_value": null
         }
