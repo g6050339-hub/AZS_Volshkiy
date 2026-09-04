@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 25,
-  "updated_at": 1788530503,
+  "updated_at": 1788530539,
   "stations": [
     {
       "id": "1817417962",
@@ -779,11 +779,11 @@
       "chain": "Газпром",
       "yandex_url": "https://yandex.ru/maps/org/37225209495",
       "cash_only": false,
-      "queue_status": "MEDIUM",
-      "queue_label": "🟡 Средняя очередь",
-      "signals_count_per_hour": 0,
+      "queue_status": "UNKNOWN",
+      "queue_label": "⚪ Обычный поток",
+      "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788520741,
+      "last_signal_timestamp": 1788528741,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
