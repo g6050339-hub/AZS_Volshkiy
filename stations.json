@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 25,
-  "updated_at": 1788516153,
+  "updated_at": 1788516189,
   "stations": [
     {
       "id": "1817417962",
@@ -604,14 +604,14 @@
       "cash_only": false,
       "queue_status": "MEDIUM",
       "queue_label": "🟡 Средняя очередь",
-      "signals_count_per_hour": 3,
+      "signals_count_per_hour": 5,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788514708,
+      "last_signal_timestamp": 1788515078,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
           "name": "92",
-          "status": "IN_STOCK",
+          "status": "OUT_OF_STOCK",
           "price_text": null,
           "price_value": null
         },
@@ -625,7 +625,7 @@
         "AI95_PREMIUM": {
           "fuel_type": "AI95_PREMIUM",
           "name": "95+",
-          "status": "IN_STOCK",
+          "status": "OUT_OF_STOCK",
           "price_text": null,
           "price_value": null
         },
