@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 25,
-  "updated_at": 1788596042,
+  "updated_at": 1788596081,
   "stations": [
     {
       "id": "1817417962",
@@ -665,7 +665,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788592242,
+      "last_signal_timestamp": 1788592402,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -1074,8 +1074,8 @@
       "chain": "Газпром",
       "yandex_url": "https://yandex.ru/maps/org/190378037547",
       "cash_only": false,
-      "queue_status": "HIGH",
-      "queue_label": "🔴 Большая очередь",
+      "queue_status": "MEDIUM",
+      "queue_label": "🟡 Средняя очередь",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
       "last_signal_timestamp": 1788594528,
@@ -1373,7 +1373,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788592242,
+      "last_signal_timestamp": 1788592402,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
