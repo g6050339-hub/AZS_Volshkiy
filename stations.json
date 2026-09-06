@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 25,
-  "updated_at": 1788660326,
+  "updated_at": 1788660362,
   "stations": [
     {
       "id": "1817417962",
@@ -606,7 +606,7 @@
       "queue_label": "🔴 Большая очередь",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788656126,
+      "last_signal_timestamp": 1788656490,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
