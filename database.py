@@ -74,6 +74,17 @@ class Database:
                 );
             """)
 
+            await db.execute("""
+                CREATE TABLE IF NOT EXISTS queue_reports (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    station_id TEXT NOT NULL,
+                    user_id INTEGER,
+                    queue_status TEXT NOT NULL,
+                    created_at INTEGER NOT NULL
+                );
+            """)
+            await db.execute("CREATE INDEX IF NOT EXISTS idx_qr_station_created ON queue_reports(station_id, created_at);")
+
             await db.commit()
             logger.info("Database initialized successfully.")
 
@@ -313,6 +324,62 @@ class Database:
             await db.commit()
 
         return events
+
+    async def add_queue_report(self, station_id: str, queue_status: str, user_id: Optional[int] = None) -> bool:
+        """Saves user crowd-sourced queue report with timestamp."""
+        import time
+        now = int(time.time())
+        async with aiosqlite.connect(self.db_path) as db:
+            if user_id:
+                cursor = await db.execute(
+                    "SELECT created_at FROM queue_reports WHERE station_id = ? AND user_id = ? ORDER BY created_at DESC LIMIT 1",
+                    (station_id, user_id)
+                )
+                row = await cursor.fetchone()
+                if row and (now - row[0] < 60):
+                    return False  # Throttled (1 report per minute)
+
+            await db.execute(
+                "INSERT INTO queue_reports (station_id, user_id, queue_status, created_at) VALUES (?, ?, ?, ?)",
+                (station_id, user_id, queue_status, now)
+            )
+            await db.commit()
+            return True
+
+    async def get_active_queue_summaries(self, window_seconds: int = 3600) -> Dict[str, Dict[str, Any]]:
+        """
+        Returns aggregated user reports for all stations within the last `window_seconds`.
+        """
+        import time
+        since = int(time.time()) - window_seconds
+        async with aiosqlite.connect(self.db_path) as db:
+            db.row_factory = aiosqlite.Row
+            cursor = await db.execute("""
+                SELECT station_id, queue_status, created_at
+                FROM queue_reports
+                WHERE created_at >= ?
+                ORDER BY created_at ASC
+            """, (since,))
+            rows = await cursor.fetchall()
+
+            summaries: Dict[str, Dict[str, Any]] = {}
+            for r in rows:
+                st_id = r["station_id"]
+                status = r["queue_status"]
+                ts = r["created_at"]
+                if st_id not in summaries:
+                    summaries[st_id] = {
+                        "latest_status": status,
+                        "latest_timestamp": ts,
+                        "total_reports": 0,
+                        "counts": {"LOW": 0, "MEDIUM": 0, "HIGH": 0}
+                    }
+                summaries[st_id]["latest_status"] = status
+                summaries[st_id]["latest_timestamp"] = ts
+                summaries[st_id]["total_reports"] += 1
+                if status in summaries[st_id]["counts"]:
+                    summaries[st_id]["counts"][status] += 1
+            return summaries
 
 
 db = Database()

@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./style.css?v=14.0">
+  <link rel="stylesheet" href="./style.css?v=15.0">
 </head>
 <body>
   <div id="app">
@@ -183,13 +183,22 @@
       </div>
       <div class="queue-status-card" id="queue-card">
         <div class="queue-header">
-          <span class="queue-label-text">🚦 Очередь:</span>
+          <span class="queue-label-text">🚦 Очередь (Яндекс):</span>
           <span class="queue-badge q-unknown" id="queue-badge">Обычный поток</span>
         </div>
-        <div class="queue-detail" id="queue-detail">🕒 Данные телеметрии</div>
+        <div class="queue-detail" id="queue-detail">🕒 Данные телеметрии дорожного потока</div>
         <div id="queue-warnings" class="queue-warnings"></div>
+
+        <div class="user-queue-block" id="user-queue-block">
+          <div class="user-queue-header">
+            <span class="user-queue-title">👥 Отметки наших водителей:</span>
+            <span class="user-queue-badge" id="user-queue-badge">Нет данных</span>
+          </div>
+          <div class="user-queue-sub" id="user-queue-sub">Будьте первым, кто отметит обстановку!</div>
+        </div>
+
         <div class="report-queue-box">
-          <span class="report-title">Вы на этой АЗС? Сообщите очередь:</span>
+          <span class="report-title">Вы на этой АЗС? Сообщите обстановку:</span>
           <div class="report-buttons">
             <button class="report-btn" data-report="LOW">🟢 Свободно</button>
             <button class="report-btn" data-report="MEDIUM">🟡 5–10 машин</button>
@@ -250,6 +259,6 @@
     </div>
 
   </div>
-  <script src="./app.js?v=14.0"></script>
+  <script src="./app.js?v=15.0"></script>
 </body>
 </html>

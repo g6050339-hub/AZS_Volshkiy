@@ -40,11 +40,18 @@ logger = logging.getLogger("VolzhskyFuelMonitor")
 async def sync_stations_json(stations):
     """Saves stations.json locally and syncs to GitHub repository."""
     try:
+        user_queues = await db.get_active_queue_summaries(window_seconds=3600)
+        stations_data = []
+        for s in stations:
+            d = s.to_dict()
+            d["user_queue"] = user_queues.get(s.id)
+            stations_data.append(d)
+
         data_dict = {
             "status": "ok",
-            "count": len(stations),
+            "count": len(stations_data),
             "updated_at": int(time.time()),
-            "stations": [s.to_dict() for s in stations]
+            "stations": stations_data
         }
         tmp_file = "stations.json.tmp"
         with open(tmp_file, "w", encoding="utf-8") as f:

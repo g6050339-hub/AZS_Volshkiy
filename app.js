@@ -380,29 +380,75 @@ document.querySelectorAll('.rf-pill').forEach(pill => {
 drawerClose.addEventListener('click', () => closeDrawer());
 
 document.querySelectorAll('.report-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
+  btn.addEventListener('click', async () => {
     if (!selectedStation) return;
     const val = btn.dataset.report;
     hapticNotification('success');
-    selectedStation.queue_status = val;
+
+    // Optimistic local update
+    if (!selectedStation.user_queue) {
+      selectedStation.user_queue = {
+        latest_status: val,
+        latest_timestamp: Math.floor(Date.now() / 1000),
+        total_reports: 1,
+        counts: { LOW: 0, MEDIUM: 0, HIGH: 0 }
+      };
+    } else {
+      selectedStation.user_queue.latest_status = val;
+      selectedStation.user_queue.latest_timestamp = Math.floor(Date.now() / 1000);
+      selectedStation.user_queue.total_reports += 1;
+    }
+    if (selectedStation.user_queue.counts) {
+      selectedStation.user_queue.counts[val] = (selectedStation.user_queue.counts[val] || 0) + 1;
+    }
+
     renderQueueCard(selectedStation);
     updateMarkersVisibility();
+
     btn.textContent = '✅ Принято!';
     setTimeout(() => {
-      btn.textContent = val === 'LOW' ? '🟢 Свободно' : val === 'MEDIUM' ? '🟡 5-10 машин' : '🔴 Затор';
+      btn.textContent = val === 'LOW' ? '🟢 Свободно' : val === 'MEDIUM' ? '🟡 5–10 машин' : '🔴 Затор';
     }, 2000);
+
+    // Send report to backend API
+    try {
+      const url = `${API_BASE_URL || ''}/api/queue-reports`;
+      await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          station_id: selectedStation.id,
+          queue_status: val
+        })
+      });
+      console.log('[QUEUE] Report successfully sent for station', selectedStation.id);
+    } catch (err) {
+      console.warn('[QUEUE] Failed to send report to API:', err);
+    }
   });
 });
 
 function renderQueueCard(station) {
+  // 1. Yandex Telemetry Queue
   const q = QUEUE_INFO[station.queue_status || 'UNKNOWN'] || QUEUE_INFO.UNKNOWN;
   const badge = document.getElementById('queue-badge');
   badge.className = `queue-badge ${q.badgeClass}`;
   badge.textContent = q.text;
+
   const activity = station.signals_count_per_hour || 0;
-  document.getElementById('queue-detail').textContent = activity > 0
-    ? `⚡ Активность водителей: ${activity} чел./час`
-    : '🕒 Данные телеметрии дорожного потока';
+  let detailText = '🕒 Данные телеметрии дорожного потока';
+  if (activity > 0) {
+    detailText = `⚡ Активность водителей: ${activity} чел./час`;
+  }
+  if (station.last_signal_timestamp) {
+    const minAgo = Math.max(1, Math.round((Date.now() / 1000 - station.last_signal_timestamp) / 60));
+    if (minAgo < 180) {
+      detailText += ` · сигнал ${minAgo} мин. назад`;
+    }
+  }
+  document.getElementById('queue-detail').textContent = detailText;
+
+  // Warnings
   const warnings = document.getElementById('queue-warnings');
   warnings.innerHTML = '';
   if (station.cash_only) {
@@ -410,6 +456,28 @@ function renderQueueCard(station) {
   }
   if (station.fuel_limit) {
     warnings.innerHTML += `<div class="warning-pill">⛔ <b>Ограничение:</b> ${station.fuel_limit}</div>`;
+  }
+
+  // 2. User Crowdsourced Queue
+  const userQueue = station.user_queue;
+  const uBadge = document.getElementById('user-queue-badge');
+  const uSub = document.getElementById('user-queue-sub');
+
+  if (uBadge && uSub) {
+    if (userQueue && userQueue.total_reports > 0) {
+      const uQInfo = QUEUE_INFO[userQueue.latest_status || 'UNKNOWN'] || QUEUE_INFO.UNKNOWN;
+      uBadge.className = `user-queue-badge ${uQInfo.badgeClass}`;
+      uBadge.textContent = `${uQInfo.emoji} ${uQInfo.text}`;
+
+      const minAgo = Math.max(1, Math.round((Date.now() / 1000 - userQueue.latest_timestamp) / 60));
+      const timeStr = minAgo < 60 ? `${minAgo} мин. назад` : `${Math.round(minAgo / 60)} ч. назад`;
+      const countStr = userQueue.total_reports === 1 ? '1 отметка' : `${userQueue.total_reports} отметки`;
+      uSub.textContent = `Подтвердили водители (${countStr}) · посл. ${timeStr}`;
+    } else {
+      uBadge.className = 'user-queue-badge';
+      uBadge.textContent = 'Нет свежих отметок';
+      uSub.textContent = 'Будьте первым, кто отметит обстановку на этой АЗС!';
+    }
   }
 }
 

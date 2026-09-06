@@ -8,6 +8,7 @@ from typing import Dict, Any
 
 from config import settings
 from parser import VolzhskyFuelParser
+from database import db
 
 logger = logging.getLogger(__name__)
 
@@ -103,7 +104,12 @@ async def handle_api_stations(request: web.Request) -> web.Response:
                 spn = 0.28
 
         stations = await parser.fetch_gas_stations(lat=lat, lon=lon, spn_lon=spn, spn_lat=spn)
-        stations_data = [st.to_dict() for st in stations]
+        user_queues = await db.get_active_queue_summaries(window_seconds=3600)
+        stations_data = []
+        for st in stations:
+            d = st.to_dict()
+            d["user_queue"] = user_queues.get(st.id)
+            stations_data.append(d)
 
         return web.json_response({
             "status": "ok",
@@ -150,6 +156,8 @@ async def handle_api_queue_report(request: web.Request) -> web.Response:
         station_id = data.get("station_id")
         queue_status = data.get("queue_status")
 
+        user_id = data.get("user_id")
+
         if not station_id or queue_status not in ("LOW", "MEDIUM", "HIGH"):
             return web.json_response(
                 {"status": "error", "code": "INVALID_REPORT", "message": "Invalid station_id or queue_status"},
@@ -157,8 +165,9 @@ async def handle_api_queue_report(request: web.Request) -> web.Response:
                 headers=CORS_HEADERS
             )
 
-        logger.info(f"[QUEUE REPORT] Station {station_id}: status {queue_status}")
-        return web.json_response({"status": "ok", "message": "Report received"}, headers=CORS_HEADERS)
+        saved = await db.add_queue_report(station_id, queue_status, user_id=user_id)
+        logger.info(f"[QUEUE REPORT] Station {station_id}: status {queue_status} (saved={saved})")
+        return web.json_response({"status": "ok", "message": "Report received", "saved": saved}, headers=CORS_HEADERS)
     except Exception as e:
         logger.error(f"Error handling /api/queue-reports: {e}", exc_info=True)
         return web.json_response(
