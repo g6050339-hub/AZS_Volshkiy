@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 25,
-  "updated_at": 1788677270,
+  "updated_at": 1788677306,
   "stations": [
     {
       "id": "1817417962",
@@ -429,7 +429,7 @@
       "queue_label": "🟢 Свободно",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788673352,
+      "last_signal_timestamp": 1788673639,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -788,21 +788,21 @@
         "AI92": {
           "fuel_type": "AI92",
           "name": "92",
-          "status": "OUT_OF_STOCK",
+          "status": "IN_STOCK",
           "price_text": null,
           "price_value": null
         },
         "AI95": {
           "fuel_type": "AI95",
           "name": "95",
-          "status": "OUT_OF_STOCK",
+          "status": "IN_STOCK",
           "price_text": null,
           "price_value": null
         },
         "AI95_PREMIUM": {
           "fuel_type": "AI95_PREMIUM",
           "name": "95+",
-          "status": "OUT_OF_STOCK",
+          "status": "IN_STOCK",
           "price_text": null,
           "price_value": null
         },
@@ -1373,7 +1373,7 @@
       "queue_label": "🔴 Большая очередь",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788673352,
+      "last_signal_timestamp": 1788673639,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
