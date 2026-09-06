@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 25,
-  "updated_at": 1788674522,
+  "updated_at": 1788674557,
   "stations": [
     {
       "id": "1817417962",
@@ -665,7 +665,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788670776,
+      "last_signal_timestamp": 1788670877,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -1369,11 +1369,11 @@
       "chain": "Татнефть",
       "yandex_url": "https://yandex.ru/maps/org/1403855927",
       "cash_only": false,
-      "queue_status": "UNKNOWN",
-      "queue_label": "⚪ Обычный поток",
+      "queue_status": "MEDIUM",
+      "queue_label": "🟡 Средняя очередь",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788670776,
+      "last_signal_timestamp": 1788670877,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
