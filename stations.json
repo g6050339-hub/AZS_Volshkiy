@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 25,
-  "updated_at": 1788677662,
+  "updated_at": 1788677698,
   "stations": [
     {
       "id": "1817417962",
@@ -602,11 +602,11 @@
       "chain": "Лукойл",
       "yandex_url": "https://yandex.ru/maps/org/1166376984",
       "cash_only": false,
-      "queue_status": "UNKNOWN",
-      "queue_label": "⚪ Обычный поток",
+      "queue_status": "MEDIUM",
+      "queue_label": "🟡 Средняя очередь",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788673639,
+      "last_signal_timestamp": 1788674036,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -1192,8 +1192,8 @@
       "chain": "Татнефть",
       "yandex_url": "https://yandex.ru/maps/org/1933105753",
       "cash_only": false,
-      "queue_status": "MEDIUM",
-      "queue_label": "🟡 Средняя очередь",
+      "queue_status": "HIGH",
+      "queue_label": "🔴 Большая очередь",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
       "last_signal_timestamp": 1788674798,
