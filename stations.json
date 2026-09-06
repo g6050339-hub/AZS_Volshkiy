@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 25,
-  "updated_at": 1788689896,
+  "updated_at": 1788689934,
   "stations": [
     {
       "id": "1817417962",
@@ -16,7 +16,7 @@
       "queue_label": "🔴 Большая очередь",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788686200,
+      "last_signal_timestamp": 1788686298,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -75,7 +75,7 @@
       "queue_label": "🔴 Большая очередь",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788685456,
+      "last_signal_timestamp": 1788686298,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -248,11 +248,11 @@
       "chain": "Татнефть",
       "yandex_url": "https://yandex.ru/maps/org/1100266843",
       "cash_only": false,
-      "queue_status": "HIGH",
-      "queue_label": "🔴 Большая очередь",
+      "queue_status": "UNKNOWN",
+      "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788685854,
+      "last_signal_timestamp": 1788686298,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -604,9 +604,9 @@
       "cash_only": false,
       "queue_status": "UNKNOWN",
       "queue_label": "⚪ Обычный поток",
-      "signals_count_per_hour": 1,
+      "signals_count_per_hour": 3,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788687191,
+      "last_signal_timestamp": 1788689154,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -722,7 +722,7 @@
       "cash_only": false,
       "queue_status": "HIGH",
       "queue_label": "🔴 Большая очередь",
-      "signals_count_per_hour": 4,
+      "signals_count_per_hour": 3,
       "fuel_limit": null,
       "last_signal_timestamp": 1788686670,
       "fuels": {
@@ -1017,9 +1017,9 @@
       "cash_only": false,
       "queue_status": "UNKNOWN",
       "queue_label": "⚪ Обычный поток",
-      "signals_count_per_hour": 0,
+      "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": null,
+      "last_signal_timestamp": 1788689172,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
