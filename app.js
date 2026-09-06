@@ -83,6 +83,18 @@ let routeCasingPolyline = null;
 let routeFuelFilter = 'ALL';
 let stationsOnRoute = [];
 
+// In-app navigation live state (declared here to avoid TDZ errors on initial load)
+let naviActive = false;
+let naviWatchId = null;
+let naviUserMarker = null;
+let naviLastPos = null;
+let naviRouteCoords = null;
+let naviHeadingUp = true; // camera follows heading by default
+let naviCurrentHeading = 0;
+let naviSmoothedHeading = 0;
+let naviWakeLock = null;
+let naviGpsRetryTimer = null;
+
 // Nominatim debounce timers
 let debounceTimerA = null;
 let debounceTimerB = null;
@@ -525,13 +537,18 @@ async function loadTunnelUrl() {
   console.warn('[API] No API backend available');
   return false;
 }
-loadTunnelUrl();
+const tunnelUrlPromise = loadTunnelUrl();
 
 async function fetchRealStations(city) {
   // Return from cache if available
   if (realStationsCache[city.id]) {
     console.log('[API] Cache hit for', city.name);
     return realStationsCache[city.id];
+  }
+
+  // Ensure tunnel URL is resolved before fetching remote city
+  if (!API_BASE_URL && tunnelUrlPromise) {
+    await tunnelUrlPromise;
   }
 
   const [cLat, cLon] = city.coords;
@@ -1067,17 +1084,6 @@ loadStationsForCity(currentCity);
 // ============================================================
 // IN-APP NAVIGATION MODE
 // ============================================================
-let naviActive = false;
-let naviWatchId = null;
-let naviUserMarker = null;
-let naviLastPos = null;
-let naviRouteCoords = null;
-let naviHeadingUp = true; // camera follows heading by default
-let naviCurrentHeading = 0;
-let naviSmoothedHeading = 0;
-let naviWakeLock = null;
-let naviGpsRetryTimer = null;
-
 const naviHud = document.getElementById('navi-hud');
 const naviSpeedEl = document.getElementById('navi-speed');
 const naviDestDistEl = document.getElementById('navi-dest-dist');

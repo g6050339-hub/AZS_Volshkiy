@@ -46,8 +46,10 @@ async def sync_stations_json(stations):
             "updated_at": int(time.time()),
             "stations": [s.to_dict() for s in stations]
         }
-        with open("stations.json", "w", encoding="utf-8") as f:
+        tmp_file = "stations.json.tmp"
+        with open(tmp_file, "w", encoding="utf-8") as f:
             json.dump(data_dict, f, ensure_ascii=False, indent=2)
+        os.replace(tmp_file, "stations.json")
         
         # Async git push
         proc = await asyncio.create_subprocess_shell(

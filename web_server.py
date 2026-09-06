@@ -12,17 +12,51 @@ from parser import VolzhskyFuelParser
 logger = logging.getLogger(__name__)
 
 parser = VolzhskyFuelParser()
-STATIC_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+CORS_HEADERS = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+}
+
+
+def _serve_file(filename: str, content_type: str) -> web.Response:
+    filepath = os.path.join(BASE_DIR, filename)
+    if not os.path.exists(filepath):
+        return web.Response(text="Not Found", status=404, headers=CORS_HEADERS)
+    with open(filepath, "r", encoding="utf-8") as f:
+        content = f.read()
+    return web.Response(text=content, content_type=content_type, charset="utf-8", headers=CORS_HEADERS)
 
 
 async def handle_index(request: web.Request) -> web.Response:
     """Serves the main index.html for Telegram Mini App."""
-    index_path = os.path.join(STATIC_DIR, "index.html")
-    if not os.path.exists(index_path):
-        return web.Response(text="<h1>Mini App HTML not found</h1>", content_type="text/html", status=404)
-    with open(index_path, "r", encoding="utf-8") as f:
-        html = f.read()
-    return web.Response(text=html, content_type="text/html", charset="utf-8")
+    return _serve_file("index.html", "text/html")
+
+
+async def handle_style(request: web.Request) -> web.Response:
+    """Serves style.css."""
+    return _serve_file("style.css", "text/css")
+
+
+async def handle_app_js(request: web.Request) -> web.Response:
+    """Serves app.js."""
+    return _serve_file("app.js", "application/javascript")
+
+
+async def handle_stations_json(request: web.Request) -> web.Response:
+    """Serves stations.json snapshot."""
+    return _serve_file("stations.json", "application/json")
+
+
+async def handle_tunnel_url_json(request: web.Request) -> web.Response:
+    """Serves tunnel_url.json."""
+    return _serve_file("tunnel_url.json", "application/json")
+
+
+async def handle_cors_options(request: web.Request) -> web.Response:
+    return web.Response(headers=CORS_HEADERS)
 
 
 async def handle_api_stations(request: web.Request) -> web.Response:
@@ -32,28 +66,57 @@ async def handle_api_stations(request: web.Request) -> web.Response:
         lat_str = request.rel_url.query.get('lat')
         lon_str = request.rel_url.query.get('lon')
         spn_str = request.rel_url.query.get('spn', '0.28')
-        
-        lat = float(lat_str) if lat_str else None
-        lon = float(lon_str) if lon_str else None
-        spn = float(spn_str)
-        
+
+        lat = None
+        lon = None
+        spn = 0.28
+
+        if lat_str or lon_str:
+            if not (lat_str and lon_str):
+                return web.json_response(
+                    {"status": "error", "code": "INVALID_QUERY", "message": "Both lat and lon must be provided"},
+                    status=400,
+                    headers=CORS_HEADERS
+                )
+            try:
+                lat = float(lat_str)
+                lon = float(lon_str)
+                if not (-90.0 <= lat <= 90.0 and -180.0 <= lon <= 180.0):
+                    return web.json_response(
+                        {"status": "error", "code": "INVALID_QUERY", "message": "Coordinates out of bounds"},
+                        status=400,
+                        headers=CORS_HEADERS
+                    )
+            except ValueError:
+                return web.json_response(
+                    {"status": "error", "code": "INVALID_QUERY", "message": "lat and lon must be numbers"},
+                    status=400,
+                    headers=CORS_HEADERS
+                )
+
+        if spn_str:
+            try:
+                spn = float(spn_str)
+                if not (0.01 <= spn <= 1.0):
+                    spn = 0.28
+            except ValueError:
+                spn = 0.28
+
         stations = await parser.fetch_gas_stations(lat=lat, lon=lon, spn_lon=spn, spn_lat=spn)
         stations_data = [st.to_dict() for st in stations]
-        
-        headers = {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type"
-        }
-        
+
         return web.json_response({
             "status": "ok",
             "count": len(stations_data),
             "stations": stations_data
-        }, headers=headers)
+        }, headers=CORS_HEADERS)
     except Exception as e:
         logger.error(f"Error handling /api/stations: {e}", exc_info=True)
-        return web.json_response({"status": "error", "message": str(e)}, status=500, headers={"Access-Control-Allow-Origin": "*"})
+        return web.json_response(
+            {"status": "error", "code": "UPSTREAM_UNAVAILABLE", "message": "Fuel data temporarily unavailable"},
+            status=503,
+            headers=CORS_HEADERS
+        )
 
 
 async def handle_api_summary(request: web.Request) -> web.Response:
@@ -66,33 +129,67 @@ async def handle_api_summary(request: web.Request) -> web.Response:
                 if item.status == "IN_STOCK":
                     summary[ftype] = summary.get(ftype, 0) + 1
 
-        headers = {"Access-Control-Allow-Origin": "*"}
         return web.json_response({
             "status": "ok",
             "total_stations": len(stations),
             "available_by_fuel": summary
-        }, headers=headers)
+        }, headers=CORS_HEADERS)
     except Exception as e:
         logger.error(f"Error handling /api/summary: {e}", exc_info=True)
-        return web.json_response({"status": "error", "message": str(e)}, status=500, headers={"Access-Control-Allow-Origin": "*"})
+        return web.json_response(
+            {"status": "error", "code": "UPSTREAM_UNAVAILABLE", "message": "Fuel summary temporarily unavailable"},
+            status=503,
+            headers=CORS_HEADERS
+        )
 
-async def handle_cors_options(request: web.Request) -> web.Response:
-    return web.Response(headers={
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type",
-    })
+
+async def handle_api_queue_report(request: web.Request) -> web.Response:
+    """Accepts crowd-sourced queue reports from Mini App users."""
+    try:
+        data = await request.json()
+        station_id = data.get("station_id")
+        queue_status = data.get("queue_status")
+
+        if not station_id or queue_status not in ("LOW", "MEDIUM", "HIGH"):
+            return web.json_response(
+                {"status": "error", "code": "INVALID_REPORT", "message": "Invalid station_id or queue_status"},
+                status=400,
+                headers=CORS_HEADERS
+            )
+
+        logger.info(f"[QUEUE REPORT] Station {station_id}: status {queue_status}")
+        return web.json_response({"status": "ok", "message": "Report received"}, headers=CORS_HEADERS)
+    except Exception as e:
+        logger.error(f"Error handling /api/queue-reports: {e}", exc_info=True)
+        return web.json_response(
+            {"status": "error", "code": "BAD_REQUEST", "message": str(e)},
+            status=400,
+            headers=CORS_HEADERS
+        )
 
 
 def create_web_app() -> web.Application:
-    """Creates and configures the aiohttp web application."""
+    """Creates and configures the aiohttp web application with safe allowlist routes."""
     app = web.Application()
+
+    # Mini App frontend routes (safe allowlist only)
     app.router.add_get("/", handle_index)
+    app.router.add_get("/index.html", handle_index)
+    app.router.add_get("/style.css", handle_style)
+    app.router.add_get("/app.js", handle_app_js)
+    app.router.add_get("/stations.json", handle_stations_json)
+    app.router.add_get("/tunnel_url.json", handle_tunnel_url_json)
+
+    # API routes
     app.router.add_options("/api/stations", handle_cors_options)
     app.router.add_get("/api/stations", handle_api_stations)
+
     app.router.add_options("/api/summary", handle_cors_options)
     app.router.add_get("/api/summary", handle_api_summary)
-    app.router.add_static("/static/", path=STATIC_DIR, name="static")
+
+    app.router.add_options("/api/queue-reports", handle_cors_options)
+    app.router.add_post("/api/queue-reports", handle_api_queue_report)
+
     return app
 
 
