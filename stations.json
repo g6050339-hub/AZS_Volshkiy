@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "count": 25,
-  "updated_at": 1788667989,
+  "updated_at": 1788668025,
   "stations": [
     {
       "id": "1817417962",
@@ -16,7 +16,7 @@
       "queue_label": "⚪ Обычный поток",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788663682,
+      "last_signal_timestamp": 1788664406,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -75,7 +75,7 @@
       "queue_label": "🟢 Свободно",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788663682,
+      "last_signal_timestamp": 1788664406,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -252,7 +252,7 @@
       "queue_label": "🟢 Свободно",
       "signals_count_per_hour": 1,
       "fuel_limit": null,
-      "last_signal_timestamp": 1788663682,
+      "last_signal_timestamp": 1788664406,
       "fuels": {
         "AI92": {
           "fuel_type": "AI92",
@@ -832,7 +832,7 @@
     {
       "id": "37225209495",
       "name": "Газпром",
-      "address": "Севастопольская ул., 1, Волжский",
+      "address": "Волжский, Севастопольская ул., 1",
       "lat": 48.748219,
       "lon": 44.835784,
       "chain": "Газпром",
